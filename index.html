@@ -1,154 +1,282 @@
-r:'var(--s500)',fontSize:12}}>{eur(l.cost)}</td></tr>)}
-              <tr><td style={{padding:'7px 0',color:'var(--s500)'}}>Aangemaakt</td><td style={{textAlign:'right',color:'var(--s600)'}}>{fdate(p.created_at)}</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div className="card" style={{gridColumn:'1 / -1'}}>
-          <div className="ctitle">Faseplanning</div>
-          <PhaseTimeline phases={p.phases} onUpdate={handlePhase}/>
-        </div>
-      </div>
-      <div style={{height:16}}/>
-      <NotesCard notes={p.notes} onAdd={handleAddNote}/>
-      <div style={{height:16}}/>
-      <OOSCard items={p.oos_items} onAdd={handleAddOOS} onRemove={handleRemoveOOS}/>
-      <div style={{height:24}}/>
-    </div>
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mission Control — Aziri</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --primary:#576BFF;--primary-dim:#3a52e8;--primary-light:#eef0ff;
+  --s50:#f8fafc;--s100:#f1f5f9;--s200:#e2e8f0;--s300:#cbd5e1;--s400:#94a3b8;
+  --s500:#64748b;--s600:#475569;--s700:#334155;--s800:#1e293b;--s900:#0f172a;
+  --green:#22c55e;--gbg:#f0fdf4;--gtxt:#166534;--gborder:#bbf7d0;
+  --amber:#f59e0b;--abg:#fffbeb;--atxt:#92400e;--aborder:#fde68a;
+  --red:#ef4444;--rbg:#fef2f2;--rtxt:#991b1b;--rborder:#fecaca;
+  --rmd:10px;--rlg:14px;--rxl:20px;
+  --font:'DM Sans','Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--s50);color:var(--s800);min-height:100vh;-webkit-font-smoothing:antialiased;}
+button{cursor:pointer;font-family:var(--font);}
+input,textarea,select{font-family:var(--font);}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-thumb{background:var(--s300);border-radius:3px;}
 
-    {showEdit&&<div className="modal-backdrop" onClick={()=>setShowEdit(false)}>
-      <div className="modal modal-lg" onClick={e=>e.stopPropagation()}>
-        <div className="mhdr"><div className="mtitle">Project bewerken</div><button className="bi" onClick={()=>setShowEdit(false)}><Ic.X/></button></div>
-        <ProjectForm initial={p} activeAM={p.owner_id} ams={ams} onSave={handleEditSave} onCancel={()=>setShowEdit(false)}/>
-      </div>
-    </div>}
-  </div>;
+/* ── Topbar ── */
+.topbar{background:#fff;border-bottom:1px solid var(--s200);height:58px;display:flex;align-items:center;padding:0 28px;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.logo-block{display:flex;flex-direction:column;gap:1px;}
+.logo-company{font-size:10px;font-weight:600;color:var(--s400);text-transform:uppercase;letter-spacing:1px;}
+.logo-title{font-size:15px;font-weight:700;color:var(--s900);letter-spacing:-.2px;}
+.logo-mc{width:32px;height:32px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;letter-spacing:-.5px;margin-right:12px;}
+.topbar-right{margin-left:auto;position:relative;}
+.am-btn{display:flex;align-items:center;gap:10px;padding:6px 12px 6px 8px;border-radius:var(--rlg);border:1px solid var(--s200);background:#fff;cursor:pointer;transition:all .15s;font-family:var(--font);}
+.am-btn:hover{background:var(--s50);border-color:var(--s300);}
+.am-btn-inner{display:flex;flex-direction:column;align-items:flex-start;gap:1px;}
+.am-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--s400);}
+.am-name{font-size:13px;font-weight:600;color:var(--s800);}
+.am-chevron{color:var(--s400);transition:transform .2s;}
+.am-chevron.open{transform:rotate(180deg);}
+.am-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+
+/* AM Dropdown */
+.am-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border:1px solid var(--s200);border-radius:var(--rlg);box-shadow:0 8px 24px rgba(0,0,0,.12);min-width:220px;z-index:200;overflow:hidden;animation:fadedown .15s ease;}
+@keyframes fadedown{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+.am-section-label{padding:10px 14px 6px;font-size:10px;font-weight:700;color:var(--s400);text-transform:uppercase;letter-spacing:.8px;}
+.am-option{display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer;transition:background .12s;}
+.am-option:hover{background:var(--s50);}
+.am-option.active{background:var(--primary-light);}
+.am-option-name{font-size:13.5px;font-weight:500;color:var(--s800);flex:1;}
+.am-check{color:var(--primary);flex-shrink:0;}
+.am-add{display:flex;align-items:center;gap:8px;padding:9px 14px;font-size:13px;color:var(--primary);font-weight:600;cursor:pointer;border-top:1px solid var(--s200);transition:background .12s;}
+.am-add:hover{background:var(--primary-light);}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--rmd);font-size:13.5px;font-weight:500;border:1px solid transparent;transition:all .15s;white-space:nowrap;cursor:pointer;}
+.bp{background:var(--primary);color:#fff;border-color:var(--primary);}
+.bp:hover{background:var(--primary-dim);}
+.bp:disabled{opacity:.4;cursor:not-allowed;}
+.bg{background:transparent;color:var(--s600);border-color:var(--s200);}
+.bg:hover{background:var(--s100);color:var(--s800);}
+.bd{background:var(--rbg);color:var(--rtxt);border-color:var(--rborder);}
+.bd:hover{background:#fee2e2;}
+.bsm{padding:5px 11px;font-size:12.5px;}
+.bi{padding:6px;border-radius:var(--rmd);background:transparent;border:1px solid var(--s200);color:var(--s500);transition:all .15s;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;}
+.bi:hover{background:var(--s100);color:var(--s700);}
+.btn-amber{background:#f59e0b;color:#fff;border-color:#f59e0b;}
+.btn-amber:hover{background:#d97706;}
+.btn-amber:disabled{opacity:.4;cursor:not-allowed;}
+
+/* ── Status Pills ── */
+.pill{display:inline-flex;align-items:center;gap:5px;padding:4px 11px 4px 8px;border-radius:999px;font-size:12.5px;font-weight:600;white-space:nowrap;border:1px solid transparent;}
+.pill.g{background:var(--gbg);color:var(--gtxt);border-color:var(--gborder);}
+.pill.a{background:var(--abg);color:var(--atxt);border-color:var(--aborder);}
+.pill.r{background:var(--rbg);color:var(--rtxt);border-color:var(--rborder);}
+.pill-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.pill.g .pill-dot{background:var(--green);}
+.pill.a .pill-dot{background:var(--amber);}
+.pill.r .pill-dot{background:var(--red);}
+
+/* ── Fields ── */
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--s500);margin-bottom:5px;text-transform:uppercase;letter-spacing:.6px;}
+.field input,.field textarea,.field select{width:100%;padding:10px 13px;border:1px solid var(--s200);border-radius:var(--rmd);font-size:13.5px;color:var(--s800);outline:none;transition:border-color .15s,box-shadow .15s;background:#fff;}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(87,107,255,.1);}
+.field textarea{resize:vertical;min-height:80px;}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+
+/* ── Modal ── */
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:#fff;border-radius:var(--rxl);box-shadow:0 12px 40px rgba(0,0,0,.15);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;animation:slideup .18s ease;}
+.modal-lg{max-width:640px;}
+.modal-sm{max-width:420px;}
+@keyframes slideup{from{transform:translateY(12px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.mhdr{padding:24px 24px 0;display:flex;align-items:flex-start;gap:14px;}
+.mhdr-icon{width:42px;height:42px;background:var(--primary-light);border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--primary);flex-shrink:0;}
+.mhdr-text{flex:1;}
+.mhdr-sup{font-size:10px;font-weight:700;color:var(--s400);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px;}
+.mtitle{font-size:19px;font-weight:700;color:var(--s900);}
+.mhdr-close{color:var(--s400);cursor:pointer;padding:4px;border-radius:8px;border:none;background:transparent;transition:all .12s;display:flex;align-items:center;}
+.mhdr-close:hover{background:var(--s100);color:var(--s700);}
+.mbody{padding:20px 24px;}
+.mftr{padding:0 24px 24px;display:flex;gap:8px;justify-content:flex-end;}
+.mdivider{height:1px;background:var(--s100);margin:4px 0 16px;}
+
+/* ── Page ── */
+.page{max-width:1180px;margin:0 auto;padding:32px 28px;}
+
+/* ── Overview KPIs ── */
+.ov-hero{margin-bottom:28px;}
+.ov-title{font-size:30px;font-weight:700;color:var(--s900);letter-spacing:-.5px;margin-bottom:4px;}
+.ov-sub{font-size:14px;color:var(--s500);}
+.kpi-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px;}
+.kpi-card{background:#fff;border:1px solid var(--s200);border-radius:var(--rlg);padding:20px 22px;display:flex;align-items:center;gap:16px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.kpi-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.kpi-icon.g{background:var(--gbg);}
+.kpi-icon.a{background:var(--abg);}
+.kpi-icon.r{background:var(--rbg);}
+.kpi-num{font-size:30px;font-weight:700;line-height:1;margin-bottom:2px;}
+.kpi-num.g{color:var(--gtxt);}
+.kpi-num.a{color:var(--atxt);}
+.kpi-num.r{color:var(--rtxt);}
+.kpi-lbl{font-size:11px;font-weight:700;color:var(--s500);text-transform:uppercase;letter-spacing:.6px;}
+
+/* ── Table ── */
+.twrap{background:#fff;border:1px solid var(--s200);border-radius:var(--rlg);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.tbar{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--s100);}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{padding:10px 16px;text-align:left;font-size:10.5px;font-weight:700;color:var(--s400);background:#fff;border-bottom:1px solid var(--s200);text-transform:uppercase;letter-spacing:.6px;}
+tbody tr{border-bottom:1px solid var(--s100);transition:background .12s;cursor:pointer;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--s50);}
+tbody td{padding:13px 16px;vertical-align:middle;}
+.row-actions{display:flex;gap:5px;}
+
+/* ── Card ── */
+.card{background:#fff;border:1px solid var(--s200);border-radius:var(--rlg);padding:22px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.card-header{display:flex;align-items:center;gap:9px;margin-bottom:4px;}
+.card-icon{color:var(--primary);}
+.card-title{font-size:15px;font-weight:700;color:var(--s900);}
+.card-sub{font-size:12.5px;color:var(--s400);margin-bottom:16px;}
+.card-meta{font-size:12px;color:var(--s400);}
+
+/* ── Detail Header ── */
+.dhdr{background:#fff;border-bottom:1px solid var(--s200);padding:0 28px;box-shadow:0 1px 4px rgba(0,0,0,.05);}
+.dhdr-inner{max-width:1180px;margin:0 auto;padding:16px 0;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.dhdr-title{font-size:22px;font-weight:700;color:var(--s900);letter-spacing:-.3px;}
+.dhdr-client{font-size:13px;color:var(--s500);margin-top:1px;}
+.tab-bar{display:flex;gap:2px;padding:4px;background:var(--s100);border-radius:var(--rmd);border:1px solid var(--s200);}
+.tab{padding:6px 14px;border-radius:7px;font-size:13px;font-weight:500;color:var(--s500);cursor:pointer;transition:all .12s;border:none;background:transparent;display:flex;align-items:center;gap:7px;}
+.tab.active{background:#fff;color:var(--s900);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+
+/* ── Speedometer Gauge ── */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px 10px;border:1px solid var(--s200);border-radius:var(--rlg);transition:all .15s;position:relative;overflow:hidden;}
+.gauge-wrap:hover{border-color:var(--s300);background:var(--s50);}
+.gauge-label-top{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--s400);}
+.gauge-sub{font-size:11px;color:var(--s500);}
+.gauge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.gauge-hint{font-size:10px;color:var(--s300);position:absolute;bottom:6px;right:8px;}
+
+/* ── Phase Cards ── */
+.phase-cards{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;margin-bottom:0;}
+.phase-card{flex:0 0 200px;border:1.5px solid var(--s200);border-radius:var(--rlg);padding:14px;cursor:pointer;transition:all .15s;background:#fff;}
+.phase-card:hover{border-color:var(--s300);background:var(--s50);}
+.phase-card.g{border-color:var(--gborder);}
+.phase-card.a{border-color:var(--aborder);}
+.phase-card.r{border-color:var(--rborder);}
+.phase-card-name{font-size:13.5px;font-weight:600;color:var(--s800);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:7px;}
+.phase-card-status{margin-bottom:8px;}
+.phase-card-date{font-size:11px;color:var(--s400);}
+.phase-card-notes-icon{color:var(--s300);cursor:pointer;transition:color .12s;}
+.phase-card-notes-icon:hover{color:var(--s500);}
+
+/* ── Gantt ── */
+.gantt-wrap{overflow-x:auto;}
+.gantt-table{min-width:800px;border-collapse:collapse;}
+.gantt-table td,.gantt-table th{border:none;padding:0;}
+.gantt-months th{font-size:10.5px;font-weight:700;color:var(--s500);text-transform:uppercase;letter-spacing:.5px;padding:6px 0;text-align:center;background:transparent;}
+.gantt-half-hdr{font-size:10px;color:var(--s400);padding:2px 0;text-align:center;border-left:1px solid var(--s100);}
+.gantt-row td{height:38px;border-bottom:1px solid var(--s100);}
+.gantt-row:last-child td{border-bottom:none;}
+.gantt-label{font-size:12.5px;color:var(--s600);font-weight:500;padding-right:12px;white-space:nowrap;display:flex;align-items:center;gap:6px;min-width:140px;}
+.gantt-cell{position:relative;border-left:1px solid var(--s100);}
+.gantt-today-line{position:absolute;top:0;bottom:0;width:2px;background:var(--green);z-index:4;pointer-events:none;}
+.gantt-today-label{position:absolute;top:-22px;left:50%;transform:translateX(-50%);background:#fff;border:1.5px solid var(--green);border-radius:999px;font-size:10px;font-weight:700;color:var(--gtxt);padding:1px 7px;white-space:nowrap;}
+.gantt-bar{position:absolute;top:7px;height:22px;border-radius:5px;cursor:pointer;transition:filter .12s;display:flex;align-items:center;padding:0 8px;font-size:11px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:6px;z-index:2;}
+.gantt-bar:hover{filter:brightness(1.08);}
+.gantt-bar-days{position:absolute;right:8px;font-size:10.5px;font-weight:600;color:rgba(255,255,255,.8);}
+.gantt-fit-buttons{display:flex;gap:4px;}
+.gantt-fit-btn{padding:5px 12px;border-radius:var(--rmd);font-size:12.5px;font-weight:500;border:1px solid var(--s200);background:#fff;color:var(--s600);cursor:pointer;transition:all .12s;}
+.gantt-fit-btn:hover,.gantt-fit-btn.active{background:var(--s100);color:var(--s800);}
+
+/* ── Milestone Modal date picker ── */
+.date-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px;}
+.date-chip{padding:7px 4px;border:1px solid var(--s200);border-radius:var(--rmd);font-size:12px;text-align:center;cursor:pointer;transition:all .12s;background:#fff;color:var(--s700);}
+.date-chip:hover{border-color:var(--primary);color:var(--primary);}
+.date-chip.selected{background:var(--primary);color:#fff;border-color:var(--primary);}
+.status-chips{display:flex;gap:8px;}
+.status-chip{display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;border:1.5px solid var(--s200);cursor:pointer;font-size:13px;font-weight:500;color:var(--s600);background:#fff;transition:all .12s;}
+.status-chip:hover{border-color:var(--s300);}
+.status-chip.selected-g{border-color:var(--green);background:var(--gbg);color:var(--gtxt);}
+.status-chip.selected-a{border-color:var(--amber);background:var(--abg);color:var(--atxt);}
+.status-chip.selected-r{border-color:var(--red);background:var(--rbg);color:var(--rtxt);}
+.status-chip-dot{width:8px;height:8px;border-radius:50%;}
+
+/* ── Notes ── */
+.notes-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;max-height:260px;overflow-y:auto;}
+.note-item{background:var(--s50);border:1px solid var(--s200);border-radius:var(--rmd);padding:12px 14px;}
+.notes-input{width:100%;padding:11px 13px;border:1px solid var(--s200);border-radius:var(--rmd);font-size:13.5px;resize:none;height:80px;outline:none;transition:border-color .15s,box-shadow .15s;color:var(--s800);}
+.notes-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(87,107,255,.1);}
+.notes-save-row{display:flex;justify-content:flex-end;margin-top:8px;}
+
+/* ── OOS ── */
+.oos-total-badge{background:var(--abg);color:var(--atxt);border:1px solid var(--aborder);border-radius:999px;padding:4px 13px;font-size:12.5px;font-weight:600;}
+.oos-form{background:var(--s50);border:1px solid var(--s200);border-radius:var(--rlg);padding:16px;}
+.oot{width:100%;font-size:13px;border-collapse:collapse;}
+.oot th{text-align:left;padding:8px 10px;font-size:10.5px;font-weight:700;color:var(--s400);border-bottom:1px solid var(--s200);text-transform:uppercase;letter-spacing:.5px;}
+.oot td{padding:10px;border-bottom:1px solid var(--s100);vertical-align:top;}
+.oot tr:last-child td{border-bottom:none;}
+
+/* ── Licentie Editor ── */
+.lic-add-btn{width:100%;padding:10px;border:1.5px dashed var(--s300);border-radius:var(--rmd);background:transparent;color:var(--s500);font-size:13px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.lic-add-btn:hover{border-color:var(--primary);color:var(--primary);}
+.lic-row{display:grid;grid-template-columns:1fr 1fr auto;gap:9px;align-items:end;margin-bottom:9px;}
+
+/* ── Logo upload ── */
+.logo-upload-area{border:2px dashed var(--s300);border-radius:var(--rlg);padding:18px;text-align:center;cursor:pointer;transition:border-color .15s;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.logo-upload-area:hover{border-color:var(--primary);}
+
+/* ── Multi-project toggle ── */
+.mpb-toggle{border:1px solid var(--s200);border-radius:var(--rlg);padding:14px 16px;display:flex;align-items:center;gap:14px;}
+.mpb-toggle-icon{color:var(--s400);}
+.mpb-toggle-text{flex:1;}
+.mpb-toggle-name{font-size:13.5px;font-weight:600;color:var(--s800);}
+.mpb-toggle-desc{font-size:12px;color:var(--s500);margin-top:2px;}
+.toggle-switch{width:38px;height:22px;border-radius:999px;border:none;cursor:pointer;padding:2px;transition:background .2s;flex-shrink:0;}
+.toggle-switch.off{background:var(--s200);}
+.toggle-switch.on{background:var(--primary);}
+.toggle-knob{width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.toggle-switch.on .toggle-knob{transform:translateX(16px);}
+
+/* ── Project overview section ── */
+.section-card{background:#fff;border:1px solid var(--s200);border-radius:var(--rlg);padding:22px;box-shadow:0 1px 3px rgba(0,0,0,.04);margin-bottom:16px;}
+.section-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
+.section-title-row{display:flex;align-items:center;gap:9px;}
+.section-title{font-size:15px;font-weight:700;color:var(--s900);}
+.section-subtitle{font-size:12.5px;color:var(--s500);margin-top:2px;}
+
+/* ── Misc ── */
+.stitle{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--s400);margin:16px 0 8px;}
+.empty-st{text-align:center;padding:48px 20px;color:var(--s400);}
+.loading{display:flex;align-items:center;justify-content:center;height:200px;color:var(--s400);font-size:14px;}
+.sep{height:1px;background:var(--s100);margin:16px 0;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.24.0/babel.min.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ── Supabase ──────────────────────────────────────────────
+const { createClient } = supabase;
+const sb = createClient(
+  'https://oblubcxkuuohpwjfaenx.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ibHViY3hrdXVvaHB3amZhZW54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2ODY0MTEsImV4cCI6MjA5NDI2MjQxMX0.Vdf7y1t5K493hUNkUtEPG4P4gC6ASAokU603UtSBrLU'
+);
+
+// ── DB helpers ────────────────────────────────────────────
+async function fetchAMs() {
+  const { data } = await sb.from('mc_account_managers').select('*').order('id');
+  return data ?? [];
 }
 
-// ── Overview ──────────────────────────────────────────────
-function Overview({projects,onSelect,onNew,onEdit,onDelete}) {
-  const [q,setQ]=useState('');
-  const filtered=projects.filter(p=>!q||p.name.toLowerCase().includes(q.toLowerCase())||p.client.toLowerCase().includes(q.toLowerCase()));
-  const cnt={g:0,a:0,r:0}; projects.forEach(p=>cnt[p.project_status]++);
-  const kpiCol={g:'var(--green)',a:'var(--amber)',r:'var(--red)'};
-  const kpiLbl={g:'Op koers',a:'Waarschuwing',r:'Kritiek'};
-
-  return <div className="page">
-    <div className="kpi-strip">
-      {['g','a','r'].map(s=><div key={s} className="kpi-card"><div className={`kpi-dot ${s}`}/><div><div className="kpi-num">{cnt[s]}</div><div className="kpi-lbl">{kpiLbl[s]}</div></div></div>)}
-    </div>
-    <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:16}}>
-      <div style={{position:'relative',flex:1,maxWidth:300}}>
-        <div style={{position:'absolute',left:10,top:'50%',transform:'translateY(-50%)',color:'var(--s400)',pointerEvents:'none'}}><Ic.Search/></div>
-        <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Zoek project of klant..." style={{width:'100%',padding:'7px 11px 7px 33px',border:'1px solid var(--s200)',borderRadius:'var(--rmd)',fontSize:13,background:'#fff',color:'var(--s800)',outline:'none'}}/>
-      </div>
-      <button className="btn bp" style={{marginLeft:'auto'}} onClick={onNew}><Ic.Plus/> Nieuw project</button>
-    </div>
-    <div className="twrap">
-      <table>
-        <thead><tr>{['Project / klant','Aangemaakt','Offerte','Licentie/jr','Status',''].map((h,i)=><th key={i}>{h}</th>)}</tr></thead>
-        <tbody>
-          {filtered.length===0&&<tr><td colSpan={6}><div className="empty-st"><div style={{fontSize:36,marginBottom:10}}>📋</div><p>{q?'Geen projecten gevonden.':'Nog geen projecten. Klik op "Nieuw project" om te starten.'}</p></div></td></tr>}
-          {filtered.map(p=><tr key={p.id} onClick={()=>onSelect(p.id)}>
-            <td><div style={{display:'flex',alignItems:'center',gap:10}}><Avatar logo={p.logo} client={p.client}/><div><div style={{fontWeight:600,color:'var(--s900)',fontSize:13.5}}>{p.name}</div><div style={{fontSize:11.5,color:'var(--s500)',marginTop:1}}>{p.client}</div></div></div></td>
-            <td style={{color:'var(--s500)',fontSize:12.5}}>{fdate(p.created_at)}</td>
-            <td style={{fontVariantNumeric:'tabular-nums',color:'var(--s700)'}}>{eur(p.offerte_total)}</td>
-            <td style={{fontVariantNumeric:'tabular-nums',color:'var(--s700)'}}>{eur(p.licentie_jr)}</td>
-            <td><Pill status={p.project_status}/></td>
-            <td onClick={e=>e.stopPropagation()}><div className="ra">
-              <button className="bi" style={{padding:5}} onClick={e=>{e.stopPropagation();onEdit(p.id);}}><Ic.Edit/></button>
-              <button className="bi" style={{padding:5,color:'var(--rtxt)'}} onClick={e=>{e.stopPropagation();onDelete(p.id);}}><Ic.Trash/></button>
-            </div></td>
-          </tr>)}
-        </tbody>
-      </table>
-    </div>
-  </div>;
-}
-
-// ── App ───────────────────────────────────────────────────
-function App() {
-  const [ams,setAms]=useState([]);
-  const [projects,setProjects]=useState([]);
-  const [activeAM,setActiveAM]=useState(()=>localStorage.getItem('mc-am')||'am1');
-  const [loading,setLoading]=useState(true);
-  const [view,setView]=useState('overview');
-  const [showNew,setShowNew]=useState(false);
-  const [editId,setEditId]=useState(null);
-  const [deleteId,setDeleteId]=useState(null);
-
-  useEffect(()=>{ fetchAMs().then(setAms); },[]);
-
-  useEffect(()=>{
-    setLoading(true);
-    fetchProjects(activeAM).then(ps=>{setProjects(ps);setLoading(false);});
-  },[activeAM]);
-
-  const switchAM=(id)=>{ setActiveAM(id); localStorage.setItem('mc-am',id); setView('overview'); };
-
-  const handleNew=async(f)=>{
-    const licentieJr=f.licenties.reduce((s,l)=>s+l.cost,0);
-    const p=await dbInsertProject({owner_id:f.owner_id,client:f.client,name:f.name,logo:f.logo,offerte_total:Number(f.offerte_total)||0,licentie_jr:licentieJr,gauge_timing:'g',gauge_budget:'g',gauge_scope:'g',timeline_status:'g',project_status:'g',created_at:new Date().toISOString(),last_updated:new Date().toISOString(),licenties:f.licenties});
-    if(p.owner_id===activeAM) setProjects(prev=>[p,...prev]);
-    setShowNew(false);
-  };
-
-  const handleEditSave=async(f)=>{
-    const project=projects.find(p=>p.id===editId);
-    const licentieJr=f.licenties.reduce((s,l)=>s+l.cost,0);
-    const updated={...project,...f,licentie_jr:licentieJr,last_updated:new Date().toISOString()};
-    await dbUpdateProject(updated);
-    await dbSyncLicenties(project.id,f.licenties);
-    const licenties=f.licenties.map((l,i)=>({...l,id:l.id||uid(),project_id:project.id,sort_order:i}));
-    setProjects(prev=>prev.map(p=>p.id===editId?{...updated,licenties}:p));
-    setEditId(null);
-  };
-
-  const handleDelete=async()=>{
-    await dbDeleteProject(deleteId);
-    setProjects(prev=>prev.filter(p=>p.id!==deleteId));
-    setDeleteId(null);
-    if(view===deleteId) setView('overview');
-  };
-
-  const curProject=projects.find(p=>p.id===view);
-
-  return <div>
-    {/* Topbar */}
-    <div className="topbar">
-      <div className="logo"><div className="logo-dot"/>Mission Control</div>
-      <div className="tsep"/>
-      <div className="am-switcher">
-        {ams.map(a=><button key={a.id} className={`am-chip${activeAM===a.id?' active':''}`} onClick={()=>switchAM(a.id)}>
-          <div className="am-av" style={{background:a.gradient}}>{a.initials}</div>
-          {a.name.split(' ')[0]}
-        </button>)}
-      </div>
-    </div>
-
-    {loading&&<div className="loading">Projecten laden...</div>}
-
-    {!loading&&view==='overview'&&<Overview projects={projects} onSelect={id=>setView(id)} onNew={()=>setShowNew(true)} onEdit={id=>setEditId(id)} onDelete={id=>setDeleteId(id)}/>}
-    {!loading&&view!=='overview'&&curProject&&<ProjectDetail project={curProject} ams={ams} onBack={()=>setView('overview')} onChange={p=>setProjects(prev=>prev.map(x=>x.id===p.id?p:x))}/>}
-
-    {showNew&&<div className="modal-backdrop" onClick={()=>setShowNew(false)}>
-      <div className="modal modal-lg" onClick={e=>e.stopPropagation()}>
-        <div className="mhdr"><div className="mtitle">Nieuw project aanmaken</div><button className="bi" onClick={()=>setShowNew(false)}><Ic.X/></button></div>
-        <ProjectForm activeAM={activeAM} ams={ams} onSave={handleNew} onCancel={()=>setShowNew(false)}/>
-      </div>
-    </div>}
-
-    {editId&&<div className="modal-backdrop" onClick={()=>setEditId(null)}>
-      <div className="modal modal-lg" onClick={e=>e.stopPropagation()}>
-        <div className="mhdr"><div className="mtitle">Project bewerken</div><button className="bi" onClick={()=>setEditId(null)}><Ic.X/></button></div>
-        <ProjectForm initial={projects.find(p=>p.id===editId)} activeAM={activeAM} ams={ams} onSave={handleEditSave} onCancel={()=>setEditId(null)}/>
-      </div>
-    </div>}
-
-    {deleteId&&<DeleteModal project={projects.find(p=>p.id===deleteId)} onConfirm={handleDelete} onCancel={()=>setDeleteId(null)}/>}
-  </div>;
-}
-
-ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
-</script>
-</body>
-</html
+async function dbInsertAM(name) {
+  const initials = name.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const gradients = ['linear-gradient(135
