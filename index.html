@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mission Control — Aziri</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --primary:#576BFF;--primary-dim:#3a52e8;--primary-light:#eef0ff;
+  --s50:#f8fafc;--s100:#f1f5f9;--s200:#e2e8f0;--s300:#cbd5e1;--s400:#94a3b8;
+  --s500:#64748b;--s600:#475569;--s700:#334155;--s800:#1e293b;--s900:#0f172a;
+  --green:#22c55e;--gbg:#f0fdf4;--gtxt:#166534;--gborder:#bbf7d0;
+  --amber:#f59e0b;--abg:#fffbeb;--atxt:#92400e;--aborder:#fde68a;
+  --red:#ef4444;--rbg:#fef2f2;--rtxt:#991b1b;--rborder:#fecaca;
+  --rmd:10px;--rlg:14px;--rxl:20px;
+  --font:'DM Sans','Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--s50);color:var(--s800);min-height:100vh;-webkit-font-smoothing:antialiased;}
+button{cursor:pointer;font-family:var(--font);}
+input,textarea,select{font-family:var(--font);}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-thumb{background:var(--s300);border-radius:3px;}
+
+/* ── Topbar ── */
+.topbar{background:#fff;border-bottom:1px solid var(--s200);height:58px;display:flex;align-items:center;padding:0 28px;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.logo-block{display:flex;flex-direction:column;gap:1px;}
+.logo-company{font-size:10px;font-weight:600;color:var(--s400);text-transform:uppercase;letter-spacing:1px;}
+.logo-title{font-size:15px;font-weight:700;color:var(--s900);letter-spacing:-.2px;}
+.logo-mc{width:32px;height:32px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;letter-spacing:-.5px;margin-right:12px;}
+.topbar-right{margin-left:auto;position:relative;}
+.am-btn{display:flex;align-items:center;gap:10px;padding:6px 12px 6px 8px;border-radius:var(--rlg);border:1px solid var(--s200);background:#fff;cursor:pointer;transition:all .15s;font-family:var(--font);}
+.am-btn:hover{background:var(--s50);border-color:var(--s300);}
+.am-btn-inner{display:flex;flex-direction:column;align-items:flex-start;gap:1px;}
+.am-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--s400);}
+.am-name{font-size:13px;font-weight:600;color:var(--s800);}
+.am-chevron{color:var(--s400);transition:transform .2s;}
+.am-chevron.open{transform:rotate(180deg);}
+.am-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+
+/* AM Dropdown */
+.am-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border:1px solid var(--s200);border-radius:var(--rlg);box-shadow:0 8px 24px rgba(0,0,0,.12);min-width:220px;z-index:200;overflow:hidden;animation:fadedown .15s ease;}
+@keyframes fadedown{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+.am-section-label{padding:10px 14px 6px;font-size:10px;font-weight:700;color:var(--s400);text-transform:uppercase;letter-spacing:.8px;}
+.am-option{display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer;transition:background .12s;}
+.am-option:hover{background:var(--s50);}
+.am-option.active{background:var(--primary-light);}
+.am-option-name{font-size:13.5px;font-weight:500;color:var(--s800);flex:1;}
+.am-check{color:var(--primary);flex-shrink:0;}
+.am-add{display:flex;align-items:center;gap:8px;padding:9px 14px;font-size:13px;color:var(--primary);font-weight:600;cursor:pointer;border-top:1px solid var(--s200);transition:background .12s;}
+.am-add:hover{background:var(--primary-light);}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--rmd);font-size:13.5px;font-weight:500;border:1px solid transparent;transition:all .15s;white-space:nowrap;cursor:pointer;}
+.bp{background:var(--primary);color:#fff;border-color:var(--primary);}
+.bp:hover{background:var(--primary-dim);}
+.bp:disabled{opacity:.4;cursor:not-allowed;}
+.bg{background:transparent;color:var(--s600);border-color:var(--s200);}
+.bg:hover{background:var(--s100);color:var(--s800);}
+.bd{background:var(--rbg);color:var(--rtxt);border-color:var(--rborder);}
+.bd:hover{background:#fee2e2;}
+.bsm{padding:5px 11px;font-size:12.5px;}
+.bi{padding:6px;border-radius:var(--rmd);background:transparent;border:1px solid var(--s200);color:var(--s500);transition:all .15s;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;}
+.bi:hover{background:var(--s100);color:var(--s700);}
+.btn-amber{background:#f59e0b;color:#fff;border-color:#f59e0b;}
+.btn-amber:hover{background:#d97706;}
+.btn-amber:disabled{opacity:.4;cursor:not-allowed;}
+
+/* ── Status Pills ── */
+.pill{display:inline-flex;align-items:center;gap:5px;padding:4px 11px 4px 8px;border-radius:999px;font-size:12.5px;font-weight:600;white-space:nowrap;border:1px solid transparent;}
+.pill.g{background:var(--gbg);color:var(--gtxt);border-color:var(--gborder);}
+.pill.a{background:var(--abg);color:var(--atxt);border-color:var(--aborder);}
+.pill.r{background:var(--rbg);color:var(--rtxt);border-color:var(--rborder);}
+.pill-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.pill.g .pill-dot{background:var(--green);}
+.pill.a .pill-dot{background:var(--amber);}
+.pill.r .pill-dot{background:var(--red);}
+
+/* ── Fields ── */
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--s500);margin-bottom:5px;text-transform:uppercase;letter-spacing:.6px;}
+.field input,.field textarea,.field select{width:100%;padding:10px 13px;border:1px solid var(--s200);border-radius:var(--rmd);font-size:13.5px;color:var(--s800);outline:none;transition:border-color .15s,box-shadow .15s;background:#fff;}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(87,107,255,.1);}
+.field textarea{resize:vertical;min-height:80px;}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+
+/* ── Modal ── */
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:#fff;border-radius:var(--rxl);box-shadow:0 12px 40px rgba(0,0,0,.15);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;animation:slideup .18s ease;}
+.modal-lg{max-width:640px;}
+.modal-sm{max-width:420px;}
+@keyframes slideup{from{transform:translateY(12px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.mhdr{padding:24px 24px 0;display:flex;align-items:flex-start;gap:14px;}
+.mhdr-icon{width:42px;height:42px;background:var(--primary-light);border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--primary);flex-shrink:0;}
+.mhdr-text{flex:1;}
+.mhdr-sup{font-size:10px;font-weight:700;color:var(--s400);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px;}
+.mtitle{font-size:19px;font-weight:700;color:var(--s900);}
+.mhdr-close{color:var(--s400);cursor:pointer;padding:4px;border-radius:8px;border:none;background:transparent;transition:all .12s;display:flex;align-items:center;}
+.mhdr-close:hover{background:var(--s100);color:var(--s700);}
+.mbody{padding:20px 24px;}
+.mftr{padding:0 24px 24px;display:flex;gap:8px;justify-content:flex-end;}
+.mdivider{height:1px;background:var(--s100);margin:4px 0 16px;}
+
+/* ── Page ── */
+.page{max-width:1180px;margin:0 auto;padding:32px 28px;}
+
+/* ── Overview KPIs ── */
+.ov-hero{margin-bottom:28px;}
+.ov-title{font-size:30px;font-weight:700;color:var(--s900);letter-spacing:-.5px;margin-bottom:4px;}
+.ov-sub{font-size:14px;color:var(--s500);}
+.kpi-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px;}
+.kpi-card{background:#fff;border:1px solid var(--s200);border-radius:var(--rlg);padding:20px 22px;display:flex;align-items:center;gap:16px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.kpi-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.kpi-icon.g{background:var(--gbg);}
+.kpi-icon.a{background:var(--abg);}
+.kpi-icon.r{background:var(--rbg);}
+.kpi-num{font-size:30px;font-weight:700;line-height:1;margin-bottom:2px;}
+.kpi-num.g{color:var(--gtxt);}
+.kpi-num.a{color:var(--atxt);}
+.kpi-num.r{color:var(--rtxt);}
+.kpi-lbl{font-size:11px;font-weight:700;color:var(--s500);text-transform:uppercase;letter-spacing:.6px;}
+
+/* ── Table ── */
+.twrap{background:#fff;border:1px solid var(--s200);border-radius:var(--rlg);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.tbar{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--s100);}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{padding:10px 16px;text-align:left;font-size:10.5px;font-weight:700;color:var(--s400);background:#fff;border-bottom:1px solid var(--s200);text-transform:uppercase;letter-spacing:.6px;}
+tbody tr{border-bottom:1px solid var(--s100);transition:background .12s;cursor:pointer;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--s50);}
+tbody td{padding:13px 16px;vertical-align:middle;}
+.row-actions{display:flex;gap:5px;}
+
+/* ── Card ── */
+.card{background:#fff;border:1px solid var(--s200);border-radius:var(--rlg);padding:22px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.card-header{display:flex;align-items:center;gap:9px;margin-bottom:4px;}
+.card-icon{color:var(--primary);}
+.card-title{font-size:15px;font-weight:700;color:var(--s900);}
+.card-sub{font-size:12.5px;color:var(--s400);margin-bottom:16px;}
+.card-meta{font-size:12px;color:var(--s400);}
+
+/* ── Detail Header ── */
+.dhdr{background:#fff;border-bottom:1px solid var(--s200);padding:0 28px;box-shadow:0 1px 4px rgba(0,0,0,.05);}
+.dhdr-inner{max-width:1180px;margin:0 auto;padding:16px 0;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.dhdr-title{font-size:22px;font-weight:700;color:var(--s900);letter-spacing:-.3px;}
+.dhdr-client{font-size:13px;color:var(--s500);margin-top:1px;}
+.tab-bar{display:flex;gap:2px;padding:4px;background:var(--s100);border-radius:var(--rmd);border:1px solid var(--s200);}
+.tab{padding:6px 14px;border-radius:7px;font-size:13px;font-weight:500;color:var(--s500);cursor:pointer;transition:all .12s;border:none;background:transparent;display:flex;align-items:center;gap:7px;}
+.tab.active{background:#fff;color:var(--s900);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+
+/* ── Speedometer Gauge ── */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px 10px;border:1px solid var(--s200);border-radius:var(--rlg);transition:all .15s;position:relative;overflow:hidden;}
+.gauge-wrap:hover{border-color:var(--s300);background:var(--s50);}
+.gauge-label-top{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--s400);}
+.gauge-sub{font-size:11px;color:var(--s500);}
+.gauge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.gauge-hint{font-size:10px;color:var(--s300);position:absolute;bottom:6px;right:8px;}
+
+/* ── Phase Cards ── */
+.phase-cards{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;margin-bottom:0;}
+.phase-card{flex:0 0 200px;border:1.5px solid var(--s200);border-radius:var(--rlg);padding:14px;cursor:pointer;transition:all .15s;background:#fff;}
+.phase-card:hover{border-color:var(--s300);background:var(--s50);}
+.phase-card.g{border-color:var(--gborder);}
+.phase-card.a{border-color:var(--aborder);}
+.phase-card.r{border-color:var(--rborder);}
+.phase-card-name{font-size:13.5px;font-weight:600;color:var(--s800);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:7px;}
+.phase-card-status{margin-bottom:8px;}
+.phase-card-date{font-size:11px;color:var(--s400);}
+.phase-card-notes-icon{color:var(--s300);cursor:pointer;transition:color .12s;}
+.phase-card-notes-icon:hover{color:var(--s500);}
+
+/* ── Gantt ── */
+.gantt-wrap{overflow-x:auto;}
+.gantt-table{min-width:800px;border-collapse:collapse;}
+.gantt-table td,.gantt-table th{border:none;padding:0;}
+.gantt-months th{font-size:10.5px;font-weight:700;color:var(--s500);text-transform:uppercase;letter-spacing:.5px;padding:6px 0;text-align:center;background:transparent;}
+.gantt-half-hdr{font-size:10px;color:var(--s400);padding:2px 0;text-align:center;border-left:1px solid var(--s100);}
+.gantt-row td{height:38px;border-bottom:1px solid var(--s100);}
+.gantt-row:last-child td{border-bottom:none;}
+.gantt-label{font-size:12.5px;color:var(--s600);font-weight:500;padding-right:12px;white-space:nowrap;display:flex;align-items:center;gap:6px;min-width:140px;}
+.gantt-cell{position:relative;border-left:1px solid var(--s100);}
+.gantt-today-line{position:absolute;top:0;bottom:0;width:2px;background:var(--green);z-index:4;pointer-events:none;}
+.gantt-today-label{position:absolute;top:-22px;left:50%;transform:translateX(-50%);background:#fff;border:1.5px solid var(--green);border-radius:999px;font-size:10px;font-weight:700;color:var(--gtxt);padding:1px 7px;white-space:nowrap;}
+.gantt-bar{position:absolute;top:7px;height:22px;border-radius:5px;cursor:pointer;transition:filter .12s;display:flex;align-items:center;padding:0 8px;font-size:11px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:6px;z-index:2;}
+.gantt-bar:hover{filter:brightness(1.08);}
+.gantt-bar-days{position:absolute;right:8px;font-size:10.5px;font-weight:600;color:rgba(255,255,255,.8);}
+.gantt-fit-buttons{display:flex;gap:4px;}
+.gantt-fit-btn{padding:5px 12px;border-radius:var(--rmd);font-size:12.5px;font-weight:500;border:1px solid var(--s200);background:#fff;color:var(--s600);cursor:pointer;transition:all .12s;}
+.gantt-fit-btn:hover,.gantt-fit-btn.active{background:var(--s100);color:var(--s800);}
+
+/* ── Milestone Modal date picker ── */
+.date-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px;}
+.date-chip{padding:7px 4px;border:1px solid var(--s200);border-radius:var(--rmd);font-size:12px;text-align:center;cursor:pointer;transition:all .12s;background:#fff;color:var(--s700);}
+.date-chip:hover{border-color:var(--primary);color:var(--primary);}
+.date-chip.selected{background:var(--primary);color:#fff;border-color:var(--primary);}
+.status-chips{display:flex;gap:8px;}
+.status-chip{display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;border:1.5px solid var(--s200);cursor:pointer;font-size:13px;font-weight:500;color:var(--s600);background:#fff;transition:all .12s;}
+.status-chip:hover{border-color:var(--s300);}
+.status-chip.selected-g{border-color:var(--green);background:var(--gbg);color:var(--gtxt);}
+.status-chip.selected-a{border-color:var(--amber);background:var(--abg);color:var(--atxt);}
+.status-chip.selected-r{border-color:var(--red);background:var(--rbg);color:var(--rtxt);}
+.status-chip-dot{width:8px;height:8px;border-radius:50%;}
+
+/* ── Notes ── */
+.notes-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;max-height:260px;overflow-y:auto;}
+.note-item{background:var(--s50);border:1px solid var(--s200);border-radius:var(--rmd);padding:12px 14px;}
+.notes-input{width:100%;padding:11px 13px;border:1px solid var(--s200);border-radius:var(--rmd);font-size:13.5px;resize:none;height:80px;outline:none;transition:border-color .15s,box-shadow .15s;color:var(--s800);}
+.notes-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(87,107,255,.1);}
+.notes-save-row{display:flex;justify-content:flex-end;margin-top:8px;}
+
+/* ── OOS ── */
+.oos-total-badge{background:var(--abg);color:var(--atxt);border:1px solid var(--aborder);border-radius:999px;padding:4px 13px;font-size:12.5px;font-weight:600;}
+.oos-form{background:var(--s50);border:1px solid var(--s200);border-radius:var(--rlg);padding:16px;}
+.oot{width:100%;font-size:13px;border-collapse:collapse;}
+.oot th{text-align:left;padding:8px 10px;font-size:10.5px;font-weight:700;color:var(--s400);border-bottom:1px solid var(--s200);text-transform:uppercase;letter-spacing:.5px;}
+.oot td{padding:10px;border-bottom:1px solid var(--s100);vertical-align:top;}
+.oot tr:last-child td{border-bottom:none;}
+
+/* ── Licentie Editor ── */
+.lic-add-btn{width:100%;padding:10px;border:1.5px dashed var(--s300);border-radius:var(--rmd);background:transparent;color:var(--s500);font-size:13px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.lic-add-btn:hover{border-color:var(--primary);color:var(--primary);}
+.lic-row{display:grid;grid-template-columns:1fr 1fr auto;gap:9px;align-items:end;margin-bottom:9px;}
+
+/* ── Logo upload ── */
+.logo-upload-area{border:2px dashed var(--s300);border-radius:var(--rlg);padding:18px;text-align:center;cursor:pointer;transition:border-color .15s;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.logo-upload-area:hover{border-color:var(--primary);}
+
+/* ── Multi-project toggle ── */
+.mpb-toggle{border:1px solid var(--s200);border-radius:var(--rlg);padding:14px 16px;display:flex;align-items:center;gap:14px;}
+.mpb-toggle-icon{color:var(--s400);}
+.mpb-toggle-text{flex:1;}
+.mpb-toggle-name{font-size:13.5px;font-weight:600;color:var(--s800);}
+.mpb-toggle-desc{font-size:12px;color:var(--s500);margin-top:2px;}
+.toggle-switch{width:38px;height:22px;border-radius:999px;border:none;cursor:pointer;padding:2px;transition:background .2s;flex-shrink:0;}
+.toggle-switch.off{background:var(--s200);}
+.toggle-switch.on{background:var(--primary);}
+.toggle-knob{width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.toggle-switch.on .toggle-knob{transform:translateX(16px);}
+
+/* ── Project overview section ── */
+.section-card{background:#fff;border:1px solid var(--s200);border-radius:var(--rlg);padding:22px;box-shadow:0 1px 3px rgba(0,0,0,.04);margin-bottom:16px;}
+.section-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
+.section-title-row{display:flex;align-items:center;gap:9px;}
+.section-title{font-size:15px;font-weight:700;color:var(--s900);}
+.section-subtitle{font-size:12.5px;color:var(--s500);margin-top:2px;}
+
+/* ── Misc ── */
+.stitle{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--s400);margin:16px 0 8px;}
+.empty-st{text-align:center;padding:48px 20px;color:var(--s400);}
+.loading{display:flex;align-items:center;justify-content:center;height:200px;color:var(--s400);font-size:14px;}
+.sep{height:1px;background:var(--s100);margin:16px 0;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.24.0/babel.min.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ── Supabase ──────────────────────────────────────────────
+const { createClient } = supabase;
+const sb = createClient(
+  'https://oblubcxkuuohpwjfaenx.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ibHViY3hrdXVvaHB3amZhZW54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2ODY0MTEsImV4cCI6MjA5NDI2MjQxMX0.Vdf7y1t5K493hUNkUtEPG4P4gC6ASAokU603UtSBrLU'
+);
+
+// ── DB helpers ────────────────────────────────────────────
+async function fetchAMs() {
+  const { data } = await sb.from('mc_account_managers').select('*').order('id');
+  return data ?? [];
+}
+
+async function dbInsertAM(name) {
+  const initials = name.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const gradients = ['linear-gradient(135deg,#576BFF,#8B5CF6)','linear-gradient(135deg,#0EA5E9,#14B8A6)','linear-gradient(135deg,#F59E0B,#EF4444)','linear-gradient(135deg,#10B981,#059669)','linear-gradient(135deg,#EC4899,#8B5CF6)'];
+  const gradient = gradients[Math.floor(Math.random()*gradients.length)];
+  const { data } = await sb.from('mc_account_managers').insert({ name: name.trim(), initials, gradient }).select().single();
+  return data;
+}
+
+async function fetchProjects(ownerId) {
+  const { data: projects } = await sb.from('mc_projects').select('*').eq('owner_id', ownerId).order('created_at', { ascending: false });
+  if (!projects?.length) return [];
+  const ids = projects.map(p => p.id);
+  const [l, ph, n, o] = await Promise.all([
+    sb.from('mc_licenties').select('*').in('project_id', ids).order('sort_order'),
+    sb.from('mc_phases').select('*').in('project_id', ids).order('sort_order'),
+    sb.from('mc_notes').select('*').in('project_id', ids).order('created_at'),
+    sb.from('mc_oos_items').select('*').in('project_id', ids).order('created_at'),
+  ]);
+  return projects.map(p => ({
+    ...p,
+    offerte_total: Number(p.offerte_total), licentie_jr: Number(p.licentie_jr),
+    licenties: (l.data??[]).filter(x=>x.project_id===p.id).map(x=>({...x,cost:Number(x.cost)})),
+    phases:    (ph.data??[]).filter(x=>x.project_id===p.id),
+    notes:     (n.data??[]).filter(x=>x.project_id===p.id),
+    oos_items: (o.data??[]).filter(x=>x.project_id===p.id).map(x=>({...x,price:Number(x.price)})),
+  }));
+}
+
+const PHASE_DEFS = [
+  { key:'Ontwikkeling', icon:'⚡' },
+  { key:'Testing intern', icon:'🧪' },
+  { key:'Testing klant', icon:'👥' },
+  { key:'Feedbackverwerking', icon:'🔄' },
+  { key:'GO-LIVE', icon:'🚀' },
+];
+
+async function dbInsertProject(data) {
+  const { licenties, ...row } = data;
+  const { data: p } = await sb.from('mc_projects').insert(row).select().single();
+  await Promise.all([
+    licenties.length && sb.from('mc_licenties').insert(licenties.map((l,i)=>({...l,project_id:p.id,sort_order:i}))),
+    sb.from('mc_phases').insert(PHASE_DEFS.map((d,i)=>({project_id:p.id,key:d.key,status:'g',note:'',sort_order:i}))),
+  ]);
+  return {...p, offerte_total:Number(p.offerte_total), licentie_jr:Number(p.licentie_jr), licenties:[], phases:[], notes:[], oos_items:[]};
+}
+
+async function dbUpdateProject(p) {
+  const {licenties,phases,notes,oos_items,...row} = p;
+  await sb.from('mc_projects').upsert(row);
+}
+
+async function dbSyncLicenties(projectId, lics) {
+  await sb.from('mc_licenties').delete().eq('project_id', projectId);
+  if (lics.length) await sb.from('mc_licenties').insert(lics.map((l,i)=>({...l,project_id:projectId,sort_order:i})));
+  await sb.from('mc_projects').update({licentie_jr: lics.reduce((s,l)=>s+l.cost,0), last_updated: new Date().toISOString()}).eq('id', projectId);
+}
+
+async function dbUpdateGauges(projectId, gauges, projectStatus) {
+  await sb.from('mc_projects').update({...gauges, project_status:projectStatus, last_updated:new Date().toISOString()}).eq('id', projectId);
+}
+
+async function dbUpdatePhase(projectId, key, data) {
+  await sb.from('mc_phases').update({...data, updated_at:new Date().toISOString()}).eq('project_id',projectId).eq('key',key);
+  const {data:phases} = await sb.from('mc_phases').select('status').eq('project_id',projectId);
+  const ss = (phases??[]).map(p=>p.status);
+  const tl = ss.includes('r')?'r':ss.includes('a')?'a':'g';
+  await sb.from('mc_projects').update({timeline_status:tl, last_updated:new Date().toISOString()}).eq('id',projectId);
+  return tl;
+}
+
+async function dbAddNote(projectId, text) {
+  const {data} = await sb.from('mc_notes').insert({project_id:projectId,text}).select().single();
+  return data;
+}
+
+async function dbAddOOS(projectId, item) {
+  const {data} = await sb.from('mc_oos_items').insert({project_id:projectId,...item}).select().single();
+  return {...data, price:Number(data.price)};
+}
+
+async function dbDeleteOOS(id) { await sb.from('mc_oos_items').delete().eq('id',id); }
+async function dbDeleteProject(id) { await sb.from('mc_projects').delete().eq('id',id); }
+
+// ── Helpers ───────────────────────────────────────────────
+function eur(n) { if(n==null)return'—'; return new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR',minimumFractionDigits:0,maximumFractionDigits:0}).format(n); }
+function fdate(iso) { if(!iso)return'—'; return new Date(iso).toLocaleDateString('nl-NL',{day:'numeric',month:'short',year:'numeric'}); }
+function fdshort(iso) { if(!iso)return'—'; return new Date(iso).toLocaleDateString('nl-NL',{day:'numeric',month:'short'}); }
+function hcol(s) {
+  const cs=['linear-gradient(135deg,#576BFF,#8B5CF6)','linear-gradient(135deg,#0EA5E9,#14B8A6)','linear-gradient(135deg,#F59E0B,#EF4444)','linear-gradient(135deg,#10B981,#059669)','linear-gradient(135deg,#EC4899,#8B5CF6)','linear-gradient(135deg,#F97316,#EF4444)','linear-gradient(135deg,#6366F1,#3B82F6)','linear-gradient(135deg,#84CC16,#14B8A6)'];
+  let h=0; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))|0;
+  return cs[Math.abs(h)%cs.length];
+}
+function slbl(s) { return {g:'Op koers',a:'Risico',r:'Kritiek'}[s]||s; }
+function drollup(g) { const v=[g.gauge_timing,g.gauge_budget,g.gauge_scope]; return v.includes('r')?'r':v.includes('a')?'a':'g'; }
+function uid() { return Math.random().toString(36).slice(2)+Date.now().toString(36); }
+
+// Gauge: left click → green, middle click → amber, right click → red
+function gaugeClickZone(e, onSet) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const w = rect.width;
+  if (x < w/3) onSet('g');
+  else if (x < 2*w/3) onSet('a');
+  else onSet('r');
+}
+
+function downscale(file, cb) {
+  const r=new FileReader(); r.onload=e=>{const img=new Image();img.onload=()=>{const sz=256,rat=Math.min(sz/img.width,sz/img.height),c=document.createElement('canvas');c.width=img.width*rat;c.height=img.height*rat;c.getContext('2d').drawImage(img,0,0,c.width,c.height);cb(c.toDataURL('image/png'));};img.src=e.target.result;};r.readAsDataURL(file);
+}
+
+// Generate half-month date periods for the milestone date picker
+function halfMonthPeriods(year) {
+  const months = ['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
+  const now = new Date();
+  const periods = [];
+  for (let m = 0; m < 12; m++) {
+    periods.push({ label: `${months[m]} 1-15`, value: `${year}-${String(m+1).padStart(2,'0')}-01` });
+    const lastDay = new Date(year, m+1, 0).getDate();
+    periods.push({ label: `${months[m]} 16-${lastDay}`, value: `${year}-${String(m+1).padStart(2,'0')}-16` });
+  }
+  return periods;
+}
+
+// ── SVG Icons ─────────────────────────────────────────────
+const Ic = {
+  Search:()=><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+  Plus:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+  Edit:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+  Trash:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>,
+  Back:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15 18 9 12 15 6"/></svg>,
+  X:()=><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+  Upload:()=><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>,
+  Warn:()=><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+  ChevronDown:()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="6 9 12 15 18 9"/></svg>,
+  Check:()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>,
+  Notes:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>,
+  Calendar:()=><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+  Activity:()=><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
+  Layers:()=><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>,
+  Target:()=><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
+  ExternalLink:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
+  Refresh:()=><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>,
+};
+
+// ── Avatar ────────────────────────────────────────────────
+function Avatar({logo,client,size=36,rad=8}) {
+  if(logo) return <img src={logo} alt={client} style={{width:size,height:size,borderRadius:rad,objectFit:'cover',border:'1px solid var(--s200)',flexShrink:0}}/>;
+  const ini=(client||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  return <div style={{width:size,height:size,borderRadius:rad,background:hcol(client||''),display:'flex',alignItems:'center',justifyContent:'center',fontSize:size*.33,fontWeight:700,color:'#fff',flexShrink:0}}>{ini}</div>;
+}
+
+// ── Pill ──────────────────────────────────────────────────
+function Pill({status,label,onClick}) {
+  return <span className={`pill ${status}`} onClick={e=>{e.stopPropagation();onClick&&onClick();}} style={{cursor:onClick?'pointer':'default'}}>
+    <span className="pill-dot"/>{label||slbl(status)}
+  </span>;
+}
+
+// ── Speedometer Gauge ─────────────────────────────────────
+function SpeedoGauge({label, sublabel, status, onSet}) {
+  // SVG speedometer
+  const needleAngle = status==='g' ? -60 : status==='a' ? 0 : 60;
+  const statusText = {g:'OP SCHEMA', a:'RISICO', r:'KRITIEK'}[status];
+  const needleColor = {g:'#22c55e', a:'#f59e0b', r:'#ef4444'}[status];
+  const bgColor = {g:'rgba(34,197,94,.15)', a:'rgba(245,158,11,.15)', r:'rgba(239,68,68,.15)'}[status];
+
+  return (
+    <div className="gauge-wrap" style={{userSelect:'none'}}>
+      <div className="gauge-label-top">{label}</div>
+      <svg
+        width="130" height="75" viewBox="0 0 130 75"
+        style={{cursor:'pointer', overflow:'visible'}}
+        onClick={e => gaugeClickZone(e, onSet)}
+        title="Klik links=op schema, midden=risico, rechts=kritiek"
+      >
+        <defs>
+          <radialGradient id={`dial-bg-${label}`} cx="50%" cy="100%" r="80%">
+            <stop offset="0%" stopColor="#1e293b"/>
+            <stop offset="100%" stopColor="#0f172a"/>
+          </radialGradient>
+        </defs>
+        {/* Dial background */}
+        <path d="M10 70 A55 55 0 0 1 120 70" fill={`url(#dial-bg-${label})`} stroke="#334155" strokeWidth="1.5"/>
+        {/* Red zone */}
+        <path d="M10 70 A55 55 0 0 1 27 31" fill="none" stroke="#ef4444" strokeWidth="6" strokeOpacity=".35"/>
+        {/* Amber zone */}
+        <path d="M27 31 A55 55 0 0 1 65 15" fill="none" stroke="#f59e0b" strokeWidth="6" strokeOpacity=".35"/>
+        {/* Green zone right */}
+        <path d="M65 15 A55 55 0 0 1 103 31" fill="none" stroke="#22c55e" strokeWidth="6" strokeOpacity=".35"/>
+        {/* Dark zone far right */}
+        <path d="M103 31 A55 55 0 0 1 120 70" fill="none" stroke="#ef4444" strokeWidth="6" strokeOpacity=".35"/>
+        {/* Active zone highlight */}
+        {status==='g' && <path d="M65 15 A55 55 0 0 1 103 31" fill="none" stroke="#22c55e" strokeWidth="7" strokeOpacity=".9"/>}
+        {status==='a' && <path d="M27 31 A55 55 0 0 1 65 15" fill="none" stroke="#f59e0b" strokeWidth="7" strokeOpacity=".9"/>}
+        {status==='r' && <path d="M10 70 A55 55 0 0 1 27 31" fill="none" stroke="#ef4444" strokeWidth="7" strokeOpacity=".9"/>}
+        {/* Tick marks */}
+        {[-60,-45,-30,-15,0,15,30,45,60].map((a,i)=>{
+          const rad2 = (a-90)*Math.PI/180;
+          const r1=48,r2=42;
+          return <line key={i}
+            x1={65+r1*Math.cos(rad2)} y1={70+r1*Math.sin(rad2)}
+            x2={65+r2*Math.cos(rad2)} y2={70+r2*Math.sin(rad2)}
+            stroke="#475569" strokeWidth={i%3===0?1.5:0.8}/>;
+        })}
+        {/* Needle */}
+        <g style={{transition:'transform .4s cubic-bezier(.34,1.56,.64,1)'}} transform={`rotate(${needleAngle},65,70)`}>
+          <line x1="65" y1="70" x2="65" y2="25" stroke={needleColor} strokeWidth="2.5" strokeLinecap="round"/>
+          <line x1="65" y1="70" x2="65" y2="78" stroke={needleColor} strokeWidth="1.5" strokeLinecap="round" strokeOpacity=".4"/>
+        </g>
+        {/* Center dot */}
+        <circle cx="65" cy="70" r="4" fill={needleColor}/>
+        <circle cx="65" cy="70" r="2" fill="#fff" fillOpacity=".8"/>
+        {/* Status text */}
+        <text x="65" y="58" textAnchor="middle" fill={needleColor} fontSize="7.5" fontWeight="700" fontFamily="DM Sans,sans-serif" letterSpacing=".5">{statusText}</text>
+      </svg>
+      <div className="gauge-sub">{sublabel}</div>
+      <div className="gauge-hint">← ● →</div>
+    </div>
+  );
+}
+
+// ── Phase Card ────────────────────────────────────────────
+function PhaseCard({phase, onClick}) {
+  const def = PHASE_DEFS.find(d=>d.key===phase.key)||{icon:'📌'};
+  const updAt = phase.updated_at||phase.created_at;
+  return (
+    <div className={`phase-card ${phase.status}`} onClick={onClick}>
+      <div className="phase-card-name">
+        <span style={{fontSize:16}}>{def.icon}</span>
+        <span style={{flex:1,minWidth:0,overflow:'hidden',textOverflow:'ellipsis'}}>{phase.key}</span>
+        <span className="phase-card-notes-icon"><Ic.Notes/></span>
+      </div>
+      <div className="phase-card-status"><Pill status={phase.status}/></div>
+      <div className="phase-card-date">{updAt ? fdshort(updAt)+', '+new Date(updAt).toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'}) : '—'}</div>
+    </div>
+  );
+}
+
+// ── Milestone Edit Modal ──────────────────────────────────
+function MilestoneModal({phase, onSave, onCancel}) {
+  const def = PHASE_DEFS.find(d=>d.key===phase.key)||{icon:'📌'};
+  const year = new Date().getFullYear();
+  const periods = halfMonthPeriods(year);
+  const [startVal, setStartVal] = useState(phase.start_date||'');
+  const [endVal, setEndVal] = useState(phase.end_date||'');
+  const [status, setStatus] = useState(phase.status||'g');
+  const [note, setNote] = useState(phase.note||'');
+
+  // Format date value to label
+  function valToLabel(v) {
+    if(!v) return null;
+    const p = periods.find(x=>x.value===v);
+    return p ? p.label : null;
+  }
+
+  return (
+    <div className="modal-backdrop" onClick={onCancel}>
+      <div className="modal" onClick={e=>e.stopPropagation()}>
+        <div className="mhdr">
+          <div className="mhdr-icon"><span style={{fontSize:20}}><Ic.Calendar/></span></div>
+          <div className="mhdr-text">
+            <div className="mhdr-sup">Tijdlijn</div>
+            <div className="mtitle">Mijlpaal bewerken</div>
+          </div>
+          <button className="mhdr-close" onClick={onCancel}><Ic.X/></button>
+        </div>
+        <div className="mbody">
+          <div className="field">
+            <label>Naam</label>
+            <input value={phase.key} readOnly style={{background:'var(--s50)',color:'var(--s600)'}}/>
+          </div>
+
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:6}}>
+            <label style={{fontSize:11,fontWeight:700,color:'var(--s500)',textTransform:'uppercase',letterSpacing:'.6px'}}>Van (Startdatum)</label>
+            {startVal && <button style={{background:'none',border:'none',color:'var(--primary)',fontSize:12,fontWeight:600,cursor:'pointer'}} onClick={()=>setStartVal('')}>Wissen</button>}
+          </div>
+          <div className="date-grid" style={{marginBottom:14}}>
+            {periods.map(p=><div key={p.value} className={`date-chip${startVal===p.value?' selected':''}`} onClick={()=>setStartVal(startVal===p.value?'':p.value)}>{p.label}</div>)}
+          </div>
+
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:6}}>
+            <label style={{fontSize:11,fontWeight:700,color:'var(--s500)',textTransform:'uppercase',letterSpacing:'.6px'}}>Tot (Einddatum)</label>
+            {endVal && <button style={{background:'none',border:'none',color:'var(--primary)',fontSize:12,fontWeight:600,cursor:'pointer'}} onClick={()=>setEndVal('')}>Wissen</button>}
+          </div>
+          <div className="date-grid" style={{marginBottom:14}}>
+            {periods.map(p=><div key={p.value} className={`date-chip${endVal===p.value?' selected':''}`} onClick={()=>setEndVal(endVal===p.value?'':p.value)}>{p.label}</div>)}
+          </div>
+
+          <div className="field" style={{marginBottom:10}}>
+            <label>Status</label>
+            <div className="status-chips">
+              {[{s:'g',label:'Op koers',dotColor:'#22c55e'},{s:'a',label:'Risico',dotColor:'#f59e0b'},{s:'r',label:'Kritiek',dotColor:'#ef4444'}].map(({s,label,dotColor})=>(
+                <div key={s} className={`status-chip${status===s?` selected-${s}`:''}`} onClick={()=>setStatus(s)}>
+                  <span className="status-chip-dot" style={{background:dotColor}}/>
+                  {label}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="field">
+            <label>Notitie (optioneel)</label>
+            <textarea value={note} onChange={e=>setNote(e.target.value)} placeholder="Toelichting bij deze mijlpaal..."/>
+          </div>
+        </div>
+        <div className="mftr">
+          <button className="btn bg" onClick={onCancel}>Annuleren</button>
+          <button className="btn bp" onClick={()=>onSave({status,start_date:startVal,end_date:endVal,note})}>
+            <Ic.Calendar/> Opslaan
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Gantt ─────────────────────────────────────────────────
+function GanttChart({phases, onPhaseClick}) {
+  const [fitMode, setFitMode] = useState('fit'); // fit, gelijk, vast
+  const today = new Date();
+  const year = today.getFullYear();
+
+  // Build month columns for full year
+  const months = ['JAN','FEB','MRT','APR','MEI','JUN','JUL','AUG','SEP','OKT','NOV','DEC'];
+  const totalHalves = 24; // 2 per month * 12
+  const halfWidth = 38; // px per half-month cell
+
+  function dateToHalf(dateStr) {
+    if(!dateStr) return null;
+    const d = new Date(dateStr);
+    const m = d.getMonth();
+    const half = d.getDate() <= 15 ? 0 : 1;
+    return m*2 + half;
+  }
+
+  const todayHalf = today.getMonth()*2 + (today.getDate()<=15?0:1);
+  const todayOffset = (today.getDate()<=15 ? (today.getDate()-1)/15 : (today.getDate()-16)/15) * halfWidth;
+
+  const barColors = {g:'#22c55e', a:'#f59e0b', r:'#ef4444'};
+
+  return (
+    <div className="gantt-wrap">
+      <table className="gantt-table">
+        <thead>
+          <tr className="gantt-months">
+            <th style={{width:150,textAlign:'left',paddingLeft:4}}></th>
+            {months.map((m,i)=><th key={i} colSpan={2} style={{borderLeft:'1px solid var(--s100)'}}>{m} {year}</th>)}
+          </tr>
+          <tr>
+            <td style={{width:150}}></td>
+            {Array.from({length:totalHalves},(_,i)=>{
+              const m=Math.floor(i/2);
+              const half=i%2;
+              const lastDay=new Date(year,m+1,0).getDate();
+              return <td key={i} className="gantt-half-hdr" style={{width:halfWidth}}>
+                {half===0?`1-15`:`16-${lastDay}`}
+              </td>;
+            })}
+          </tr>
+        </thead>
+        <tbody>
+          {/* Today row */}
+          <tr className="gantt-row">
+            <td style={{paddingLeft:4}}><span style={{fontSize:12,fontWeight:700,color:'var(--green)'}}>Vandaag</span></td>
+            {Array.from({length:totalHalves},(_,i)=>(
+              <td key={i} className="gantt-cell" style={{position:'relative'}}>
+                {i===todayHalf&&<>
+                  <div className="gantt-today-line" style={{left:todayOffset}}/>
+                  <div style={{position:'absolute',top:0,left:todayOffset,transform:'translateX(-50%)'}}>
+                    <div style={{background:'#fff',border:'1.5px solid var(--green)',borderRadius:999,fontSize:10,fontWeight:700,color:'var(--gtxt)',padding:'1px 7px',whiteSpace:'nowrap',marginTop:-20}}>vandaag</div>
+                  </div>
+                </>}
+              </td>
+            ))}
+          </tr>
+          {phases.map(phase=>{
+            const def=PHASE_DEFS.find(d=>d.key===phase.key)||{icon:'📌'};
+            const sh=dateToHalf(phase.start_date);
+            const eh=dateToHalf(phase.end_date);
+            const days=phase.start_date&&phase.end_date?Math.round((new Date(phase.end_date)-new Date(phase.start_date))/86400000):null;
+            return (
+              <tr key={phase.key} className="gantt-row">
+                <td>
+                  <div className="gantt-label">
+                    <span style={{fontSize:14}}>{def.icon}</span>
+                    {phase.key}
+                  </div>
+                </td>
+                {Array.from({length:totalHalves},(_,i)=>(
+                  <td key={i} className="gantt-cell">
+                    {sh!==null && i===sh && eh!==null && (
+                      <div
+                        className="gantt-bar"
+                        style={{
+                          background:barColors[phase.status],
+                          left:0,
+                          width:`${(eh-sh+1)*halfWidth}px`,
+                        }}
+                        onClick={()=>onPhaseClick(phase)}
+                      >
+                        {phase.key}
+                        {days!==null&&<span className="gantt-bar-days">{days}d</span>}
+                      </div>
+                    )}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// ── Notes Card ────────────────────────────────────────────
+function NotesCard({notes, onAdd}) {
+  const [txt,setTxt]=useState('');
+  return (
+    <div className="section-card">
+      <div className="section-header">
+        <div>
+          <div className="section-title-row">
+            <span style={{color:'var(--primary)'}}><Ic.Notes/></span>
+            <span className="section-title">Algemene notities</span>
+          </div>
+        </div>
+        <span className="card-meta">{notes.length} notities</span>
+      </div>
+      {notes.length>0&&<div className="notes-list">
+        {[...notes].reverse().map(n=><div key={n.id} className="note-item">
+          <div style={{fontSize:13.5,color:'var(--s700)',lineHeight:1.55}}>{n.text}</div>
+          <div style={{fontSize:11,color:'var(--s400)',marginTop:5}}>{fdate(n.created_at)}</div>
+        </div>)}
+      </div>}
+      <textarea
+        className="notes-input"
+        value={txt}
+        onChange={e=>setTxt(e.target.value)}
+        placeholder={`Voeg een notitie toe... (⌘+Enter om op te slaan)`}
+        onKeyDown={e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter'&&txt.trim()){onAdd(txt.trim());setTxt('');}}}
+      />
+      <div className="notes-save-row">
+        <button className="btn bp bsm" disabled={!txt.trim()} onClick={async()=>{await onAdd(txt.trim());setTxt('');}}>
+          <Ic.Notes/> Opslaan
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── OOS Card ──────────────────────────────────────────────
+function OOSCard({items, onAdd, onRemove, projects=[]}) {
+  const [f,setF]=useState({title:'',linked_project:'',description:'',price:''});
+  const [showForm,setShowForm]=useState(false);
+  const total=items.reduce((s,i)=>s+i.price,0);
+  const valid=f.title.trim();
+
+  return (
+    <div className="section-card">
+      <div className="section-header">
+        <div>
+          <div className="section-title-row">
+            <span style={{color:'var(--amber)'}}><Ic.Warn/></span>
+            <span className="section-title">Out of scope verzoeken</span>
+          </div>
+          <div style={{fontSize:12.5,color:'var(--s400)',marginTop:3}}>{items.length} verzoeken</div>
+        </div>
+        <span className="oos-total-badge">Totaal {eur(total)}</span>
+      </div>
+
+      {items.length>0&&<>
+        <table className="oot" style={{marginBottom:16}}>
+          <thead><tr><th>Titel</th><th>Omschrijving</th><th style={{textAlign:'right'}}>Prijs</th><th></th></tr></thead>
+          <tbody>{items.map(it=><tr key={it.id}>
+            <td style={{fontWeight:600}}>{it.title}</td>
+            <td style={{color:'var(--s500)'}}>{it.description}</td>
+            <td style={{textAlign:'right',fontVariantNumeric:'tabular-nums'}}>{eur(it.price)}</td>
+            <td><button className="bi" style={{padding:4}} onClick={()=>onRemove(it.id)}><Ic.Trash/></button></td>
+          </tr>)}</tbody>
+        </table>
+      </>}
+
+      <div className="oos-form">
+        <div className="field" style={{marginBottom:10}}>
+          <label>Titel</label>
+          <input value={f.title} onChange={e=>setF(p=>({...p,title:e.target.value}))} placeholder="bijv. Extra rapportage module"/>
+        </div>
+        <div className="field" style={{marginBottom:10}}>
+          <label>Gekoppeld aan project</label>
+          <select value={f.linked_project} onChange={e=>setF(p=>({...p,linked_project:e.target.value}))}>
+            <option value="">— Niet gekoppeld —</option>
+            {projects.map(pr=><option key={pr.id} value={pr.id}>{pr.name}</option>)}
+          </select>
+        </div>
+        <div className="field" style={{marginBottom:10}}>
+          <label>Beschrijving</label>
+          <textarea value={f.description} onChange={e=>setF(p=>({...p,description:e.target.value}))} placeholder="Gedetailleerde beschrijving van het verzoek..." style={{minHeight:72}}/>
+        </div>
+        <div className="field" style={{marginBottom:10}}>
+          <label>Indicatieve prijs (optioneel)</label>
+          <input type="number" value={f.price} onChange={e=>setF(p=>({...p,price:e.target.value}))} placeholder="0" style={{}}/>
+        </div>
+        <div style={{display:'flex',gap:8,justifyContent:'flex-end'}}>
+          <button className="btn bg bsm" onClick={()=>setF({title:'',linked_project:'',description:'',price:''})}>Annuleren</button>
+          <button className="btn btn-amber bsm" disabled={!valid} onClick={async()=>{
+            await onAdd({title:f.title,description:f.description,price:parseFloat(f.price)||0});
+            setF({title:'',linked_project:'',description:'',price:''});
+          }}><Ic.Plus/> Toevoegen</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Logo Uploader ─────────────────────────────────────────
+function LogoUploader({value,onChange}) {
+  const ref=useRef();
+  if(value) return <div style={{display:'flex',alignItems:'center',gap:12}}>
+    <img src={value} style={{width:56,height:56,borderRadius:8,objectFit:'cover',border:'1px solid var(--s200)'}}/>
+    <div>
+      <div style={{fontSize:13,color:'var(--s600)',marginBottom:6}}>Logo ingesteld</div>
+      <button className="btn bg bsm" onClick={()=>onChange(null)}>Verwijderen</button>
+    </div>
+  </div>;
+  return <div>
+    <input ref={ref} type="file" accept="image/*" style={{display:'none'}} onChange={e=>{const f=e.target.files[0];if(f)downscale(f,onChange);}}/>
+    <div style={{display:'flex',alignItems:'center',gap:10}}>
+      <div style={{width:56,height:56,borderRadius:8,border:'1.5px dashed var(--s300)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--s300)',flexShrink:0}}>
+        <span style={{fontSize:24}}>?</span>
+      </div>
+      <div>
+        <button className="btn bg bsm" onClick={()=>ref.current.click()}><Ic.Upload/> Logo uploaden</button>
+        <div style={{fontSize:11.5,color:'var(--s400)',marginTop:4}}>PNG of JPG, automatisch verkleind tot 256px</div>
+      </div>
+    </div>
+  </div>;
+}
+
+// ── Licentie Editor ───────────────────────────────────────
+const LICENSE_TYPES = ['Zoho Creator','Xano/WeWeb','Claude','Xano/Claude','N8N','Zapier','Make','Custom'];
+
+function LicEditor({rows,onChange}) {
+  const total=rows.reduce((s,l)=>s+(Number(l.cost)||0),0);
+  return <div>
+    {rows.map((l,i)=><div key={i} className="lic-row">
+      <div className="field" style={{marginBottom:0}}>
+        <label style={{fontSize:10}}>Type</label>
+        <select value={l.type} onChange={e=>{const n=[...rows];n[i]={...n[i],type:e.target.value};onChange(n);}}>
+          <option value="">Selecteer type...</option>
+          {LICENSE_TYPES.map(t=><option key={t} value={t}>{t}</option>)}
+          <option value="custom">Aangepast...</option>
+        </select>
+      </div>
+      <div className="field" style={{marginBottom:0}}>
+        <label style={{fontSize:10}}>Kosten/jr (€)</label>
+        <input type="number" value={l.cost} onChange={e=>{const n=[...rows];n[i]={...n[i],cost:parseFloat(e.target.value)||0};onChange(n);}} placeholder="0"/>
+      </div>
+      <button className="bi" style={{padding:5,alignSelf:'flex-end',marginBottom:1}} onClick={()=>onChange(rows.filter((_,j)=>j!==i))}><Ic.X/></button>
+    </div>)}
+    <button className="lic-add-btn" onClick={()=>onChange([...rows,{type:'',cost:0}])}><Ic.Plus/> Licentie toevoegen</button>
+    {rows.length>0&&<div style={{fontSize:12.5,color:'var(--s500)',textAlign:'right',paddingTop:8,marginTop:4}}>Totaal: <strong style={{color:'var(--s800)'}}>{eur(total)}/jr</strong></div>}
+  </div>;
+}
+
+// ── Project Form ──────────────────────────────────────────
+function ProjectForm({initial,activeAM,ams,onSave,onCancel}) {
+  const [f,setF]=useState(initial?{
+    client:initial.client,name:initial.name,logo:initial.logo,
+    offerte_total:initial.offerte_total,owner_id:initial.owner_id,
+    licenties:initial.licenties.map(l=>({type:l.type,cost:l.cost})),
+    multi_project_board:initial.multi_project_board||false,
+  }:{
+    client:'',name:'',logo:null,offerte_total:'',owner_id:activeAM,licenties:[],multi_project_board:false,
+  });
+  const set=(k,v)=>setF(p=>({...p,[k]:v}));
+  const valid=f.client.trim()&&f.name.trim();
+
+  return <>
+    <div className="mbody">
+      <div className="fr2" style={{marginBottom:0}}>
+        <div className="field">
+          <label>Klantnaam</label>
+          <input value={f.client} onChange={e=>set('client',e.target.value)} placeholder="bijv. Acme BV" autoFocus/>
+        </div>
+        <div className="field">
+          <label>Projectnaam</label>
+          <input value={f.name} onChange={e=>set('name',e.target.value)} placeholder="bijv. CRM implementatie"/>
+        </div>
+      </div>
+
+      <div className="field">
+        <label>Klant logo (optioneel)</label>
+        <LogoUploader value={f.logo} onChange={v=>set('logo',v)}/>
+      </div>
+
+      <div className="field">
+        <label>Offerte totaal</label>
+        <div style={{position:'relative'}}>
+          <span style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',color:'var(--s500)',fontSize:14}}>€</span>
+          <input type="number" value={f.offerte_total} onChange={e=>set('offerte_total',parseFloat(e.target.value)||'')} placeholder="0" style={{paddingLeft:26}}/>
+        </div>
+      </div>
+
+      <div className="field">
+        <label>Jaarlijkse licenties</label>
+        <LicEditor rows={f.licenties} onChange={v=>set('licenties',v)}/>
+      </div>
+
+      <div className="field">
+        <label>Multi-project board</label>
+        <div className="mpb-toggle">
+          <span className="mpb-toggle-icon"><Ic.Layers/></span>
+          <div className="mpb-toggle-text">
+            <div className="mpb-toggle-name">Multi-project board inschakelen</div>
+            <div className="mpb-toggle-desc">Voegt een tabblad toe met een wekelijkse trajecten-tabel (zoals Itzu').</div>
+          </div>
+          <button className={`toggle-switch ${f.multi_project_board?'on':'off'}`} onClick={()=>set('multi_project_board',!f.multi_project_board)}>
+            <div className="toggle-knob"/>
+          </button>
+        </div>
+      </div>
+
+      <div className="field" style={{marginBottom:0}}>
+        <label>Getekende offerte</label>
+        <div className="logo-upload-area">
+          <Ic.Upload/>
+          <div style={{fontSize:13.5,fontWeight:500,color:'var(--s600)'}}>Sleep bestand hierheen of klik om te uploaden</div>
+          <div style={{fontSize:12,color:'var(--s400)'}}>PDF, Word of afbeelding</div>
+        </div>
+        <div style={{fontSize:11.5,color:'var(--s400)',marginTop:5,textAlign:'center'}}>Druk op Enter om op te slaan</div>
+      </div>
+    </div>
+    <div className="mftr">
+      <button className="btn bg" onClick={onCancel}>Annuleren</button>
+      <button className="btn bp" disabled={!valid} onClick={()=>onSave(f)}>
+        {initial?'Opslaan':'Project starten'}
+      </button>
+    </div>
+  </>;
+}
+
+// ── Delete Modal ──────────────────────────────────────────
+function DeleteModal({project,onConfirm,onCancel}) {
+  return <div className="modal-backdrop" onClick={onCancel}>
+    <div className="modal modal-sm" onClick={e=>e.stopPropagation()}>
+      <div className="mhdr" style={{paddingBottom:0}}>
+        <div style={{width:42,height:42,background:'var(--rbg)',borderRadius:12,display:'flex',alignItems:'center',justifyContent:'center',color:'var(--red)',flexShrink:0}}><Ic.Warn/></div>
+        <div className="mhdr-text"><div className="mhdr-sup">Bevestiging</div><div className="mtitle">Project verwijderen?</div></div>
+        <button className="mhdr-close" onClick={onCancel}><Ic.X/></button>
+      </div>
+      <div className="mbody">
+        <p style={{fontSize:13.5,color:'var(--s500)',lineHeight:1.6}}><strong style={{color:'var(--s800)'}}>{project.name}</strong> voor <strong style={{color:'var(--s800)'}}>{project.client}</strong> wordt permanent verwijderd inclusief alle data.</p>
+      </div>
+      <div className="mftr">
+        <button className="btn bg" onClick={onCancel}>Annuleren</button>
+        <button className="btn bd" onClick={onConfirm}>Verwijderen</button>
+      </div>
+    </div>
+  </div>;
+}
+
+// ── AM Dropdown ───────────────────────────────────────────
+function AMDropdown({ams, activeAM, onSwitch, onAddAM, onClose}) {
+  const [adding,setAdding]=useState(false);
+  const [newName,setNewName]=useState('');
+  const ref=useRef();
+
+  useEffect(()=>{
+    function handler(e){if(ref.current&&!ref.current.contains(e.target))onClose();}
+    document.addEventListener('mousedown',handler);
+    return()=>document.removeEventListener('mousedown',handler);
+  },[onClose]);
+
+  return <div className="am-dropdown" ref={ref}>
+    <div className="am-section-label">Account Manager</div>
+    {ams.map(a=><div key={a.id} className={`am-option${activeAM===a.id?' active':''}`} onClick={()=>{onSwitch(a.id);onClose();}}>
+      <div className="am-av" style={{background:a.gradient}}>{a.initials}</div>
+      <span className="am-option-name">{a.name}</span>
+      {activeAM===a.id&&<span className="am-check"><Ic.Check/></span>}
+    </div>)}
+    {!adding
+      ? <div className="am-add" onClick={()=>setAdding(true)}><Ic.Plus/> Nieuwe AM toevoegen</div>
+      : <div style={{padding:'8px 14px',borderTop:'1px solid var(--s200)'}}>
+          <input
+            autoFocus value={newName} onChange={e=>setNewName(e.target.value)}
+            placeholder="Naam accountmanager..."
+            style={{width:'100%',padding:'7px 10px',border:'1px solid var(--s200)',borderRadius:'var(--rmd)',fontSize:13,outline:'none',marginBottom:7}}
+            onKeyDown={async e=>{if(e.key==='Enter'&&newName.trim()){const a=await dbInsertAM(newName);onAddAM(a);setAdding(false);setNewName('');}if(e.key==='Escape')setAdding(false);}}
+          />
+          <div style={{display:'flex',gap:6}}>
+            <button className="btn bg bsm" style={{flex:1}} onClick={()=>setAdding(false)}>Annuleren</button>
+            <button className="btn bp bsm" style={{flex:1}} disabled={!newName.trim()} onClick={async()=>{const a=await dbInsertAM(newName);onAddAM(a);setAdding(false);setNewName('');}}>Toevoegen</button>
+          </div>
+        </div>
+    }
+  </div>;
+}
+
+// ── Overview ──────────────────────────────────────────────
+function Overview({projects,ams,activeAM,onSelect,onNew,onEdit,onDelete}) {
+  const [q,setQ]=useState('');
+  const filtered=projects.filter(p=>!q||p.name.toLowerCase().includes(q.toLowerCase())||p.client.toLowerCase().includes(q.toLowerCase()));
+  const cnt={g:0,a:0,r:0}; projects.forEach(p=>cnt[p.project_status]=(cnt[p.project_status]||0)+1);
+
+  const kpiConfig=[
+    {s:'g',icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#166534" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>,label:'Op koers'},
+    {s:'a',icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#92400e" strokeWidth="2.5" strokeLinecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,label:'Waarschuwing'},
+    {s:'r',icon:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#991b1b" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>,label:'Kritiek'},
+  ];
+
+  return <div className="page">
+    <div className="ov-hero">
+      <div className="ov-title">Actieve projecten</div>
+      <div className="ov-sub">Bewaar overzicht over de gezondheid van alle klantprojecten.</div>
+    </div>
+
+    <div className="kpi-strip">
+      {kpiConfig.map(({s,icon,label})=><div key={s} className="kpi-card">
+        <div className={`kpi-icon ${s}`}>{icon}</div>
+        <div>
+          <div className={`kpi-num ${s}`}>{cnt[s]||0}</div>
+          <div className="kpi-lbl">{label.toUpperCase()}</div>
+        </div>
+      </div>)}
+    </div>
+
+    <div className="twrap">
+      <div className="tbar">
+        <div style={{position:'relative',flex:1,maxWidth:420}}>
+          <div style={{position:'absolute',left:11,top:'50%',transform:'translateY(-50%)',color:'var(--s400)',pointerEvents:'none'}}><Ic.Search/></div>
+          <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Zoek op project of klantnaam..." style={{width:'100%',padding:'8px 12px 8px 34px',border:'1px solid var(--s200)',borderRadius:'var(--rmd)',fontSize:13,background:'#fff',color:'var(--s800)',outline:'none'}}/>
+        </div>
+        <span style={{fontSize:12.5,color:'var(--s400)',marginLeft:'auto',marginRight:10}}>{filtered.length} van {projects.length} projecten</span>
+        <button className="btn bp" onClick={onNew}><Ic.Plus/> Nieuw project</button>
+      </div>
+      <table>
+        <thead><tr>
+          <th>Project</th>
+          <th>Aangemaakt</th>
+          <th>Offerte</th>
+          <th>Licentie/jr</th>
+          <th>Status</th>
+          <th></th>
+        </tr></thead>
+        <tbody>
+          {filtered.length===0&&<tr><td colSpan={6}><div className="empty-st">
+            <div style={{fontSize:36,marginBottom:10}}>📋</div>
+            <p>{q?'Geen projecten gevonden.':'Nog geen projecten. Klik op "Nieuw project" om te starten.'}</p>
+          </div></td></tr>}
+          {filtered.map(p=><tr key={p.id} onClick={()=>onSelect(p.id)}>
+            <td>
+              <div style={{display:'flex',alignItems:'center',gap:11}}>
+                <Avatar logo={p.logo} client={p.client}/>
+                <div>
+                  <div style={{fontWeight:600,color:'var(--s900)',fontSize:14}}>{p.name}</div>
+                  <div style={{fontSize:12,color:'var(--s500)',marginTop:1}}>{p.client}</div>
+                </div>
+              </div>
+            </td>
+            <td style={{color:'var(--s500)',fontSize:13}}>
+              <div style={{display:'flex',alignItems:'center',gap:5}}><span style={{color:'var(--s300)'}}><Ic.Calendar/></span>{fdate(p.created_at)}</div>
+            </td>
+            <td style={{fontVariantNumeric:'tabular-nums',color:'var(--s700)',fontWeight:500}}>{eur(p.offerte_total)}</td>
+            <td style={{fontVariantNumeric:'tabular-nums',color:'var(--s700)',fontWeight:500}}>{eur(p.licentie_jr)}</td>
+            <td><Pill status={p.project_status}/></td>
+            <td onClick={e=>e.stopPropagation()}>
+              <div className="row-actions">
+                <button className="bi" style={{padding:5}} onClick={e=>{e.stopPropagation();onEdit(p.id);}}><Ic.Edit/></button>
+                <button className="bi" style={{padding:5,color:'var(--rtxt)'}} onClick={e=>{e.stopPropagation();onDelete(p.id);}}><Ic.Trash/></button>
+              </div>
+            </td>
+          </tr>)}
+        </tbody>
+      </table>
+    </div>
+  </div>;
+}
+
+// ── Project Detail ────────────────────────────────────────
+function ProjectDetail({project:init, ams, onBack, onChange}) {
+  const [p,setP]=useState(init);
+  const [showEdit,setShowEdit]=useState(false);
+  const [editPhase,setEditPhase]=useState(null);
+
+  const upd=(patch)=>{ const np={...p,...patch}; setP(np); onChange(np); };
+
+  const setGauge=async(k,v)=>{
+    const gauges={gauge_timing:p.gauge_timing,gauge_budget:p.gauge_budget,gauge_scope:p.gauge_scope,[k]:v};
+    const ps=drollup(gauges);
+    await dbUpdateGauges(p.id,gauges,ps);
+    upd({...gauges,project_status:ps});
+  };
+
+  const handlePhase=async(key,data)=>{
+    const tl=await dbUpdatePhase(p.id,key,data);
+    const phases=p.phases.map(ph=>ph.key===key?{...ph,...data,updated_at:new Date().toISOString()}:ph);
+    upd({phases,timeline_status:tl});
+  };
+
+  const handleAddNote=async(text)=>{
+    const n=await dbAddNote(p.id,text);
+    upd({notes:[...p.notes,n]});
+  };
+
+  const handleAddOOS=async(item)=>{
+    const o=await dbAddOOS(p.id,item);
+    upd({oos_items:[...p.oos_items,o]});
+  };
+
+  const handleRemoveOOS=async(id)=>{
+    await dbDeleteOOS(id);
+    upd({oos_items:p.oos_items.filter(o=>o.id!==id)});
+  };
+
+  const handleEditSave=async(f)=>{
+    const licentieJr=f.licenties.reduce((s,l)=>s+Number(l.cost),0);
+    const updated={...p,...f,licentie_jr:licentieJr,last_updated:new Date().toISOString()};
+    await dbUpdateProject(updated);
+    await dbSyncLicenties(p.id,f.licenties);
+    const licenties=f.licenties.map((l,i)=>({...l,id:l.id||uid(),project_id:p.id,sort_order:i}));
+    upd({...updated,licenties});
+    setShowEdit(false);
+  };
+
+  // Phase stats
+  const phaseStats=p.phases.reduce((acc,ph)=>{acc[ph.status]=(acc[ph.status]||0)+1;return acc;},{g:0,a:0,r:0});
+  const lastUpdated=p.phases.reduce((latest,ph)=>{const d=ph.updated_at||'';return d>latest?d:latest;},'');
+
+  return <div>
+    {/* Detail Header */}
+    <div className="dhdr">
+      <div className="dhdr-inner">
+        <button style={{display:'flex',alignItems:'center',gap:5,fontSize:12.5,color:'var(--s500)',padding:'5px 9px',borderRadius:'var(--rmd)',border:'1px solid var(--s200)',background:'transparent',cursor:'pointer'}} onClick={onBack}><Ic.Back/> Overzicht</button>
+        <Avatar logo={p.logo} client={p.client} size={44} rad={10}/>
+        <div>
+          <div style={{display:'flex',alignItems:'center',gap:8}}>
+            <div className="dhdr-title">{p.name}</div>
+            <button style={{background:'none',border:'none',color:'var(--s400)',cursor:'pointer',padding:2}}><Ic.ExternalLink/></button>
+          </div>
+          <div className="dhdr-client">{p.client}</div>
+        </div>
+        <div style={{display:'flex',gap:7,flexWrap:'wrap',marginLeft:'auto',alignItems:'center'}}>
+          <Pill status={p.timeline_status} label={`Timeline status: ${slbl(p.timeline_status)}`}/>
+          <Pill status={p.project_status} label={`Project status: ${slbl(p.project_status)}`}/>
+        </div>
+        <button className="btn bg bsm" onClick={()=>setShowEdit(true)}><Ic.Edit/> Bewerken</button>
+      </div>
+      <div style={{maxWidth:1180,margin:'0 auto',paddingBottom:0}}>
+        <div className="tab-bar" style={{display:'inline-flex',marginBottom:'-1px'}}>
+          <button className="tab active"><Ic.Target/> Mission Control</button>
+          {p.multi_project_board&&<button className="tab"><Ic.Layers/> Multi-project board</button>}
+        </div>
+      </div>
+    </div>
+
+    <div className="page" style={{paddingTop:24}}>
+      {/* Project Overview (Gauges) */}
+      <div className="section-card">
+        <div className="section-header">
+          <div>
+            <div className="section-title-row"><span style={{color:'var(--primary)'}}><Ic.Activity/></span><span className="section-title">Project overview</span></div>
+            <div className="section-subtitle">Klik links/midden/rechts op een meter om de status direct in te stellen.</div>
+          </div>
+          <div style={{textAlign:'right'}}>
+            <div style={{fontSize:10.5,fontWeight:700,color:'var(--s400)',textTransform:'uppercase',letterSpacing:'.6px',marginBottom:3}}>Offerte &nbsp;&nbsp; Licentie/jr</div>
+            <div style={{fontSize:16,fontWeight:700,color:'var(--s900)'}}>{eur(p.offerte_total)} &nbsp;&nbsp; {eur(p.licentie_jr)}</div>
+          </div>
+        </div>
+        <div className="gauge-grid">
+          <SpeedoGauge label="TIMING" sublabel="Tijdsplanning" status={p.gauge_timing} onSet={v=>setGauge('gauge_timing',v)}/>
+          <SpeedoGauge label="BUDGET" sublabel="Financieel" status={p.gauge_budget} onSet={v=>setGauge('gauge_budget',v)}/>
+          <SpeedoGauge label="SCOPE" sublabel="Omvang werk" status={p.gauge_scope} onSet={v=>setGauge('gauge_scope',v)}/>
+        </div>
+      </div>
+
+      {/* Phases */}
+      <div className="section-card">
+        <div className="section-header">
+          <div>
+            <div className="section-title-row"><span style={{color:'var(--primary)'}}><Ic.Target/></span><span className="section-title">Mission Control · Fasen</span></div>
+            <div className="section-subtitle">Klik links/midden/rechts op een fase om de status direct in te stellen.</div>
+          </div>
+          <div style={{textAlign:'right'}}>
+            {lastUpdated&&<div style={{fontSize:12,color:'var(--s400)',display:'flex',alignItems:'center',gap:5}}><Ic.Refresh/> Bijgewerkt {fdshort(lastUpdated)}</div>}
+          </div>
+        </div>
+        {/* Phase summary bar */}
+        {p.phases.length>0&&<div style={{marginBottom:12}}>
+          <div style={{height:6,borderRadius:999,background:'var(--s100)',display:'flex',overflow:'hidden',marginBottom:6}}>
+            {p.phases.map(ph=><div key={ph.key} style={{flex:1,background:ph.status==='g'?'var(--green)':ph.status==='a'?'var(--amber)':'var(--red)',margin:'0 1px'}}/>}
+          </div>
+          <div style={{fontSize:12,color:'var(--s500)'}}>{phaseStats.g}/{p.phases.length} op koers · {phaseStats.a} risico · {phaseStats.r} kritiek</div>
+        </div>}
+        {/* Phase cards */}
+        <div className="phase-cards" style={{marginBottom:0}}>
+          {p.phases.map(ph=><PhaseCard key={ph.key} phase={ph} onClick={()=>setEditPhase(ph)}/>)}
+        </div>
+      </div>
+
+      {/* Gantt */}
+      <div className="section-card">
+        <div className="section-header">
+          <div>
+            <div className="section-title-row"><span style={{color:'var(--primary)'}}><Ic.Calendar/></span><span className="section-title">Tijdlijn · Gantt</span></div>
+            <div className="section-subtitle">Klik op een balk of mijlpaal om te bewerken</div>
+          </div>
+          <div style={{display:'flex',gap:6,alignItems:'center'}}>
+            <button className="btn bg bsm"><Ic.Plus/> Mijlpaal</button>
+          </div>
+        </div>
+        <GanttChart phases={p.phases} onPhaseClick={ph=>setEditPhase(ph)}/>
+      </div>
+
+      {/* Notes */}
+      <NotesCard notes={p.notes} onAdd={handleAddNote}/>
+
+      {/* OOS */}
+      <OOSCard items={p.oos_items} onAdd={handleAddOOS} onRemove={handleRemoveOOS}/>
+
+      <div style={{height:32}}/>
+    </div>
+
+    {/* Phase edit modal */}
+    {editPhase&&<MilestoneModal
+      phase={editPhase}
+      onSave={async(data)=>{await handlePhase(editPhase.key,data);setEditPhase(null);}}
+      onCancel={()=>setEditPhase(null)}
+    />}
+
+    {/* Edit project modal */}
+    {showEdit&&<div className="modal-backdrop" onClick={()=>setShowEdit(false)}>
+      <div className="modal modal-lg" onClick={e=>e.stopPropagation()}>
+        <div className="mhdr">
+          <div className="mhdr-icon"><Ic.Edit/></div>
+          <div className="mhdr-text"><div className="mhdr-sup">Project</div><div className="mtitle">Project bewerken</div></div>
+          <button className="mhdr-close" onClick={()=>setShowEdit(false)}><Ic.X/></button>
+        </div>
+        <ProjectForm initial={p} activeAM={p.owner_id} ams={ams} onSave={handleEditSave} onCancel={()=>setShowEdit(false)}/>
+      </div>
+    </div>}
+  </div>;
+}
+
+// ── App ───────────────────────────────────────────────────
+function App() {
+  const [ams,setAms]=useState([]);
+  const [projects,setProjects]=useState([]);
+  const [activeAM,setActiveAM]=useState(()=>localStorage.getItem('mc-am')||'');
+  const [loading,setLoading]=useState(true);
+  const [view,setView]=useState('overview');
+  const [showNew,setShowNew]=useState(false);
+  const [editId,setEditId]=useState(null);
+  const [deleteId,setDeleteId]=useState(null);
+  const [showAMMenu,setShowAMMenu]=useState(false);
+
+  useEffect(()=>{
+    fetchAMs().then(data=>{
+      setAms(data);
+      if(data.length>0){
+        const saved=localStorage.getItem('mc-am');
+        const valid=data.find(a=>a.id===saved);
+        setActiveAM(valid?saved:data[0].id);
+      }
+    });
+  },[]);
+
+  useEffect(()=>{
+    if(!activeAM) return;
+    setLoading(true);
+    fetchProjects(activeAM).then(ps=>{setProjects(ps);setLoading(false);});
+  },[activeAM]);
+
+  const switchAM=(id)=>{ setActiveAM(id); localStorage.setItem('mc-am',id); setView('overview'); };
+
+  const handleNew=async(f)=>{
+    const licentieJr=f.licenties.reduce((s,l)=>s+Number(l.cost),0);
+    const p=await dbInsertProject({owner_id:f.owner_id||activeAM,client:f.client,name:f.name,logo:f.logo,offerte_total:Number(f.offerte_total)||0,licentie_jr:licentieJr,gauge_timing:'g',gauge_budget:'g',gauge_scope:'g',timeline_status:'g',project_status:'g',created_at:new Date().toISOString(),last_updated:new Date().toISOString(),licenties:f.licenties,multi_project_board:f.multi_project_board||false});
+    if(p.owner_id===activeAM) setProjects(prev=>[p,...prev]);
+    setShowNew(false);
+  };
+
+  const handleEditSave=async(f)=>{
+    const project=projects.find(p=>p.id===editId);
+    const licentieJr=f.licenties.reduce((s,l)=>s+Number(l.cost),0);
+    const updated={...project,...f,licentie_jr:licentieJr,last_updated:new Date().toISOString()};
+    await dbUpdateProject(updated);
+    await dbSyncLicenties(project.id,f.licenties);
+    const licenties=f.licenties.map((l,i)=>({...l,id:l.id||uid(),project_id:project.id,sort_order:i}));
+    setProjects(prev=>prev.map(p=>p.id===editId?{...updated,licenties}:p));
+    setEditId(null);
+  };
+
+  const handleDelete=async()=>{
+    await dbDeleteProject(deleteId);
+    setProjects(prev=>prev.filter(p=>p.id!==deleteId));
+    setDeleteId(null);
+    if(view===deleteId) setView('overview');
+  };
+
+  const curProject=projects.find(p=>p.id===view);
+  const activeAMObj=ams.find(a=>a.id===activeAM);
+
+  return <div>
+    {/* Topbar */}
+    <div className="topbar">
+      <div className="logo-mc">MC</div>
+      <div className="logo-block">
+        <div className="logo-company">Aziri</div>
+        <div className="logo-title">Project Mission Control</div>
+      </div>
+
+      <div className="topbar-right">
+        <button className="am-btn" onClick={()=>setShowAMMenu(v=>!v)}>
+          {activeAMObj&&<div className="am-av" style={{background:activeAMObj.gradient}}>{activeAMObj.initials}</div>}
+          <div className="am-btn-inner">
+            <div className="am-label">Account Manager</div>
+            <div className="am-name">{activeAMObj?.name||'Selecteer AM'}</div>
+          </div>
+          <div className={`am-chevron${showAMMenu?' open':''}`}><Ic.ChevronDown/></div>
+        </button>
+        {showAMMenu&&<AMDropdown
+          ams={ams}
+          activeAM={activeAM}
+          onSwitch={switchAM}
+          onAddAM={a=>{setAms(prev=>[...prev,a]);}}
+          onClose={()=>setShowAMMenu(false)}
+        />}
+      </div>
+    </div>
+
+    {loading&&<div className="loading"><Ic.Refresh/> &nbsp; Projecten laden...</div>}
+
+    {!loading&&view==='overview'&&<Overview
+      projects={projects} ams={ams} activeAM={activeAM}
+      onSelect={id=>setView(id)} onNew={()=>setShowNew(true)}
+      onEdit={id=>setEditId(id)} onDelete={id=>setDeleteId(id)}
+    />}
+    {!loading&&view!=='overview'&&curProject&&<ProjectDetail
+      project={curProject} ams={ams}
+      onBack={()=>setView('overview')}
+      onChange={p=>setProjects(prev=>prev.map(x=>x.id===p.id?p:x))}
+    />}
+
+    {/* New project modal */}
+    {showNew&&<div className="modal-backdrop" onClick={()=>setShowNew(false)}>
+      <div className="modal modal-lg" onClick={e=>e.stopPropagation()}>
+        <div className="mhdr">
+          <div className="mhdr-icon"><Ic.Layers/></div>
+          <div className="mhdr-text"><div className="mhdr-sup">Nieuw project</div><div className="mtitle">Mission Control</div></div>
+          <button className="mhdr-close" onClick={()=>setShowNew(false)}><Ic.X/></button>
+        </div>
+        <ProjectForm activeAM={activeAM} ams={ams} onSave={handleNew} onCancel={()=>setShowNew(false)}/>
+      </div>
+    </div>}
+
+    {/* Edit project modal */}
+    {editId&&<div className="modal-backdrop" onClick={()=>setEditId(null)}>
+      <div className="modal modal-lg" onClick={e=>e.stopPropagation()}>
+        <div className="mhdr">
+          <div className="mhdr-icon"><Ic.Edit/></div>
+          <div className="mhdr-text"><div className="mhdr-sup">Project</div><div className="mtitle">Project bewerken</div></div>
+          <button className="mhdr-close" onClick={()=>setEditId(null)}><Ic.X/></button>
+        </div>
+        <ProjectForm initial={projects.find(p=>p.id===editId)} activeAM={activeAM} ams={ams} onSave={handleEditSave} onCancel={()=>setEditId(null)}/>
+      </div>
+    </div>}
+
+    {deleteId&&<DeleteModal project={projects.find(p=>p.id===deleteId)} onConfirm={handleDelete} onCancel={()=>setDeleteId(null)}/>}
+  </div>;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
