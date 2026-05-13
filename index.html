@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mission Control — Aziri</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --primary:#576BFF;--primary-dim:#3a52e8;--primary-light:#eef0ff;
+    --s50:#f8fafc;--s100:#f1f5f9;--s200:#e2e8f0;--s300:#cbd5e1;--s400:#94a3b8;
+    --s500:#64748b;--s600:#475569;--s700:#334155;--s800:#1e293b;--s900:#0f172a;
+    --green:#22c55e;--gbg:#f0fdf4;--gtxt:#166534;
+    --amber:#f59e0b;--abg:#fffbeb;--atxt:#92400e;
+    --red:#ef4444;--rbg:#fef2f2;--rtxt:#991b1b;
+    --rmd:10px;--rlg:14px;--rxl:20px;
+    --font:'DM Sans','Segoe UI',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--font);background:var(--s50);color:var(--s800);min-height:100vh;-webkit-font-smoothing:antialiased;}
+  button{cursor:pointer;font-family:var(--font);}
+  input,textarea,select{font-family:var(--font);}
+  ::-webkit-scrollbar{width:6px;height:6px;}
+  ::-webkit-scrollbar-thumb{background:var(--s300);border-radius:3px;}
+
+  /* Topbar */
+  .topbar{background:#fff;border-bottom:1px solid var(--s200);height:56px;display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:100;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+  .logo{display:flex;align-items:center;gap:9px;font-size:16px;font-weight:700;color:var(--s900);letter-spacing:-.3px;white-space:nowrap;}
+  .logo-dot{width:8px;height:8px;background:var(--primary);border-radius:50%;}
+  .tsep{width:1px;height:22px;background:var(--s200);flex-shrink:0;}
+  .am-switcher{display:flex;align-items:center;gap:5px;}
+  .am-chip{display:flex;align-items:center;gap:7px;padding:4px 12px 4px 5px;border-radius:999px;border:1.5px solid transparent;cursor:pointer;transition:all .15s;background:transparent;font-size:12.5px;font-weight:500;color:var(--s600);}
+  .am-chip:hover{background:var(--s100);}
+  .am-chip.active{border-color:var(--primary);background:var(--primary-light);color:var(--primary);}
+  .am-av{width:25px;height:25px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;color:#fff;flex-shrink:0;}
+  .tbr{margin-left:auto;}
+
+  /* Buttons */
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 15px;border-radius:var(--rmd);font-size:13.5px;font-weight:500;border:1px solid transparent;transition:all .15s;white-space:nowrap;cursor:pointer;}
+  .bp{background:var(--primary);color:#fff;border-color:var(--primary);}
+  .bp:hover{background:var(--primary-dim);}
+  .bp:disabled{opacity:.5;cursor:not-allowed;}
+  .bg{background:transparent;color:var(--s600);border-color:var(--s200);}
+  .bg:hover{background:var(--s100);color:var(--s800);}
+  .bd{background:var(--rbg);color:var(--rtxt);border-color:#fecaca;}
+  .bd:hover{background:#fee2e2;}
+  .bsm{padding:5px 11px;font-size:12.5px;}
+  .bi{padding:6px;border-radius:var(--rmd);background:transparent;border:1px solid var(--s200);color:var(--s500);transition:all .15s;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;}
+  .bi:hover{background:var(--s100);color:var(--s700);}
+
+  /* Pills */
+  .pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px 3px 7px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer;user-select:none;border:1px solid transparent;transition:all .12s;}
+  .pill:hover{filter:brightness(.95);}
+  .pill.g{background:var(--gbg);color:var(--gtxt);border-color:#bbf7d0;}
+  .pill.a{background:var(--abg);color:var(--atxt);border-color:#fde68a;}
+  .pill.r{background:var(--rbg);color:var(--rtxt);border-color:#fecaca;}
+  .pill-dot{width:7px;height:7px;border-radius:50%;}
+  .pill.g .pill-dot{background:var(--green);}
+  .pill.a .pill-dot{background:var(--amber);}
+  .pill.r .pill-dot{background:var(--red);}
+
+  /* Fields */
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:12px;font-weight:600;color:var(--s600);margin-bottom:4px;}
+  .field input,.field textarea,.field select{width:100%;padding:9px 12px;border:1px solid var(--s200);border-radius:var(--rmd);font-size:13.5px;color:var(--s800);outline:none;transition:border-color .15s;background:#fff;}
+  .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--primary);}
+  .field textarea{resize:vertical;min-height:80px;}
+  .fr2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+
+  /* Modal */
+  .modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .modal{background:#fff;border-radius:var(--rxl);box-shadow:0 8px 32px rgba(0,0,0,.12);width:100%;max-width:580px;max-height:90vh;overflow-y:auto;animation:slideup .18s ease;}
+  .modal-lg{max-width:660px;}
+  .modal-sm{max-width:400px;}
+  @keyframes slideup{from{transform:translateY(10px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+  .mhdr{padding:22px 22px 0;display:flex;align-items:flex-start;justify-content:space-between;}
+  .mtitle{font-size:18px;font-weight:700;color:var(--s900);}
+  .mbody{padding:18px 22px;}
+  .mftr{padding:0 22px 22px;display:flex;gap:8px;justify-content:flex-end;}
+
+  /* Page */
+  .page{max-width:1160px;margin:0 auto;padding:26px 22px;}
+
+  /* KPI */
+  .kpi-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;}
+  .kpi-card{background:#fff;border:1px solid var(--s200);border-radius:var(--rlg);padding:16px 18px;display:flex;align-items:center;gap:14px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+  .kpi-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
+  .kpi-dot.g{background:var(--green);}.kpi-dot.a{background:var(--amber);}.kpi-dot.r{background:var(--red);}
+  .kpi-num{font-size:26px;font-weight:700;line-height:1;color:var(--s900);}
+  .kpi-lbl{font-size:12px;color:var(--s500);margin-top:2px;}
+
+  /* Table */
+  .twrap{background:#fff;border:1px solid var(--s200);border-radius:var(--rlg);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--s500);background:var(--s50);border-bottom:1px solid var(--s200);text-transform:uppercase;letter-spacing:.5px;}
+  tbody tr{border-bottom:1px solid var(--s100);transition:background .12s;cursor:pointer;}
+  tbody tr:last-child{border-bottom:none;}
+  tbody tr:hover{background:var(--s50);}
+  tbody td{padding:12px 14px;vertical-align:middle;}
+  .ra{display:flex;gap:5px;opacity:0;transition:opacity .12s;}
+  tbody tr:hover .ra{opacity:1;}
+
+  /* Card */
+  .card{background:#fff;border:1px solid var(--s200);border-radius:var(--rlg);padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+  .ctitle{font-size:12px;font-weight:700;color:var(--s700);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;}
+
+  /* Detail header */
+  .dhdr{background:#fff;border-bottom:1px solid var(--s200);padding:18px 22px;display:flex;align-items:center;gap:14px;box-shadow:0 1px 3px rgba(0,0,0,.05);flex-wrap:wrap;}
+
+  /* Gauges */
+  .ggrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  .gc{text-align:center;padding:14px 10px;border:1px solid var(--s200);border-radius:var(--rmd);cursor:pointer;transition:all .15s;}
+  .gc:hover{border-color:var(--s300);background:var(--s50);}
+
+  /* Phase timeline */
+  .ph-row{display:grid;grid-template-columns:120px 1fr;align-items:center;margin-bottom:8px;}
+  .ph-track{position:relative;height:26px;background:var(--s100);border-radius:5px;overflow:visible;cursor:pointer;}
+  .ph-bar{position:absolute;top:3px;height:20px;border-radius:4px;cursor:pointer;transition:filter .12s;min-width:6px;}
+  .ph-bar:hover{filter:brightness(1.1);}
+  .ph-editor{background:var(--s50);border:1px solid var(--s200);border-radius:var(--rmd);padding:14px;margin-top:8px;margin-bottom:10px;}
+
+  /* Notes */
+  .notes-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;max-height:240px;overflow-y:auto;}
+  .note-item{background:var(--s50);border:1px solid var(--s200);border-radius:var(--rmd);padding:11px 13px;}
+
+  /* OOS */
+  .oot{width:100%;font-size:12.5px;border-collapse:collapse;}
+  .oot th{text-align:left;padding:7px 9px;font-size:11px;font-weight:600;color:var(--s400);border-bottom:1px solid var(--s200);text-transform:uppercase;letter-spacing:.4px;}
+  .oot td{padding:9px;border-bottom:1px solid var(--s100);vertical-align:top;}
+  .oot tr:last-child td{border-bottom:none;}
+
+  /* Licentieset */
+  .licset{border:1px solid var(--s200);border-radius:var(--rmd);padding:11px 13px;margin-top:5px;}
+  .lsrow{display:grid;grid-template-columns:1fr 1fr auto;gap:9px;align-items:end;margin-bottom:9px;}
+
+  /* Logo uploader */
+  .lupl{border:2px dashed var(--s300);border-radius:var(--rmd);padding:14px;text-align:center;cursor:pointer;transition:border-color .15s;display:block;}
+  .lupl:hover{border-color:var(--primary);}
+
+  .stitle{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--s400);margin:18px 0 10px;}
+  .empty-st{text-align:center;padding:48px 20px;color:var(--s400);}
+  .loading{display:flex;align-items:center;justify-content:center;height:200px;color:var(--s400);font-size:14px;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.24.0/babel.min.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+// ── Supabase ──────────────────────────────────────────────
+const { createClient } = supabase;
+const sb = createClient(
+  'https://oblubcxkuuohpwjfaenx.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ibHViY3hrdXVvaHB3amZhZW54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2ODY0MTEsImV4cCI6MjA5NDI2MjQxMX0.Vdf7y1t5K493hUNkUtEPG4P4gC6ASAokU603UtSBrLU'
+);
+
+// ── DB helpers ────────────────────────────────────────────
+async function fetchAMs() {
+  const { data } = await sb.from('mc_account_managers').select('*').order('id');
+  return data ?? [];
+}
+
+async function fetchProjects(ownerId) {
+  const { data: projects } = await sb.from('mc_projects').select('*').eq('owner_id', ownerId).order('created_at', { ascending: false });
+  if (!projects?.length) return [];
+  const ids = projects.map(p => p.id);
+  const [l, ph, n, o] = await Promise.all([
+    sb.from('mc_licenties').select('*').in('project_id', ids).order('sort_order'),
+    sb.from('mc_phases').select('*').in('project_id', ids).order('sort_order'),
+    sb.from('mc_notes').select('*').in('project_id', ids).order('created_at'),
+    sb.from('mc_oos_items').select('*').in('project_id', ids).order('created_at'),
+  ]);
+  return projects.map(p => ({
+    ...p,
+    offerte_total: Number(p.offerte_total), licentie_jr: Number(p.licentie_jr),
+    licenties: (l.data??[]).filter(x=>x.project_id===p.id).map(x=>({...x,cost:Number(x.cost)})),
+    phases:    (ph.data??[]).filter(x=>x.project_id===p.id),
+    notes:     (n.data??[]).filter(x=>x.project_id===p.id),
+    oos_items: (o.data??[]).filter(x=>x.project_id===p.id).map(x=>({...x,price:Number(x.price)})),
+  }));
+}
+
+const PHASE_KEYS = ['Pre-offerte','Analyse','Implementatie','Test','Go-live','Nazorg'];
+
+async function dbInsertProject(data) {
+  const { licenties, ...row } = data;
+  const { data: p } = await sb.from('mc_projects').insert(row).select().single();
+  await Promise.all([
+    licenties.length && sb.from('mc_licenties').insert(licenties.map((l,i)=>({...l,project_id:p.id,sort_order:i}))),
+    sb.from('mc_phases').insert(PHASE_KEYS.map((key,i)=>({project_id:p.id,key,status:'g',note:'',sort_order:i}))),
+  ]);
+  return {...p, offerte_total:Number(p.offerte_total), licentie_jr:Number(p.licentie_jr), licenties:[], phases:[], notes:[], oos_items:[]};
+}
+
+async function dbUpdateProject(p) {
+  const {licenties,phases,notes,oos_items,...row} = p;
+  await sb.from('mc_projects').upsert(row);
+}
+
+async function dbSyncLicenties(projectId, lics) {
+  await sb.from('mc_licenties').delete().eq('project_id', projectId);
+  if (lics.length) await sb.from('mc_licenties').insert(lics.map((l,i)=>({...l,project_id:projectId,sort_order:i})));
+  await sb.from('mc_projects').update({licentie_jr: lics.reduce((s,l)=>s+l.cost,0), last_updated: new Date().toISOString()}).eq('id', projectId);
+}
+
+async function dbUpdateGauges(projectId, gauges, projectStatus) {
+  await sb.from('mc_projects').update({...gauges, project_status:projectStatus, last_updated:new Date().toISOString()}).eq('id', projectId);
+}
+
+async function dbUpdatePhase(projectId, key, data) {
+  await sb.from('mc_phases').update({...data, updated_at:new Date().toISOString()}).eq('project_id',projectId).eq('key',key);
+  const {data:phases} = await sb.from('mc_phases').select('status').eq('project_id',projectId);
+  const ss = (phases??[]).map(p=>p.status);
+  const tl = ss.includes('r')?'r':ss.includes('a')?'a':'g';
+  await sb.from('mc_projects').update({timeline_status:tl, last_updated:new Date().toISOString()}).eq('id',projectId);
+  return tl;
+}
+
+async function dbAddNote(projectId, text) {
+  const {data} = await sb.from('mc_notes').insert({project_id:projectId,text}).select().single();
+  return data;
+}
+
+async function dbAddOOS(projectId, item) {
+  const {data} = await sb.from('mc_oos_items').insert({project_id:projectId,...item}).select().single();
+  return {...data, price:Number(data.price)};
+}
+
+async function dbDeleteOOS(id) { await sb.from('mc_oos_items').delete().eq('id',id); }
+async function dbDeleteProject(id) { await sb.from('mc_projects').delete().eq('id',id); }
+
+// ── Helpers ───────────────────────────────────────────────
+function eur(n) { if(n==null)return'—'; return new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR',minimumFractionDigits:0,maximumFractionDigits:0}).format(n); }
+function fdate(iso) { if(!iso)return'—'; return new Date(iso).toLocaleDateString('nl-NL',{day:'numeric',month:'short',year:'numeric'}); }
+function fdshort(iso) { if(!iso)return'—'; return new Date(iso).toLocaleDateString('nl-NL',{day:'numeric',month:'short'}); }
+function hcol(s) {
+  const cs=['linear-gradient(135deg,#576BFF,#8B5CF6)','linear-gradient(135deg,#0EA5E9,#14B8A6)','linear-gradient(135deg,#F59E0B,#EF4444)','linear-gradient(135deg,#10B981,#059669)','linear-gradient(135deg,#EC4899,#8B5CF6)','linear-gradient(135deg,#F97316,#EF4444)','linear-gradient(135deg,#6366F1,#3B82F6)','linear-gradient(135deg,#84CC16,#14B8A6)'];
+  let h=0; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))|0;
+  return cs[Math.abs(h)%cs.length];
+}
+function slbl(s) { return {g:'Op koers',a:'Waarschuwing',r:'Kritiek'}[s]||s; }
+function drollup(g) { const v=[g.gauge_timing,g.gauge_budget,g.gauge_scope]; return v.includes('r')?'r':v.includes('a')?'a':'g'; }
+const SN = {g:'a',a:'r',r:'g'};
+function uid() { return Math.random().toString(36).slice(2)+Date.now().toString(36); }
+
+function downscale(file, cb) {
+  const r=new FileReader(); r.onload=e=>{const img=new Image();img.onload=()=>{const sz=256,rat=Math.min(sz/img.width,sz/img.height),c=document.createElement('canvas');c.width=img.width*rat;c.height=img.height*rat;c.getContext('2d').drawImage(img,0,0,c.width,c.height);cb(c.toDataURL('image/png'));};img.src=e.target.result;};r.readAsDataURL(file);
+}
+
+// ── SVG Icons ─────────────────────────────────────────────
+const Ic = {
+  Search:()=><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+  Plus:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+  Edit:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+  Trash:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>,
+  Back:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15 18 9 12 15 6"/></svg>,
+  X:()=><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+  Upload:()=><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>,
+  Warn:()=><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+};
+
+// ── Avatar ────────────────────────────────────────────────
+function Avatar({logo,client,size=34,rad=6}) {
+  if(logo) return <img src={logo} alt={client} style={{width:size,height:size,borderRadius:rad,objectFit:'cover',border:'1px solid var(--s200)',flexShrink:0}}/>;
+  const ini=(client||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  return <div style={{width:size,height:size,borderRadius:rad,background:hcol(client||''),display:'flex',alignItems:'center',justifyContent:'center',fontSize:size*.35,fontWeight:700,color:'#fff',flexShrink:0}}>{ini}</div>;
+}
+
+// ── Pill ──────────────────────────────────────────────────
+function Pill({status,onClick,label}) {
+  return <span className={`pill ${status}`} onClick={e=>{e.stopPropagation();onClick&&onClick();}}><span className="pill-dot"/>{label||slbl(status)}</span>;
+}
+
+// ── Logo Uploader ─────────────────────────────────────────
+function LogoUploader({value,onChange}) {
+  const ref=useRef();
+  if(value) return <div style={{display:'flex',alignItems:'center',gap:10}}><img src={value} style={{width:52,height:52,borderRadius:6,objectFit:'cover',border:'1px solid var(--s200)'}}/><div><div style={{fontSize:13,color:'var(--s600)',marginBottom:5}}>Logo ingesteld</div><button className="btn bg bsm" onClick={()=>onChange(null)}>Verwijderen</button></div></div>;
+  return <label className="lupl" onClick={()=>ref.current.click()}><input ref={ref} type="file" accept="image/*" style={{display:'none'}} onChange={e=>{const f=e.target.files[0];if(f)downscale(f,onChange);}}/><Ic.Upload/><div style={{fontSize:12.5,color:'var(--s500)',marginTop:5}}>Klik om logo te uploaden</div></label>;
+}
+
+// ── Licentie Editor ───────────────────────────────────────
+function LicEditor({rows,onChange}) {
+  const total=rows.reduce((s,l)=>s+(l.cost||0),0);
+  return <div className="licset">
+    {rows.map((l,i)=><div key={i} className="lsrow">
+      <div className="field" style={{marginBottom:0}}><label style={{fontSize:11}}>Type</label><input value={l.type} onChange={e=>{const n=[...rows];n[i]={...n[i],type:e.target.value};onChange(n);}} placeholder="bijv. Enterprise"/></div>
+      <div className="field" style={{marginBottom:0}}><label style={{fontSize:11}}>Kosten/jr (€)</label><input type="number" value={l.cost} onChange={e=>{const n=[...rows];n[i]={...n[i],cost:parseFloat(e.target.value)||0};onChange(n);}} placeholder="0"/></div>
+      <button className="bi" style={{padding:5,marginBottom:1}} onClick={()=>onChange(rows.filter((_,j)=>j!==i))}><Ic.X/></button>
+    </div>)}
+    <button className="btn bg bsm" style={{marginTop:7}} onClick={()=>onChange([...rows,{type:'',cost:0}])}><Ic.Plus/> Toevoegen</button>
+    <div style={{fontSize:12.5,color:'var(--s500)',textAlign:'right',paddingTop:7,borderTop:'1px solid var(--s100)',marginTop:7}}>Totaal: <strong style={{color:'var(--s800)'}}>{eur(total)}/jr</strong></div>
+  </div>;
+}
+
+// ── Project Form ──────────────────────────────────────────
+function ProjectForm({initial,activeAM,ams,onSave,onCancel}) {
+  const [f,setF]=useState(initial?{client:initial.client,name:initial.name,logo:initial.logo,offerte_total:initial.offerte_total,owner_id:initial.owner_id,licenties:initial.licenties.map(l=>({type:l.type,cost:l.cost}))}:{client:'',name:'',logo:null,offerte_total:'',owner_id:activeAM,licenties:[]});
+  const set=(k,v)=>setF(p=>({...p,[k]:v}));
+  const valid=f.client.trim()&&f.name.trim();
+  return <>
+    <div className="mbody">
+      <div className="fr2">
+        <div className="field"><label>Klantnaam *</label><input value={f.client} onChange={e=>set('client',e.target.value)} placeholder="bijv. Deloitte" autoFocus/></div>
+        <div className="field"><label>Projectnaam *</label><input value={f.name} onChange={e=>set('name',e.target.value)} placeholder="bijv. ERP Migratie Q3"/></div>
+      </div>
+      <div className="fr2">
+        <div className="field"><label>Offerte totaal (€)</label><input type="number" value={f.offerte_total} onChange={e=>set('offerte_total',parseFloat(e.target.value)||'')} placeholder="0"/></div>
+        <div className="field"><label>Account Manager</label><select value={f.owner_id} onChange={e=>set('owner_id',e.target.value)}>{ams.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></div>
+      </div>
+      <div className="field"><label>Licenties / jaar</label><LicEditor rows={f.licenties} onChange={v=>set('licenties',v)}/></div>
+      <div className="field"><label>Logo (optioneel)</label><LogoUploader value={f.logo} onChange={v=>set('logo',v)}/></div>
+    </div>
+    <div className="mftr">
+      <button className="btn bg" onClick={onCancel}>Annuleren</button>
+      <button className="btn bp" disabled={!valid} onClick={()=>onSave(f)}>{initial?'Opslaan':'Aanmaken'}</button>
+    </div>
+  </>;
+}
+
+// ── Delete Modal ──────────────────────────────────────────
+function DeleteModal({project,onConfirm,onCancel}) {
+  return <div className="modal-backdrop" onClick={onCancel}>
+    <div className="modal modal-sm" onClick={e=>e.stopPropagation()}>
+      <div className="mhdr" style={{borderBottom:'none',paddingBottom:4}}><div/><button className="bi" onClick={onCancel}><Ic.X/></button></div>
+      <div className="mbody">
+        <div style={{textAlign:'center',padding:'6px 0 2px'}}>
+          <div style={{width:48,height:48,background:'var(--rbg)',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 12px'}}><Ic.Warn/></div>
+          <div style={{fontSize:16,fontWeight:700,marginBottom:7,color:'var(--s900)'}}>Project verwijderen?</div>
+          <p style={{fontSize:13,color:'var(--s500)',lineHeight:1.5}}><strong>{project.name}</strong> voor <strong>{project.client}</strong> wordt permanent verwijderd.</p>
+        </div>
+      </div>
+      <div className="mftr"><button className="btn bg" onClick={onCancel}>Annuleren</button><button className="btn bd" onClick={onConfirm}>Verwijderen</button></div>
+    </div>
+  </div>;
+}
+
+// ── Gauge ─────────────────────────────────────────────────
+function Gauge({label,status,onToggle}) {
+  const em={g:'✅',a:'⚠️',r:'🔴'}[status];
+  const bg={g:'#dcfce7',a:'#fef9c3',r:'#fee2e2'}[status];
+  const col={g:'var(--gtxt)',a:'var(--atxt)',r:'var(--rtxt)'}[status];
+  return <div className="gc" onClick={onToggle} title="Klik om te wisselen">
+    <div style={{fontSize:11,fontWeight:600,color:'var(--s500)',textTransform:'uppercase',letterSpacing:'.5px',marginBottom:8}}>{label}</div>
+    <div style={{width:40,height:40,borderRadius:'50%',background:bg,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,margin:'0 auto 8px'}}>{em}</div>
+    <div style={{fontSize:11.5,fontWeight:600,color:col}}>{slbl(status)}</div>
+  </div>;
+}
+
+// ── Phase Timeline ────────────────────────────────────────
+function PhaseTimeline({phases,onUpdate}) {
+  const [tip,setTip]=useState(null);
+  const [ed,setEd]=useState(null);
+  const [ef,setEf]=useState({status:'g',start_date:'',end_date:'',note:''});
+
+  const allD=phases.flatMap(p=>[p.start_date,p.end_date]).filter(Boolean).map(d=>new Date(d));
+  const mn=allD.length?new Date(Math.min(...allD)):new Date();
+  const mx=allD.length?new Date(Math.max(...allD)):new Date(mn.getTime()+60*86400000);
+  const span=Math.max((mx-mn)/86400000,1);
+
+  function bs(p) {
+    if(!p.start_date||!p.end_date) return null;
+    const s=new Date(p.start_date),e=new Date(p.end_date);
+    const left=Math.max(0,(s-mn)/(span*86400000))*100;
+    const width=Math.max(1,(e-s)/(span*86400000))*100;
+    return{left:left+'%',width:width+'%'};
+  }
+  const bc={g:'var(--green)',a:'var(--amber)',r:'var(--red)'};
+
+  return <div>
+    {phases.map(p=>{
+      const b=bs(p);
+      return <div key={p.key}>
+        <div className="ph-row">
+          <div style={{fontSize:11.5,fontWeight:600,color:'var(--s500)',whiteSpace:'nowrap',paddingRight:10}}>{p.key}</div>
+          <div className="ph-track" onClick={()=>{setEd(p.key);setEf({status:p.status,start_date:p.start_date||'',end_date:p.end_date||'',note:p.note||''});}}>
+            {b
+              ? <div style={{position:'absolute',top:3,height:20,...b,background:bc[p.status],borderRadius:4,cursor:'pointer'}}
+                  onMouseEnter={()=>setTip(p.key)} onMouseLeave={()=>setTip(null)}>
+                  {tip===p.key&&<div style={{position:'absolute',bottom:'calc(100% + 6px)',left:'50%',transform:'translateX(-50%)',background:'var(--s800)',color:'#fff',fontSize:11,padding:'6px 10px',borderRadius:'var(--rmd)',whiteSpace:'nowrap',zIndex:60,pointerEvents:'none'}}>
+                    <strong>{p.key}</strong>{p.start_date&&<><br/>{fdshort(p.start_date)} → {fdshort(p.end_date)}</>}{p.note&&<><br/>{p.note}</>}
+                  </div>}
+                </div>
+              : <div style={{position:'absolute',top:'50%',transform:'translateY(-50%)',left:8,fontSize:10.5,color:'var(--s400)'}}>klik om in te stellen</div>
+            }
+          </div>
+        </div>
+        {ed===p.key&&<div className="ph-editor">
+          <div style={{fontWeight:600,fontSize:12.5,marginBottom:11,color:'var(--s700)'}}>{p.key} — bewerken</div>
+          <div className="fr3">
+            <div className="field" style={{marginBottom:0}}><label>Status</label><select value={ef.status} onChange={e=>setEf(f=>({...f,status:e.target.value}))}><option value="g">Op koers</option><option value="a">Waarschuwing</option><option value="r">Kritiek</option></select></div>
+            <div className="field" style={{marginBottom:0}}><label>Start</label><input type="date" value={ef.start_date} onChange={e=>setEf(f=>({...f,start_date:e.target.value}))}/></div>
+            <div className="field" style={{marginBottom:0}}><label>Eind</label><input type="date" value={ef.end_date} onChange={e=>setEf(f=>({...f,end_date:e.target.value}))}/></div>
+          </div>
+          <div className="field" style={{marginTop:9}}><label>Notitie</label><input value={ef.note} onChange={e=>setEf(f=>({...f,note:e.target.value}))} placeholder="Optioneel..."/></div>
+          <div style={{display:'flex',gap:7,justifyContent:'flex-end',marginTop:9}}>
+            <button className="btn bg bsm" onClick={()=>setEd(null)}>Annuleren</button>
+            <button className="btn bp bsm" onClick={async()=>{await onUpdate(p.key,ef);setEd(null);}}>Opslaan</button>
+          </div>
+        </div>}
+      </div>;
+    })}
+  </div>;
+}
+
+// ── Notes ─────────────────────────────────────────────────
+function NotesCard({notes,onAdd}) {
+  const [txt,setTxt]=useState('');
+  return <div className="card" style={{gridColumn:'1 / -1'}}>
+    <div className="ctitle">Notities</div>
+    {notes.length>0&&<div className="notes-list">{[...notes].reverse().map(n=><div key={n.id} className="note-item"><div style={{fontSize:13,color:'var(--s700)',lineHeight:1.5}}>{n.text}</div><div style={{fontSize:11,color:'var(--s400)',marginTop:4}}>{fdate(n.created_at)}</div></div>)}</div>}
+    <div style={{display:'flex',gap:7}}>
+      <textarea value={txt} onChange={e=>setTxt(e.target.value)} placeholder="Voeg een notitie toe..." style={{flex:1,padding:'8px 11px',border:'1px solid var(--s200)',borderRadius:'var(--rmd)',fontSize:13,resize:'none',height:72,outline:'none'}}/>
+      <button className="btn bp" style={{alignSelf:'flex-end'}} disabled={!txt.trim()} onClick={async()=>{await onAdd(txt.trim());setTxt('');}}>Toevoegen</button>
+    </div>
+  </div>;
+}
+
+// ── OOS ───────────────────────────────────────────────────
+function OOSCard({items,onAdd,onRemove}) {
+  const [f,setF]=useState({title:'',description:'',price:''});
+  const total=items.reduce((s,i)=>s+i.price,0);
+  const valid=f.title.trim()&&f.price!=='';
+  return <div className="card" style={{gridColumn:'1 / -1'}}>
+    <div className="ctitle">Out-of-scope items</div>
+    {items.length>0&&<>
+      <table className="oot">
+        <thead><tr><th>Titel</th><th>Omschrijving</th><th style={{textAlign:'right'}}>Prijs</th><th></th></tr></thead>
+        <tbody>{items.map(it=><tr key={it.id}><td style={{fontWeight:600}}>{it.title}</td><td style={{color:'var(--s500)'}}>{it.description}</td><td style={{textAlign:'right',fontVariantNumeric:'tabular-nums'}}>{eur(it.price)}</td><td><button className="bi" style={{padding:4}} onClick={()=>onRemove(it.id)}><Ic.Trash/></button></td></tr>)}</tbody>
+      </table>
+      <div style={{display:'flex',justifyContent:'flex-end',paddingTop:9,borderTop:'1px solid var(--s200)',marginTop:7,fontSize:13.5,fontWeight:700,color:'var(--s800)',gap:9}}><span style={{color:'var(--s500)',fontSize:12.5}}>Totaal out-of-scope</span><strong>{eur(total)}</strong></div>
+    </>}
+    <div className="stitle" style={{marginTop:items.length?14:0}}>Nieuw item</div>
+    <div style={{display:'grid',gridTemplateColumns:'1fr 1.5fr 90px auto',gap:7,alignItems:'end'}}>
+      <div className="field" style={{marginBottom:0}}><label>Titel</label><input value={f.title} onChange={e=>setF(p=>({...p,title:e.target.value}))} placeholder="bijv. Extra module"/></div>
+      <div className="field" style={{marginBottom:0}}><label>Omschrijving</label><input value={f.description} onChange={e=>setF(p=>({...p,description:e.target.value}))} placeholder="Toelichting..."/></div>
+      <div className="field" style={{marginBottom:0}}><label>Prijs (€)</label><input type="number" value={f.price} onChange={e=>setF(p=>({...p,price:e.target.value}))} placeholder="0"/></div>
+      <div><label style={{fontSize:12,visibility:'hidden',display:'block',marginBottom:4}}>.</label><button className="btn bp bsm" disabled={!valid} onClick={async()=>{await onAdd({title:f.title,description:f.description,price:parseFloat(f.price)||0});setF({title:'',description:'',price:''});}}><Ic.Plus/> Toevoegen</button></div>
+    </div>
+  </div>;
+}
+
+// ── Project Detail ────────────────────────────────────────
+function ProjectDetail({project:init,ams,onBack,onChange}) {
+  const [p,setP]=useState(init);
+  const [showEdit,setShowEdit]=useState(false);
+
+  const upd=(patch)=>{ const np={...p,...patch}; setP(np); onChange(np); };
+
+  const toggleGauge=async(k)=>{
+    const gauges={gauge_timing:p.gauge_timing,gauge_budget:p.gauge_budget,gauge_scope:p.gauge_scope,[k]:SN[p[k]]};
+    const ps=drollup(gauges);
+    await dbUpdateGauges(p.id,gauges,ps);
+    upd({...gauges,project_status:ps});
+  };
+
+  const handlePhase=async(key,data)=>{
+    const tl=await dbUpdatePhase(p.id,key,data);
+    const phases=p.phases.map(ph=>ph.key===key?{...ph,...data,updated_at:new Date().toISOString()}:ph);
+    upd({phases,timeline_status:tl});
+  };
+
+  const handleAddNote=async(text)=>{
+    const n=await dbAddNote(p.id,text);
+    upd({notes:[...p.notes,n]});
+  };
+
+  const handleAddOOS=async(item)=>{
+    const o=await dbAddOOS(p.id,item);
+    upd({oos_items:[...p.oos_items,o]});
+  };
+
+  const handleRemoveOOS=async(id)=>{
+    await dbDeleteOOS(id);
+    upd({oos_items:p.oos_items.filter(o=>o.id!==id)});
+  };
+
+  const handleEditSave=async(f)=>{
+    const licentieJr=f.licenties.reduce((s,l)=>s+l.cost,0);
+    const updated={...p,...f,licentie_jr:licentieJr,last_updated:new Date().toISOString()};
+    await dbUpdateProject(updated);
+    await dbSyncLicenties(p.id,f.licenties);
+    const licenties=f.licenties.map((l,i)=>({...l,id:l.id||uid(),project_id:p.id,sort_order:i}));
+    upd({...updated,licenties});
+    setShowEdit(false);
+  };
+
+  return <div>
+    <div className="dhdr">
+      <button style={{display:'flex',alignItems:'center',gap:5,fontSize:12.5,color:'var(--s500)',padding:'5px 9px',borderRadius:'var(--rmd)',border:'1px solid var(--s200)',background:'transparent',cursor:'pointer'}} onClick={onBack}><Ic.Back/> Overzicht</button>
+      <Avatar logo={p.logo} client={p.client} size={40} rad={8}/>
+      <div><div style={{fontSize:18,fontWeight:700,color:'var(--s900)'}}>{p.name}</div><div style={{fontSize:12.5,color:'var(--s500)'}}>{p.client}</div></div>
+      <div style={{display:'flex',gap:7,flexWrap:'wrap',marginLeft:'auto'}}>
+        <Pill status={p.timeline_status} label={`Timeline: ${slbl(p.timeline_status)}`}/>
+        <Pill status={p.project_status} label={`Project: ${slbl(p.project_status)}`}/>
+      </div>
+      <button className="btn bg bsm" style={{marginLeft:8}} onClick={()=>setShowEdit(true)}><Ic.Edit/> Bewerken</button>
+    </div>
+
+    <div className="page" style={{paddingTop:18}}>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+        <div className="card">
+          <div className="ctitle">Projectstatus</div>
+          <div className="ggrid">
+            <Gauge label="Timing" status={p.gauge_timing} onToggle={()=>toggleGauge('gauge_timing')}/>
+            <Gauge label="Budget" status={p.gauge_budget} onToggle={()=>toggleGauge('gauge_budget')}/>
+            <Gauge label="Scope"  status={p.gauge_scope}  onToggle={()=>toggleGauge('gauge_scope')}/>
+          </div>
+        </div>
+        <div className="card">
+          <div className="ctitle">Financieel</div>
+          <table style={{width:'100%',fontSize:13,borderCollapse:'collapse'}}>
+            <tbody>
+              <tr><td style={{padding:'7px 0',color:'var(--s500)',borderBottom:'1px solid var(--s100)'}}>Offerte totaal</td><td style={{textAlign:'right',fontWeight:700,borderBottom:'1px solid var(--s100)'}}>{eur(p.offerte_total)}</td></tr>
+              <tr><td style={{padding:'7px 0',color:'var(--s500)',borderBottom:'1px solid var(--s100)'}}>Licentie/jaar</td><td style={{textAlign:'right',fontWeight:600,borderBottom:'1px solid var(--s100)'}}>{eur(p.licentie_jr)}</td></tr>
+              {p.licenties.map(l=><tr key={l.id}><td style={{padding:'5px 0 5px 12px',color:'var(--s400)',fontSize:12}}>└ {l.type}</td><td style={{textAlign:'right',color:'var(--s500)',fontSize:12}}>{eur(l.cost)}</td></tr>)}
+              <tr><td style={{padding:'7px 0',color:'var(--s500)'}}>Aangemaakt</td><td style={{textAlign:'right',color:'var(--s600)'}}>{fdate(p.created_at)}</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div className="card" style={{gridColumn:'1 / -1'}}>
+          <div className="ctitle">Faseplanning</div>
+          <PhaseTimeline phases={p.phases} onUpdate={handlePhase}/>
+        </div>
+      </div>
+      <div style={{height:16}}/>
+      <NotesCard notes={p.notes} onAdd={handleAddNote}/>
+      <div style={{height:16}}/>
+      <OOSCard items={p.oos_items} onAdd={handleAddOOS} onRemove={handleRemoveOOS}/>
+      <div style={{height:24}}/>
+    </div>
+
+    {showEdit&&<div className="modal-backdrop" onClick={()=>setShowEdit(false)}>
+      <div className="modal modal-lg" onClick={e=>e.stopPropagation()}>
+        <div className="mhdr"><div className="mtitle">Project bewerken</div><button className="bi" onClick={()=>setShowEdit(false)}><Ic.X/></button></div>
+        <ProjectForm initial={p} activeAM={p.owner_id} ams={ams} onSave={handleEditSave} onCancel={()=>setShowEdit(false)}/>
+      </div>
+    </div>}
+  </div>;
+}
+
+// ── Overview ──────────────────────────────────────────────
+function Overview({projects,onSelect,onNew,onEdit,onDelete}) {
+  const [q,setQ]=useState('');
+  const filtered=projects.filter(p=>!q||p.name.toLowerCase().includes(q.toLowerCase())||p.client.toLowerCase().includes(q.toLowerCase()));
+  const cnt={g:0,a:0,r:0}; projects.forEach(p=>cnt[p.project_status]++);
+  const kpiCol={g:'var(--green)',a:'var(--amber)',r:'var(--red)'};
+  const kpiLbl={g:'Op koers',a:'Waarschuwing',r:'Kritiek'};
+
+  return <div className="page">
+    <div className="kpi-strip">
+      {['g','a','r'].map(s=><div key={s} className="kpi-card"><div className={`kpi-dot ${s}`}/><div><div className="kpi-num">{cnt[s]}</div><div className="kpi-lbl">{kpiLbl[s]}</div></div></div>)}
+    </div>
+    <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:16}}>
+      <div style={{position:'relative',flex:1,maxWidth:300}}>
+        <div style={{position:'absolute',left:10,top:'50%',transform:'translateY(-50%)',color:'var(--s400)',pointerEvents:'none'}}><Ic.Search/></div>
+        <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Zoek project of klant..." style={{width:'100%',padding:'7px 11px 7px 33px',border:'1px solid var(--s200)',borderRadius:'var(--rmd)',fontSize:13,background:'#fff',color:'var(--s800)',outline:'none'}}/>
+      </div>
+      <button className="btn bp" style={{marginLeft:'auto'}} onClick={onNew}><Ic.Plus/> Nieuw project</button>
+    </div>
+    <div className="twrap">
+      <table>
+        <thead><tr>{['Project / klant','Aangemaakt','Offerte','Licentie/jr','Status',''].map((h,i)=><th key={i}>{h}</th>)}</tr></thead>
+        <tbody>
+          {filtered.length===0&&<tr><td colSpan={6}><div className="empty-st"><div style={{fontSize:36,marginBottom:10}}>📋</div><p>{q?'Geen projecten gevonden.':'Nog geen projecten. Klik op "Nieuw project" om te starten.'}</p></div></td></tr>}
+          {filtered.map(p=><tr key={p.id} onClick={()=>onSelect(p.id)}>
+            <td><div style={{display:'flex',alignItems:'center',gap:10}}><Avatar logo={p.logo} client={p.client}/><div><div style={{fontWeight:600,color:'var(--s900)',fontSize:13.5}}>{p.name}</div><div style={{fontSize:11.5,color:'var(--s500)',marginTop:1}}>{p.client}</div></div></div></td>
+            <td style={{color:'var(--s500)',fontSize:12.5}}>{fdate(p.created_at)}</td>
+            <td style={{fontVariantNumeric:'tabular-nums',color:'var(--s700)'}}>{eur(p.offerte_total)}</td>
+            <td style={{fontVariantNumeric:'tabular-nums',color:'var(--s700)'}}>{eur(p.licentie_jr)}</td>
+            <td><Pill status={p.project_status}/></td>
+            <td onClick={e=>e.stopPropagation()}><div className="ra">
+              <button className="bi" style={{padding:5}} onClick={e=>{e.stopPropagation();onEdit(p.id);}}><Ic.Edit/></button>
+              <button className="bi" style={{padding:5,color:'var(--rtxt)'}} onClick={e=>{e.stopPropagation();onDelete(p.id);}}><Ic.Trash/></button>
+            </div></td>
+          </tr>)}
+        </tbody>
+      </table>
+    </div>
+  </div>;
+}
+
+// ── App ───────────────────────────────────────────────────
+function App() {
+  const [ams,setAms]=useState([]);
+  const [projects,setProjects]=useState([]);
+  const [activeAM,setActiveAM]=useState(()=>localStorage.getItem('mc-am')||'am1');
+  const [loading,setLoading]=useState(true);
+  const [view,setView]=useState('overview');
+  const [showNew,setShowNew]=useState(false);
+  const [editId,setEditId]=useState(null);
+  const [deleteId,setDeleteId]=useState(null);
+
+  useEffect(()=>{ fetchAMs().then(setAms); },[]);
+
+  useEffect(()=>{
+    setLoading(true);
+    fetchProjects(activeAM).then(ps=>{setProjects(ps);setLoading(false);});
+  },[activeAM]);
+
+  const switchAM=(id)=>{ setActiveAM(id); localStorage.setItem('mc-am',id); setView('overview'); };
+
+  const handleNew=async(f)=>{
+    const licentieJr=f.licenties.reduce((s,l)=>s+l.cost,0);
+    const p=await dbInsertProject({owner_id:f.owner_id,client:f.client,name:f.name,logo:f.logo,offerte_total:Number(f.offerte_total)||0,licentie_jr:licentieJr,gauge_timing:'g',gauge_budget:'g',gauge_scope:'g',timeline_status:'g',project_status:'g',created_at:new Date().toISOString(),last_updated:new Date().toISOString(),licenties:f.licenties});
+    if(p.owner_id===activeAM) setProjects(prev=>[p,...prev]);
+    setShowNew(false);
+  };
+
+  const handleEditSave=async(f)=>{
+    const project=projects.find(p=>p.id===editId);
+    const licentieJr=f.licenties.reduce((s,l)=>s+l.cost,0);
+    const updated={...project,...f,licentie_jr:licentieJr,last_updated:new Date().toISOString()};
+    await dbUpdateProject(updated);
+    await dbSyncLicenties(project.id,f.licenties);
+    const licenties=f.licenties.map((l,i)=>({...l,id:l.id||uid(),project_id:project.id,sort_order:i}));
+    setProjects(prev=>prev.map(p=>p.id===editId?{...updated,licenties}:p));
+    setEditId(null);
+  };
+
+  const handleDelete=async()=>{
+    await dbDeleteProject(deleteId);
+    setProjects(prev=>prev.filter(p=>p.id!==deleteId));
+    setDeleteId(null);
+    if(view===deleteId) setView('overview');
+  };
+
+  const curProject=projects.find(p=>p.id===view);
+
+  return <div>
+    {/* Topbar */}
+    <div className="topbar">
+      <div className="logo"><div className="logo-dot"/>Mission Control</div>
+      <div className="tsep"/>
+      <div className="am-switcher">
+        {ams.map(a=><button key={a.id} className={`am-chip${activeAM===a.id?' active':''}`} onClick={()=>switchAM(a.id)}>
+          <div className="am-av" style={{background:a.gradient}}>{a.initials}</div>
+          {a.name.split(' ')[0]}
+        </button>)}
+      </div>
+    </div>
+
+    {loading&&<div className="loading">Projecten laden...</div>}
+
+    {!loading&&view==='overview'&&<Overview projects={projects} onSelect={id=>setView(id)} onNew={()=>setShowNew(true)} onEdit={id=>setEditId(id)} onDelete={id=>setDeleteId(id)}/>}
+    {!loading&&view!=='overview'&&curProject&&<ProjectDetail project={curProject} ams={ams} onBack={()=>setView('overview')} onChange={p=>setProjects(prev=>prev.map(x=>x.id===p.id?p:x))}/>}
+
+    {showNew&&<div className="modal-backdrop" onClick={()=>setShowNew(false)}>
+      <div className="modal modal-lg" onClick={e=>e.stopPropagation()}>
+        <div className="mhdr"><div className="mtitle">Nieuw project aanmaken</div><button className="bi" onClick={()=>setShowNew(false)}><Ic.X/></button></div>
+        <ProjectForm activeAM={activeAM} ams={ams} onSave={handleNew} onCancel={()=>setShowNew(false)}/>
+      </div>
+    </div>}
+
+    {editId&&<div className="modal-backdrop" onClick={()=>setEditId(null)}>
+      <div className="modal modal-lg" onClick={e=>e.stopPropagation()}>
+        <div className="mhdr"><div className="mtitle">Project bewerken</div><button className="bi" onClick={()=>setEditId(null)}><Ic.X/></button></div>
+        <ProjectForm initial={projects.find(p=>p.id===editId)} activeAM={activeAM} ams={ams} onSave={handleEditSave} onCancel={()=>setEditId(null)}/>
+      </div>
+    </div>}
+
+    {deleteId&&<DeleteModal project={projects.find(p=>p.id===deleteId)} onConfirm={handleDelete} onCancel={()=>setDeleteId(null)}/>}
+  </div>;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
