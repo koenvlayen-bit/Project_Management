@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Itzu · Project Overzicht</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --bleu: #4F46E5; --bleu-l: #EEF2FF; --bleu-m: #818CF8;
+    --bg: #F2F1EE; --surf: #fff; --bdr: rgba(0,0,0,.10);
+    --txt: #0D0D0D; --mut: #6B6B6B;
+    --grn: #16A34A; --grn-b: #DCFCE7; --grn-row: #F0FDF4;
+    --amb: #D97706; --amb-b: #FEF3C7;
+    --red: #DC2626; --red-b: #FEE2E2; --red-row: #FEF2F2;
+    --r: 8px; --nav-h: 56px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-family: 'Bricolage Grotesque', sans-serif; background: var(--bg); color: var(--txt); }
+  body { min-height: 100vh; }
+
+  /* NAV */
+  .nav { position: sticky; top: 0; z-index: 100; height: var(--nav-h); background: var(--surf); border-bottom: 1px solid var(--bdr); display: flex; align-items: center; padding: 0 28px; gap: 12px; }
+  .nav-back { display: none; align-items: center; gap: 6px; background: none; border: none; cursor: pointer; font: 500 14px 'Bricolage Grotesque', sans-serif; color: var(--mut); padding: 6px 10px 6px 6px; border-radius: 6px; transition: background .15s, color .15s; margin-right: 4px; }
+  .nav-back:hover { background: var(--bg); color: var(--txt); }
+  .nav-back.visible { display: flex; }
+  .nav-logo { font-size: 17px; font-weight: 800; letter-spacing: -.3px; color: var(--txt); }
+  .nav-badge { background: var(--bleu-l); color: var(--bleu); font-size: 11px; font-weight: 700; letter-spacing: .5px; padding: 3px 8px; border-radius: 20px; }
+  .nav-spacer { flex: 1; }
+  .nav-live { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--grn); }
+  .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--grn); box-shadow: 0 0 0 0 rgba(22,163,74,.4); animation: pulse 2s infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(22,163,74,.4); } 70% { box-shadow: 0 0 0 8px rgba(22,163,74,0); } 100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); } }
+  .nav-actions { display: flex; gap: 8px; margin-left: 16px; }
+  .btn-p, .btn-d { border: none; cursor: pointer; font: 600 13px 'Bricolage Grotesque', sans-serif; padding: 7px 16px; border-radius: 20px; transition: opacity .15s, transform .1s; }
+  .btn-p { background: var(--bleu); color: #fff; }
+  .btn-d { background: var(--txt); color: #fff; }
+  .btn-p:hover, .btn-d:hover { opacity: .88; transform: translateY(-1px); }
+
+  /* LOADING */
+  .loading-screen { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; z-index: 999; transition: opacity .3s; }
+  .loading-screen.hidden { opacity: 0; pointer-events: none; }
+  .loading-spinner { width: 32px; height: 32px; border: 3px solid var(--bdr); border-top-color: var(--bleu); border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-txt { font-size: 13px; font-weight: 600; color: var(--mut); }
+
+  /* VIEWS */
+  .view { display: none; animation: fadeIn .2s ease; }
+  .view.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* LANDING */
+  .landing { max-width: 860px; margin: 0 auto; padding: 72px 28px 100px; }
+  .landing-crumb { font-size: 12px; font-weight: 600; letter-spacing: 1.2px; color: var(--mut); text-transform: uppercase; margin-bottom: 20px; }
+  .landing-title { font-size: clamp(48px, 7vw, 88px); font-weight: 800; line-height: .95; letter-spacing: -2px; color: var(--txt); margin-bottom: 20px; }
+  .landing-title span { color: var(--bleu); }
+  .landing-sub { font-size: 18px; font-weight: 400; color: var(--mut); max-width: 460px; line-height: 1.5; margin-bottom: 40px; }
+  .landing-week { position: fixed; bottom: 28px; right: 32px; font-size: 12px; font-weight: 600; color: var(--mut); letter-spacing: .5px; }
+
+  /* DASHBOARD */
+  .po-header { max-width: 1180px; margin: 0 auto; padding: 32px 28px 20px; display: flex; align-items: flex-end; justify-content: space-between; }
+  .po-title { font-size: 28px; font-weight: 800; letter-spacing: -.5px; }
+  .po-meta { font-size: 13px; font-weight: 500; color: var(--mut); text-align: right; }
+  .po-grid { max-width: 1180px; margin: 0 auto; padding: 0 28px 60px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  /* PROJECT CARD */
+  .proj-card { background: var(--surf); border: 1.5px solid var(--bdr); border-radius: 12px; padding: 24px; cursor: pointer; transition: transform .18s, box-shadow .18s, border-color .18s; display: flex; flex-direction: column; gap: 16px; }
+  .proj-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(79,70,229,.13); border-color: var(--bleu-m); }
+  .card-name { font-size: 26px; font-weight: 800; letter-spacing: -.5px; line-height: 1.1; }
+  .card-sub { font-size: 13px; color: var(--mut); font-weight: 500; margin-top: 4px; }
+  .badge-strip { display: flex; flex-wrap: wrap; gap: 6px; }
+  .badge { font-size: 11px; font-weight: 700; letter-spacing: .3px; padding: 3px 9px; border-radius: 20px; }
+  .badge-grn { background: var(--grn-b); color: #15803D; }
+  .badge-blu { background: #DBEAFE; color: #1D4ED8; }
+  .badge-amb { background: var(--amb-b); color: var(--amb); }
+  .badge-gry { background: #F1F5F9; color: #475569; }
+  .badge-red { background: var(--red-b); color: var(--red); }
+  .card-stats { display: flex; gap: 16px; }
+  .card-stat { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+  .card-stat-val { font-size: 22px; font-weight: 800; }
+  .card-stat-val.c-grn { color: var(--grn); }
+  .card-stat-val.c-red { color: var(--red); }
+  .card-stat-lbl { font-size: 11px; font-weight: 600; color: var(--mut); letter-spacing: .3px; text-transform: uppercase; }
+  .card-preview { display: flex; flex-direction: column; gap: 6px; }
+  .preview-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px solid var(--bdr); }
+  .preview-row:first-child { border-top: none; padding-top: 0; }
+  .actie-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red); flex-shrink: 0; }
+  .actie-dot.hidden { background: transparent; }
+  .preview-desc { flex: 1; font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .preview-date { font-size: 11px; color: var(--mut); font-weight: 600; white-space: nowrap; }
+  .card-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid var(--bdr); }
+  .card-warn { font-size: 12px; font-weight: 600; color: var(--red); }
+  .card-cta { font-size: 12px; font-weight: 700; color: var(--bleu); }
+
+  /* DETAIL */
+  .detail-wrap { max-width: 1100px; margin: 0 auto; padding: 32px 28px 80px; }
+  .detail-crumb { font-size: 11px; font-weight: 700; letter-spacing: 1.4px; color: var(--mut); text-transform: uppercase; margin-bottom: 12px; }
+  .detail-title { font-size: 36px; font-weight: 800; letter-spacing: -.8px; margin-bottom: 28px; }
+  .hero-stats { display: flex; gap: 12px; margin-bottom: 32px; }
+  .hero-stat { flex: 1; background: var(--surf); border: 1.5px solid var(--bdr); border-radius: var(--r); padding: 18px 20px; }
+  .hero-stat-val { font-size: 36px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+  .hero-stat-lbl { font-size: 12px; font-weight: 600; color: var(--mut); letter-spacing: .4px; text-transform: uppercase; }
+  .table-section { background: var(--surf); border: 1.5px solid var(--bdr); border-radius: 12px; overflow: hidden; }
+  .table-section-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--bdr); }
+  .table-section-title { font-size: 13px; font-weight: 700; letter-spacing: .4px; color: var(--mut); text-transform: uppercase; }
+  .btn-add { font: 600 13px 'Bricolage Grotesque', sans-serif; background: var(--bleu-l); color: var(--bleu); border: none; padding: 6px 14px; border-radius: 20px; cursor: pointer; transition: background .15s; }
+  .btn-add:hover { background: #E0E7FF; }
+  table { width: 100%; border-collapse: collapse; }
+  th { font-size: 11px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: var(--mut); padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--bdr); background: #FAFAFA; }
+  td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid rgba(0,0,0,.05); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr.row-grn { background: var(--grn-row); }
+  tr.row-red { background: var(--red-row); }
+  [contenteditable] { outline: none; border-radius: 4px; padding: 2px 4px; transition: background .15s; min-width: 60px; display: inline-block; }
+  [contenteditable]:focus { background: var(--bleu-l); }
+  .status-sel { font: 600 11px 'Bricolage Grotesque', sans-serif; border: none; background: none; cursor: pointer; padding: 3px 9px; border-radius: 20px; outline: none; -webkit-appearance: none; appearance: none; }
+  .actie-toggle { font: 700 11px 'Bricolage Grotesque', sans-serif; border: 1.5px solid var(--bdr); background: var(--surf); padding: 3px 10px; border-radius: 20px; cursor: pointer; transition: all .15s; }
+  .actie-toggle.ja { background: var(--red-b); color: var(--red); border-color: var(--red); }
+  .btn-del { background: none; border: none; cursor: pointer; color: var(--mut); font-size: 16px; padding: 2px 6px; border-radius: 4px; transition: color .15s, background .15s; line-height: 1; }
+  .btn-del:hover { color: var(--red); background: var(--red-b); }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(13,13,13,.45); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surf); border-radius: 14px; padding: 28px; width: 480px; max-width: calc(100vw - 32px); box-shadow: 0 20px 60px rgba(0,0,0,.18); animation: modalIn .2s ease; }
+  @keyframes modalIn { from { opacity: 0; transform: scale(.96) translateY(8px); } to { opacity: 1; transform: none; } }
+  .modal-title { font-size: 20px; font-weight: 800; margin-bottom: 20px; }
+  .modal-field { margin-bottom: 16px; }
+  .modal-label { font-size: 12px; font-weight: 700; color: var(--mut); letter-spacing: .4px; text-transform: uppercase; margin-bottom: 6px; display: block; }
+  .modal-input, .modal-select, .modal-textarea { width: 100%; font: 400 14px 'Bricolage Grotesque', sans-serif; border: 1.5px solid var(--bdr); border-radius: var(--r); padding: 9px 12px; background: var(--bg); color: var(--txt); outline: none; transition: border-color .15s; }
+  .modal-input:focus, .modal-select:focus, .modal-textarea:focus { border-color: var(--bleu-m); }
+  .modal-input[disabled] { opacity: .5; }
+  .modal-textarea { resize: vertical; min-height: 72px; }
+  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
+  .btn-cancel { font: 600 13px 'Bricolage Grotesque', sans-serif; background: var(--bg); border: 1.5px solid var(--bdr); color: var(--mut); padding: 8px 18px; border-radius: 20px; cursor: pointer; }
+  .btn-cancel:hover { background: #E8E8E4; }
+  .csv-area { width: 100%; height: 180px; font: 12px monospace; border: 1.5px solid var(--bdr); border-radius: var(--r); padding: 10px; background: var(--bg); resize: vertical; outline: none; }
+  .csv-area:focus { border-color: var(--bleu-m); }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--txt); color: #fff; font-size: 13px; font-weight: 600; padding: 10px 20px; border-radius: 20px; opacity: 0; transition: all .25s; pointer-events: none; z-index: 999; white-space: nowrap; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 700px) { .po-grid { grid-template-columns: 1fr; } .hero-stats { flex-direction: column; } .landing-title { font-size: 42px; } }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-spinner"></div>
+  <div class="loading-txt">Laden…</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- NAV -->
+<nav class="nav">
+  <button class="nav-back" id="navBack" onclick="goBack()">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Terug
+  </button>
+  <span class="nav-logo">AZIRI</span>
+  <span class="nav-badge">itzu</span>
+  <div class="nav-spacer"></div>
+  <span class="nav-live"><span class="live-dot"></span>LIVE</span>
+  <div class="nav-actions">
+    <button class="btn-d" onclick="openCsvImport()">CSV Import</button>
+    <button class="btn-p" onclick="openCsvExport()">CSV Export</button>
+  </div>
+</nav>
+
+<!-- LANDING -->
+<div class="view active" id="vLanding">
+  <div class="landing">
+    <div class="landing-crumb">ITZU · AZIRI</div>
+    <h1 class="landing-title">Project<br><span>Overzicht</span></h1>
+    <p class="landing-sub">Presenter mode voor maandelijkse meetings</p>
+    <button class="btn-p" style="font-size:15px;padding:11px 26px;" onclick="showView('vPo')">Open dashboard →</button>
+  </div>
+  <div class="landing-week" id="landingWeek"></div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="view" id="vPo">
+  <div class="po-header">
+    <div class="po-title">Project Overzicht</div>
+    <div class="po-meta" id="poMeta"></div>
+  </div>
+  <div class="po-grid" id="poGrid"></div>
+</div>
+
+<!-- DETAIL -->
+<div class="view" id="vPoDetail">
+  <div class="detail-wrap" id="detailWrap"></div>
+</div>
+
+<!-- MODAL: ADD ROW -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-title">Nieuwe regel toevoegen</div>
+    <div class="modal-field"><label class="modal-label">Project naam</label><input class="modal-input" id="mProj" disabled></div>
+    <div class="modal-field"><label class="modal-label">Beschrijving</label><input class="modal-input" id="mDesc" placeholder="Beschrijving van het traject"></div>
+    <div class="modal-field"><label class="modal-label">Status</label>
+      <select class="modal-select" id="mStatus">
+        <option>Afgerond</option><option>On track</option><option selected>Aankomend</option><option>Ingepland</option><option>Geblokkeerd</option>
+      </select>
+    </div>
+    <div class="modal-field"><label class="modal-label">Verwachte oplevering</label><input class="modal-input" id="mDate" placeholder="bv. 30/06"></div>
+    <div class="modal-field"><label class="modal-label">Commentaar</label><textarea class="modal-textarea" id="mComment" placeholder="Optioneel commentaar"></textarea></div>
+    <div class="modal-field"><label class="modal-label">Actie nodig van Itzu?</label>
+      <select class="modal-select" id="mActie"><option value="false">Nee</option><option value="true">Ja</option></select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('addModal')">Annuleren</button>
+      <button class="btn-p" onclick="saveNewRow()">Toevoegen</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CSV IMPORT -->
+<div class="modal-overlay" id="csvImportModal">
+  <div class="modal">
+    <div class="modal-title">CSV Import</div>
+    <p style="font-size:13px;color:var(--mut);margin-bottom:12px;">Formaat: <code>Project;Beschrijving;Status;Verwachte oplevering;Comment;Actie Itzu</code></p>
+    <textarea class="csv-area" id="csvImportArea" placeholder="Plak hier uw CSV data..."></textarea>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('csvImportModal')">Annuleren</button>
+      <button class="btn-p" onclick="doImport()">Importeren</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CSV EXPORT -->
+<div class="modal-overlay" id="csvExportModal">
+  <div class="modal">
+    <div class="modal-title">CSV Export</div>
+    <p style="font-size:13px;color:var(--mut);margin-bottom:12px;">Kopieer de data hieronder:</p>
+    <textarea class="csv-area" id="csvExportArea" readonly></textarea>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('csvExportModal')">Sluiten</button>
+      <button class="btn-p" onclick="copyExport()">Kopiëren</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== SUPABASE INIT =====
+// These values are injected by Vercel from environment variables at build time
+const SUPABASE_URL = '__SUPABASE_URL__';
+const SUPABASE_ANON_KEY = '__SUPABASE_ANON_KEY__';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ===== STATE =====
+let data = [];
+let viewStack = ['vLanding'];
+let currentProjId = null;
+let addModalProjId = null;
+
+// ===== INIT: LOAD FROM SUPABASE =====
+async function init() {
+  try {
+    const { data: projects, error: pErr } = await db.from('projects').select('*').order('sort_order');
+    if (pErr) throw pErr;
+    const { data: trajecten, error: tErr } = await db.from('trajecten').select('*').order('sort_order');
+    if (tErr) throw tErr;
+
+    data = projects.map(p => ({
+      id: p.slug,
+      dbId: p.id,
+      name: p.name,
+      sort_order: p.sort_order,
+      rows: trajecten
+        .filter(t => t.project_id === p.id)
+        .map(t => ({
+          id: t.id,
+          desc: t.beschrijving,
+          status: t.status,
+          date: t.oplevering,
+          comment: t.commentaar,
+          actie: t.actie_itzu,
+          sort_order: t.sort_order
+        }))
+    }));
+  } catch(e) {
+    console.error('Supabase load error:', e);
+    showToast('⚠ Kon data niet laden');
+  }
+  document.getElementById('loadingScreen').classList.add('hidden');
+  setWeekInfo();
+}
+
+// ===== SAVE HELPERS =====
+async function updateTraject(rowId, fields) {
+  const mapped = {};
+  if ('desc' in fields)    mapped.beschrijving = fields.desc;
+  if ('status' in fields)  mapped.status = fields.status;
+  if ('date' in fields)    mapped.oplevering = fields.date;
+  if ('comment' in fields) mapped.commentaar = fields.comment;
+  if ('actie' in fields)   mapped.actie_itzu = fields.actie;
+  const { error } = await db.from('trajecten').update(mapped).eq('id', rowId);
+  if (error) { console.error(error); showToast('⚠ Opslaan mislukt'); }
+}
+
+async function insertTraject(projectDbId, fields, sortOrder) {
+  const { data: row, error } = await db.from('trajecten').insert({
+    project_id: projectDbId,
+    beschrijving: fields.desc || '',
+    status: fields.status || 'Aankomend',
+    oplevering: fields.date || '',
+    commentaar: fields.comment || '',
+    actie_itzu: fields.actie || false,
+    sort_order: sortOrder
+  }).select().single();
+  if (error) { console.error(error); showToast('⚠ Toevoegen mislukt'); return null; }
+  return row;
+}
+
+async function deleteTraject(rowId) {
+  const { error } = await db.from('trajecten').delete().eq('id', rowId);
+  if (error) { console.error(error); showToast('⚠ Verwijderen mislukt'); }
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ===== NAVIGATION =====
+function showView(viewId, projId) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(viewId).classList.add('active');
+  viewStack.push(viewId);
+  document.getElementById('navBack').classList.toggle('visible', viewStack.length > 1);
+  if (viewId === 'vPo') renderDashboard();
+  if (viewId === 'vPoDetail') { currentProjId = projId; renderDetail(projId); }
+  setWeekInfo();
+}
+function goBack() {
+  if (viewStack.length <= 1) return;
+  viewStack.pop();
+  const prev = viewStack[viewStack.length - 1];
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(prev).classList.add('active');
+  document.getElementById('navBack').classList.toggle('visible', viewStack.length > 1);
+  if (prev === 'vPo') renderDashboard();
+}
+
+// ===== WEEK INFO =====
+function setWeekInfo() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 1);
+  const week = Math.ceil(((now - start) / 86400000 + start.getDay() + 1) / 7);
+  const months = ['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
+  const str = `Week ${week} · ${months[now.getMonth()]} ${now.getFullYear()}`;
+  const lw = document.getElementById('landingWeek'); if (lw) lw.textContent = str;
+  const pm = document.getElementById('poMeta'); if (pm) pm.innerHTML = `<div>Week ${week}</div><div>${months[now.getMonth()]} ${now.getFullYear()}</div>`;
+}
+
+// ===== BADGE HELPERS =====
+function statusClass(s) {
+  if (s==='Afgerond') return 'badge-grn'; if (s==='On track') return 'badge-blu';
+  if (s==='Aankomend') return 'badge-amb'; if (s==='Ingepland') return 'badge-gry';
+  if (s==='Geblokkeerd') return 'badge-red'; return 'badge-gry';
+}
+function rowClass(s) { if (s==='Afgerond') return 'row-grn'; if (s==='Geblokkeerd') return 'row-red'; return ''; }
+function statusSelectStyle(s) {
+  if (s==='Afgerond') return 'background:#DCFCE7;color:#15803D';
+  if (s==='On track') return 'background:#DBEAFE;color:#1D4ED8';
+  if (s==='Aankomend') return 'background:#FEF3C7;color:#D97706';
+  if (s==='Ingepland') return 'background:#F1F5F9;color:#475569';
+  if (s==='Geblokkeerd') return 'background:#FEE2E2;color:#DC2626';
+  return '';
+}
+function countByStatus(rows, s) { return rows.filter(r => r.status === s).length; }
+
+// ===== DASHBOARD =====
+function renderDashboard() {
+  const grid = document.getElementById('poGrid'); grid.innerHTML = '';
+  data.forEach(proj => {
+    const rows = proj.rows;
+    const afg = countByStatus(rows,'Afgerond'), actie = rows.filter(r=>r.actie).length, gebl = countByStatus(rows,'Geblokkeerd'), total = rows.length;
+    const badgeHtml = ['Afgerond','On track','Aankomend','Ingepland','Geblokkeerd'].map(s => { const c=countByStatus(rows,s); return c ? `<span class="badge ${statusClass(s)}">${s} ×${c}</span>` : ''; }).join('');
+    const previewHtml = rows.slice(0,3).map(r => `<div class="preview-row"><span class="actie-dot ${r.actie?'':'hidden'}"></span><span class="preview-desc">${r.desc}</span><span class="badge ${statusClass(r.status)}" style="font-size:10px;">${r.status}</span>${r.date?`<span class="preview-date">${r.date}</span>`:''}</div>`).join('');
+    const card = document.createElement('div'); card.className = 'proj-card';
+    card.innerHTML = `
+      <div><div class="card-name">${proj.name}</div><div class="card-sub">${total} traject${total!==1?'en':''}</div></div>
+      <div class="badge-strip">${badgeHtml}</div>
+      <div class="card-stats">
+        <div class="card-stat"><div class="card-stat-val c-grn">${afg}</div><div class="card-stat-lbl">Afgerond</div></div>
+        <div class="card-stat"><div class="card-stat-val ${actie>0?'c-red':''}">${actie}</div><div class="card-stat-lbl">Actie Itzu</div></div>
+        <div class="card-stat"><div class="card-stat-val ${gebl>0?'c-red':''}">${gebl}</div><div class="card-stat-lbl">Geblokkeerd</div></div>
+      </div>
+      <div class="card-preview">${previewHtml}</div>
+      <div class="card-footer"><span class="card-warn">${actie>0?`⚠ ${actie} actie${actie>1?'s':''} vereist`:''}</span><span class="card-cta">Details &amp; bewerken →</span></div>`;
+    card.addEventListener('click', () => showView('vPoDetail', proj.id));
+    grid.appendChild(card);
+  });
+}
+
+// ===== DETAIL =====
+function renderDetail(projId) {
+  const proj = data.find(p => p.id === projId); if (!proj) return;
+  const rows = proj.rows, total = rows.length;
+  const actie = rows.filter(r=>r.actie).length, gebl = countByStatus(rows,'Geblokkeerd');
+  const tableRows = rows.map((r,i) => `
+    <tr class="${rowClass(r.status)}" id="tr-${r.id}">
+      <td style="color:var(--mut);font-weight:700;width:36px;">${i+1}</td>
+      <td><span contenteditable="true" data-id="${r.id}" data-field="desc" onblur="saveField(this)">${r.desc}</span></td>
+      <td><select class="status-sel" style="${statusSelectStyle(r.status)}" data-id="${r.id}" onchange="saveStatus(this)">${['Afgerond','On track','Aankomend','Ingepland','Geblokkeerd'].map(s=>`<option ${s===r.status?'selected':''}>${s}</option>`).join('')}</select></td>
+      <td><span contenteditable="true" data-id="${r.id}" data-field="date" onblur="saveField(this)">${r.date}</span></td>
+      <td><span contenteditable="true" data-id="${r.id}" data-field="comment" onblur="saveField(this)">${r.comment}</span></td>
+      <td><button class="actie-toggle ${r.actie?'ja':''}" data-id="${r.id}" onclick="toggleActie(this)">${r.actie?'Ja':'Nee'}</button></td>
+      <td><button class="btn-del" data-proj="${projId}" data-id="${r.id}" onclick="deleteRow(this)" title="Verwijderen">✕</button></td>
+    </tr>`).join('');
+  document.getElementById('detailWrap').innerHTML = `
+    <div class="detail-crumb">PROJECT · ITZU // ${proj.name.toUpperCase()}</div>
+    <div class="detail-title">${proj.name}</div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hero-stat-val" style="color:${actie>0?'var(--red)':'var(--txt)'}">${actie}</div><div class="hero-stat-lbl">Actie Itzu</div></div>
+      <div class="hero-stat"><div class="hero-stat-val" style="color:${gebl>0?'var(--red)':'var(--txt)'}">${gebl}</div><div class="hero-stat-lbl">Geblokkeerd</div></div>
+    </div>
+    <div class="table-section">
+      <div class="table-section-header"><span class="table-section-title">Trajecten · ${total}</span><button class="btn-add" onclick="openAddModal('${projId}')">+ Regel toevoegen</button></div>
+      <table><thead><tr><th>#</th><th>Beschrijving</th><th>Status</th><th>Oplevering</th><th>Commentaar</th><th>Actie Itzu?</th><th></th></tr></thead><tbody>${tableRows}</tbody></table>
+    </div>`;
+}
+
+// ===== INLINE EDIT =====
+function getLocalRow(rowId) {
+  for (const proj of data) { const r = proj.rows.find(r => r.id === rowId); if (r) return r; }
+  return null;
+}
+function saveField(el) {
+  const r = getLocalRow(el.dataset.id); if (!r) return;
+  r[el.dataset.field] = el.innerText.trim();
+  updateTraject(el.dataset.id, { [el.dataset.field]: r[el.dataset.field] });
+}
+function saveStatus(sel) {
+  const r = getLocalRow(sel.dataset.id); if (!r) return;
+  r.status = sel.value;
+  sel.style.cssText = statusSelectStyle(sel.value);
+  const tr = document.getElementById(`tr-${sel.dataset.id}`); if (tr) tr.className = rowClass(sel.value);
+  updateTraject(sel.dataset.id, { status: sel.value });
+  refreshHeroStats(currentProjId);
+}
+function toggleActie(btn) {
+  const r = getLocalRow(btn.dataset.id); if (!r) return;
+  r.actie = !r.actie;
+  btn.classList.toggle('ja', r.actie); btn.textContent = r.actie ? 'Ja' : 'Nee';
+  updateTraject(btn.dataset.id, { actie: r.actie });
+  refreshHeroStats(currentProjId);
+}
+async function deleteRow(btn) {
+  const proj = data.find(p => p.id === btn.dataset.proj); if (!proj) return;
+  proj.rows = proj.rows.filter(r => r.id !== btn.dataset.id);
+  await deleteTraject(btn.dataset.id);
+  renderDetail(btn.dataset.proj);
+  showToast('Regel verwijderd');
+}
+function refreshHeroStats(projId) {
+  const proj = data.find(p => p.id === projId); if (!proj) return;
+  const rows = proj.rows;
+  const actie = rows.filter(r=>r.actie).length, gebl = countByStatus(rows,'Geblokkeerd');
+  const stats = document.querySelectorAll('.hero-stat');
+  if (stats[0]) { stats[0].querySelector('.hero-stat-val').style.color = actie>0?'var(--red)':'var(--txt)'; stats[0].querySelector('.hero-stat-val').textContent = actie; }
+  if (stats[1]) { stats[1].querySelector('.hero-stat-val').style.color = gebl>0?'var(--red)':'var(--txt)'; stats[1].querySelector('.hero-stat-val').textContent = gebl; }
+}
+
+// ===== ADD ROW MODAL =====
+function openAddModal(projId) {
+  addModalProjId = projId;
+  const proj = data.find(p => p.id === projId);
+  document.getElementById('mProj').value = proj ? proj.name : '';
+  document.getElementById('mDesc').value = '';
+  document.getElementById('mStatus').value = 'Aankomend';
+  document.getElementById('mDate').value = '';
+  document.getElementById('mComment').value = '';
+  document.getElementById('mActie').value = 'false';
+  document.getElementById('addModal').classList.add('open');
+  setTimeout(() => document.getElementById('mDesc').focus(), 100);
+}
+async function saveNewRow() {
+  const proj = data.find(p => p.id === addModalProjId); if (!proj) return;
+  const fields = {
+    desc: document.getElementById('mDesc').value.trim(),
+    status: document.getElementById('mStatus').value,
+    date: document.getElementById('mDate').value.trim(),
+    comment: document.getElementById('mComment').value.trim(),
+    actie: document.getElementById('mActie').value === 'true'
+  };
+  const sortOrder = proj.rows.length + 1;
+  const row = await insertTraject(proj.dbId, fields, sortOrder);
+  if (row) {
+    proj.rows.push({ id: row.id, desc: row.beschrijving, status: row.status, date: row.oplevering, comment: row.commentaar, actie: row.actie_itzu, sort_order: row.sort_order });
+    showToast('Regel toegevoegd ✓');
+  }
+  closeModal('addModal');
+  renderDetail(addModalProjId);
+}
+
+// ===== CSV =====
+function openCsvImport() { document.getElementById('csvImportArea').value = ''; document.getElementById('csvImportModal').classList.add('open'); }
+function openCsvExport() {
+  const lines = ['Project;Beschrijving;Status;Verwachte oplevering;Comment;Actie Itzu'];
+  data.forEach(proj => proj.rows.forEach(r => lines.push([proj.name,r.desc,r.status,r.date,r.comment,r.actie?'Ja':'Nee'].join(';'))));
+  document.getElementById('csvExportArea').value = lines.join('\n');
+  document.getElementById('csvExportModal').classList.add('open');
+}
+function copyExport() { const a = document.getElementById('csvExportArea'); a.select(); document.execCommand('copy'); showToast('Gekopieerd ✓'); }
+async function doImport() {
+  const raw = document.getElementById('csvImportArea').value.trim();
+  const lines = raw.split('\n').filter(l => l.trim() && !l.startsWith('Project;'));
+  for (const line of lines) {
+    const parts = line.split(';');
+    if (parts.length < 2) continue;
+    const [projName, desc, status, date, comment, actieStr] = parts.map(p=>(p||'').trim());
+    const proj = data.find(p => p.name.toLowerCase() === projName.toLowerCase());
+    if (!proj) continue;
+    const sortOrder = proj.rows.length + 1;
+    const row = await insertTraject(proj.dbId, { desc, status: status||'Aankomend', date, comment, actie: (actieStr||'').toLowerCase()==='ja' }, sortOrder);
+    if (row) proj.rows.push({ id: row.id, desc: row.beschrijving, status: row.status, date: row.oplevering, comment: row.commentaar, actie: row.actie_itzu, sort_order: row.sort_order });
+  }
+  showToast('Import voltooid ✓');
+  closeModal('csvImportModal');
+  if (currentProjId) renderDetail(currentProjId);
+  if (document.getElementById('vPo').classList.contains('active')) renderDashboard();
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay').forEach(ov => ov.addEventListener('click', e => { if (e.target===ov) ov.classList.remove('open'); }));
+document.addEventListener('keydown', e => { if (e.key==='Escape') document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open')); });
+
+// ===== START =====
+init();
+</script>
+</body>
+</html>
