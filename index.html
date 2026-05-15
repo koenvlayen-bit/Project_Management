@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mission Control — Aziri</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#576BFF;--primary-dim:#3a52e8;--primary-light:#eef0ff;--s50:#f8fafc;--s100:#f1f5f9;--s200:#e2e8f0;--s300:#cbd5e1;--s400:#94a3b8;--s500:#64748b;--s600:#475569;--s700:#334155;--s800:#1e293b;--s900:#0f172a;--green:#22c55e;--gbg:#f0fdf4;--gtxt:#166534;--gborder:#bbf7d0;--amber:#f59e0b;--abg:#fffbeb;--atxt:#92400e;--aborder:#fde68a;--red:#ef4444;--rbg:#fef2f2;--rtxt:#991b1b;--rborder:#fecaca;--rmd:10px;--rlg:14px;--rxl:20px;--font:'DM Sans','Segoe UI',system-ui,sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--s50);color:var(--s800);min-height:100vh;-webkit-font-smoothing:antialiased;}
+button{cursor:pointer;font-family:var(--font);}
+input,textarea,select{font-family:var(--font);}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-thumb{background:var(--s300);border-radius:3px;}
+.topbar{background:#fff;border-bottom:1px solid var(--s200);height:58px;display:flex;align-items:center;padding:0 28px;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.topbar-right{margin-left:auto;position:relative;}
+.am-btn{display:flex;align-items:center;gap:10px;padding:6px 12px 6px 8px;border-radius:var(--rlg);border:1px solid var(--s200);background:#fff;cursor:pointer;transition:all .15s;font-family:var(--font);}
+.am-btn:hover{background:var(--s50);border-color:var(--s300);}
+.am-btn-inner{display:flex;flex-direction:column;align-items:flex-start;gap:1px;}
+.am-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--s400);}
+.am-name{font-size:13px;font-weight:600;color:var(--s800);}
+.am-chevron{color:var(--s400);transition:transform .2s;}
+.am-chevron.open{transform:rotate(180deg);}
+.am-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+.am-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border:1px solid var(--s200);border-radius:var(--rlg);box-shadow:0 8px 24px rgba(0,0,0,.12);min-width:220px;z-index:300;overflow:hidden;animation:fadedown .15s ease;}
+@keyframes fadedown{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+.am-section-label{padding:10px 14px 6px;font-size:10px;font-weight:700;color:var(--s400);text-transform:uppercase;letter-spacing:.8px;}
+.am-option{display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer;transition:background .12s;}
+.am-option:hover{background:var(--s50);}
+.am-option.active{background:var(--primary-light);}
+.am-option-name{font-size:13.5px;font-weight:500;color:var(--s800);flex:1;}
+.am-check{color:var(--primary);flex-shrink:0;}
+.am-add{display:flex;align-items:center;gap:8px;padding:9px 14px;font-size:13px;color:var(--primary);font-weight:600;cursor:pointer;border-top:1px solid var(--s200);transition:background .12s;}
+.am-add:hover{background:var(--primary-light);}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--rmd);font-size:13.5px;font-weight:500;border:1px solid transparent;transition:all .15s;white-space:nowrap;cursor:pointer;}
+.bp{background:var(--primary);color:#fff;border-color:var(--primary);}
+.bp:hover{background:var(--primary-dim);}
+.bp:disabled{opacity:.4;cursor:not-allowed;}
+.bg{background:transparent;color:var(--s600);border-color:var(--s200);}
+.bg:hover{background:var(--s100);color:var(--s800);}
+.bd{background:var(--rbg);color:var(--rtxt);border-color:var(--rborder);}
+.bd:hover{background:#fee2e2;}
+.bsm{padding:5px 11px;font-size:12.5px;}
+.bi{padding:6px;border-radius:var(--rmd);background:transparent;border:1px solid var(--s200);color:var(--s500);transition:all .15s;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;}
+.bi:hover{background:var(--s100);color:var(--s700);}
+.btn-amber{background:#f59e0b;color:#fff;border-color:#f59e0b;}
+.btn-amber:hover{background:#d97706;}
+.btn-amber:disabled{opacity:.4;cursor:not-allowed;}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:4px 11px 4px 8px;border-radius:999px;font-size:12.5px;font-weight:600;white-space:nowrap;border:1px solid transparent;}
+.pill.g{background:var(--gbg);color:var(--gtxt);border-color:var(--gborder);}
+.pill.a{background:var(--abg);color:var(--atxt);border-color:var(--aborder);}
+.pill.r{background:var(--rbg);color:var(--rtxt);border-color:var(--rborder);}
+.pill.done{background:#f0f4ff;color:#3730a3;border-color:#c7d2fe;}
+.pill.done .pill-dot{background:#6366f1;}
+.pill-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.pill.g .pill-dot{background:var(--green);}
+.pill.a .pill-dot{background:var(--amber);}
+.pill.r .pill-dot{background:var(--red);}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--s500);margin-bottom:5px;text-transform:uppercase;letter-spacing:.6px;}
+.field input,.field textarea,.field select{width:100%;padding:10px 13px;border:1px solid var(--s200);border-radius:var(--rmd);font-size:13.5px;color:var(--s800);outline:none;transition:border-color .15s,box-shadow .15s;background:#fff;}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(87,107,255,.1);}
+.field textarea{resize:vertical;min-height:80px;}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:#fff;border-radius:var(--rxl);box-shadow:0 12px 40px rgba(0,0,0,.15);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;animation:slideup .18s ease;}
+.modal-lg{max-width:640px;}
+.modal-sm{max-width:420px;}
+@keyframes slideup{from{transform:translateY(12px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.mhdr{padding:24px 24px 0;display:flex;align-items:flex-start;gap:14px;}
+.mhdr-icon{width:42px;height:42px;background:var(--primary-light);border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--primary);flex-shrink:0;}
+.mhdr-text{flex:1;}
+.mhdr-sup{font-size:10px;font-weight:700;color:var(--s400);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px;}
+.mtitle{font-size:19px;font-weight:700;color:var(--s900);}
+.mhdr-close{color:var(--s400);cursor:pointer;padding:4px;border-radius:8px;border:none;background:transparent;transition:all .12s;display:flex;align-items:center;}
+.mhdr-close:hover{background:var(--s100);color:var(--s700);}
+.mbody{padding:20px 24px;}
+.mftr{padding:0 24px 24px;display:flex;gap:8px;justify-content:flex-end;}
+.page{max-width:1180px;margin:0 auto;padding:32px 28px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;}
+.kpi-card{position:relative;padding:22px 24px;border-radius:12px;border:1px solid #E2E8F0;background:#fff;display:flex;align-items:center;gap:16px;overflow:hidden;}
+.kpi-card::before{content:"";position:absolute;inset:0;background:var(--kpi-tint,transparent);opacity:.6;pointer-events:none;}
+.kpi-card>*{position:relative;}
+.kpi-card.green{--kpi-tint:linear-gradient(135deg,rgba(16,185,129,0.06),rgba(16,185,129,0.02) 60%);}
+.kpi-card.amber{--kpi-tint:linear-gradient(135deg,rgba(245,158,11,0.07),rgba(245,158,11,0.02) 60%);}
+.kpi-card.red{--kpi-tint:linear-gradient(135deg,rgba(239,68,68,0.06),rgba(239,68,68,0.02) 60%);}
+.kpi-icon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;flex-shrink:0;}
+.kpi-icon svg{width:22px;height:22px;}
+.kpi-card.green .kpi-icon{background:#ECFDF5;color:#059669;border:1px solid #A7F3D0;}
+.kpi-card.amber .kpi-icon{background:#FFFBEB;color:#D97706;border:1px solid #FDE68A;}
+.kpi-card.red .kpi-icon{background:#FEF2F2;color:#DC2626;border:1px solid #FECACA;}
+.kpi-value{font-size:32px;font-weight:700;letter-spacing:-0.02em;line-height:1;font-variant-numeric:tabular-nums;}
+.kpi-card.green .kpi-value{color:#047857;}
+.kpi-card.amber .kpi-value{color:#D97706;}
+.kpi-card.red .kpi-value{color:#B91C1C;}
+.kpi-label{margin-top:6px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#64748B;}
+@media(max-width:640px){.kpi-grid{grid-template-columns:1fr;}}
+.twrap{background:#fff;border:1px solid var(--s200);border-radius:var(--rlg);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.tbar{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--s100);}
+.client-group{border-bottom:1px solid var(--s100);}
+.client-group:last-child{border-bottom:none;}
+.client-header{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;user-select:none;transition:background .12s;background:#fff;}
+.client-header:hover{background:var(--s50);}
+.client-header-name{font-size:14px;font-weight:700;color:var(--s900);flex:1;}
+.client-header-count{font-size:12px;color:var(--s400);margin-right:4px;}
+.client-chevron{color:var(--s400);transition:transform .2s;display:flex;align-items:center;}
+.client-chevron.open{transform:rotate(90deg);}
+.client-projects{border-top:1px solid var(--s100);}
+.project-row{display:flex;align-items:center;gap:14px;padding:13px 16px 13px 20px;border-bottom:1px solid var(--s100);cursor:pointer;transition:background .12s;position:relative;}
+.project-row:last-child{border-bottom:none;}
+.project-row:hover{background:var(--s50);}
+.project-status-bar{position:absolute;left:0;top:0;bottom:0;width:3px;}
+.project-status-bar.g{background:var(--green);}
+.project-status-bar.a{background:var(--amber);}
+.project-status-bar.r{background:var(--red);}
+.project-info{flex:1;min-width:0;}
+.project-name{font-size:14px;font-weight:600;color:var(--s900);}
+.project-meta{font-size:12px;color:var(--s500);margin-top:2px;}
+.row-actions{display:flex;gap:5px;}
+.dhdr{background:#fff;border-bottom:1px solid var(--s200);padding:0 28px;box-shadow:0 1px 4px rgba(0,0,0,.05);}
+.dhdr-inner{max-width:1180px;margin:0 auto;padding:16px 0;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.tab-bar{display:flex;gap:2px;padding:4px;background:var(--s100);border-radius:var(--rmd);border:1px solid var(--s200);overflow-x:auto;max-width:100%;}
+.tab{padding:6px 14px;border-radius:7px;font-size:13px;font-weight:500;color:var(--s500);cursor:pointer;transition:all .12s;border:none;background:transparent;display:flex;align-items:center;gap:7px;white-space:nowrap;flex-shrink:0;}
+.tab.active{background:#fff;color:var(--s900);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+.section-card{background:#fff;border:1px solid var(--s200);border-radius:var(--rlg);padding:22px;box-shadow:0 1px 3px rgba(0,0,0,.04);margin-bottom:16px;}
+.section-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
+.section-title-row{display:flex;align-items:center;gap:9px;}
+.section-title{font-size:15px;font-weight:700;color:var(--s900);}
+.section-subtitle{font-size:12.5px;color:var(--s500);margin-top:2px;}
+.gauge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.phase-cards{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;}
+.phase-card{flex:0 0 190px;border:1.5px solid var(--s200);border-radius:var(--rlg);padding:14px;cursor:pointer;transition:all .15s;background:#fff;}
+.phase-card:hover{border-color:var(--s300);background:var(--s50);}
+.phase-card.g{border-color:var(--gborder);}
+.phase-card.a{border-color:var(--aborder);}
+.phase-card.r{border-color:var(--rborder);}
+.phase-card-name{font-size:13.5px;font-weight:600;color:var(--s800);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:7px;}
+.phase-card-status{margin-bottom:8px;}
+.phase-card-date{font-size:11px;color:var(--s400);}
+.gantt-wrap{overflow-x:auto;}
+.gantt-table{min-width:800px;border-collapse:collapse;}
+.gantt-table td,.gantt-table th{border:none;padding:0;}
+.gantt-months th{font-size:10.5px;font-weight:700;color:var(--s500);text-transform:uppercase;letter-spacing:.5px;padding:6px 0;text-align:center;}
+.gantt-half-hdr{font-size:10px;color:var(--s400);padding:2px 0;text-align:center;border-left:1px solid var(--s100);}
+.gantt-row td{height:38px;border-bottom:1px solid var(--s100);}
+.gantt-row:last-child td{border-bottom:none;}
+.gantt-label{font-size:12.5px;color:var(--s600);font-weight:500;padding-right:12px;white-space:nowrap;display:flex;align-items:center;gap:6px;min-width:150px;}
+.gantt-cell{position:relative;border-left:1px solid var(--s100);}
+.gantt-bar{position:absolute;top:7px;height:22px;border-radius:5px;cursor:pointer;transition:filter .12s;display:flex;align-items:center;padding:0 8px;font-size:11px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;z-index:2;}
+.gantt-bar:hover{filter:brightness(1.08);}
+.date-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px;}
+.date-chip{padding:7px 4px;border:1px solid var(--s200);border-radius:var(--rmd);font-size:12px;text-align:center;cursor:pointer;transition:all .12s;background:#fff;color:var(--s700);}
+.date-chip:hover{border-color:var(--primary);color:var(--primary);}
+.date-chip.selected{background:var(--primary);color:#fff;border-color:var(--primary);}
+.status-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.status-chip{display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;border:1.5px solid var(--s200);cursor:pointer;font-size:13px;font-weight:500;color:var(--s600);background:#fff;transition:all .12s;}
+.status-chip.selected-g{border-color:var(--green);background:var(--gbg);color:var(--gtxt);}
+.status-chip.selected-a{border-color:var(--amber);background:var(--abg);color:var(--atxt);}
+.status-chip.selected-r{border-color:var(--red);background:var(--rbg);color:var(--rtxt);}
+.status-chip-dot{width:8px;height:8px;border-radius:50%;}
+.notes-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;max-height:200px;overflow-y:auto;}
+.note-item{background:var(--s50);border:1px solid var(--s200);border-radius:var(--rmd);padding:12px 14px;}
+.notes-input{width:100%;padding:11px 13px;border:1px solid var(--s200);border-radius:var(--rmd);font-size:13.5px;resize:none;height:80px;outline:none;transition:border-color .15s,box-shadow .15s;color:var(--s800);}
+.notes-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(87,107,255,.1);}
+.oos-form{background:var(--s50);border:1px solid var(--s200);border-radius:var(--rlg);padding:16px;}
+.oot{width:100%;font-size:13px;border-collapse:collapse;}
+.oot th{text-align:left;padding:8px 10px;font-size:10.5px;font-weight:700;color:var(--s400);border-bottom:1px solid var(--s200);text-transform:uppercase;letter-spacing:.5px;}
+.oot td{padding:10px;border-bottom:1px solid var(--s100);vertical-align:top;}
+.oot tr:last-child td{border-bottom:none;}
+.lic-add-btn{width:100%;padding:10px;border:1.5px dashed var(--s300);border-radius:var(--rmd);background:transparent;color:var(--s500);font-size:13px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.lic-add-btn:hover{border-color:var(--primary);color:var(--primary);}
+.logo-upload-area{border:2px dashed var(--s300);border-radius:var(--rlg);padding:18px;text-align:center;cursor:pointer;transition:border-color .15s;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.logo-upload-area:hover{border-color:var(--primary);}
+.toggle-switch{width:38px;height:22px;border-radius:999px;border:none;cursor:pointer;padding:2px;transition:background .2s;flex-shrink:0;}
+.toggle-switch.off{background:var(--s200);}
+.toggle-switch.on{background:var(--primary);}
+.toggle-knob{width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.toggle-switch.on .toggle-knob{transform:translateX(16px);}
+.empty-st{text-align:center;padding:48px 20px;color:var(--s400);}
+.loading{display:flex;align-items:center;justify-content:center;height:200px;color:var(--s400);font-size:14px;gap:8px;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.24.0/babel.min.js"></script>
+<script type="text/babel">
+const { useState, useEffect, useRef, useMemo } = React;
+const { createClient } = supabase;
+const sb = createClient(
+  'https://oblubcxkuuohpwjfaenx.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ibHViY3hrdXVvaHB3amZhZW54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2ODY0MTEsImV4cCI6MjA5NDI2MjQxMX0.Vdf7y1t5K493hUNkUtEPG4P4gC6ASAokU603UtSBrLU'
+);
+
+const PHASE_DEFS=[{key:'Analyse',icon:'🔍'},{key:'Implementatie',icon:'⚡'},{key:'Test',icon:'🧪'},{key:'Go-live',icon:'🚀'},{key:'Support',icon:'🔄'}];
+const LICENSE_TYPES=['Zoho Creator','Xano/WeWeb','Claude','N8N'];
+const FALLBACK_AMS=[
+  {id:'am1',name:'Koen Vlayen',initials:'KV',gradient:'linear-gradient(135deg,#576BFF,#8B5CF6)'},
+  {id:'am2',name:'Maxim Daels',initials:'MD',gradient:'linear-gradient(135deg,#0EA5E9,#14B8A6)'},
+];
+
+// ── DB ────────────────────────────────────────────────────
+async function fetchAMs(){
+  const{data}=await sb.from('mc_account_managers').select('*').order('id');
+  return(data??[]).map(a=>({...a,initials:a.initials||(a.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(),gradient:a.gradient||hcol(a.name||'')}));
+}
+async function dbInsertAM(name){
+  const initials=name.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const gradients=['linear-gradient(135deg,#576BFF,#8B5CF6)','linear-gradient(135deg,#0EA5E9,#14B8A6)','linear-gradient(135deg,#F59E0B,#EF4444)','linear-gradient(135deg,#10B981,#059669)'];
+  const gradient=gradients[Math.floor(Math.random()*gradients.length)];
+  let r=await sb.from('mc_account_managers').insert({name:name.trim(),initials,gradient}).select().single();
+  if(r.error)r=await sb.from('mc_account_managers').insert({name:name.trim()}).select().single();
+  const d=r.data;
+  return d?{...d,initials:d.initials||initials,gradient:d.gradient||gradient}:{id:uid(),name:name.trim(),initials,gradient};
+}
+
+async function fetchProjects(ownerId){
+  // Fetch root projects (parent_id IS NULL) — these are the "main" projects shown in overview
+  const{data:roots,error}=await sb.from('mc_projects').select('*').eq('owner_id',ownerId).is('parent_id',null).order('created_at',{ascending:false});
+  if(error)throw new Error(error.message);
+  if(!roots?.length)return[];
+  // Also fetch sub-projects (deelprojecten) for each root
+  const rootIds=roots.map(p=>p.id);
+  const{data:subs}=await sb.from('mc_projects').select('*').eq('owner_id',ownerId).in('parent_id',rootIds).order('created_at',{ascending:true});
+  // Collect all IDs for related data
+  const allIds=[...rootIds,...(subs??[]).map(s=>s.id)];
+  const[l,ph,n,o]=await Promise.all([
+    sb.from('mc_licenties').select('*').in('project_id',allIds).order('sort_order'),
+    sb.from('mc_phases').select('*').in('project_id',allIds).order('sort_order'),
+    sb.from('mc_notes').select('*').in('project_id',allIds).order('created_at'),
+    sb.from('mc_oos_items').select('*').in('project_id',allIds).order('created_at'),
+  ]);
+  const enrich=p=>({
+    ...p,offerte_total:Number(p.offerte_total||0),licentie_jr:Number(p.licentie_jr||0),
+    licenties:(l.data??[]).filter(x=>x.project_id===p.id).map(x=>({...x,cost:Number(x.cost)})),
+    phases:(ph.data??[]).filter(x=>x.project_id===p.id),
+    notes:(n.data??[]).filter(x=>x.project_id===p.id),
+    oos_items:(o.data??[]).filter(x=>x.project_id===p.id).map(x=>({...x,price:Number(x.price)})),
+  });
+  return roots.map(r=>({...enrich(r),deelprojecten:(subs??[]).filter(s=>s.parent_id===r.id).map(enrich)}));
+}
+
+async function dbInsertProject(data){
+  const{licenties,...row}=data;
+  const{data:p,error}=await sb.from('mc_projects').insert({...row,parent_id:null}).select().single();
+  if(error)throw new Error(error.message);
+  await Promise.all([
+    licenties.length&&sb.from('mc_licenties').insert(licenties.map((l,i)=>({...l,project_id:p.id,sort_order:i}))),
+    sb.from('mc_phases').insert(PHASE_DEFS.map((d,i)=>({project_id:p.id,key:d.key,status:'g',note:'',sort_order:i}))),
+  ]);
+  return{...p,offerte_total:Number(p.offerte_total||0),licentie_jr:Number(p.licentie_jr||0),licenties:[],phases:[],notes:[],oos_items:[],deelprojecten:[]};
+}
+
+async function dbInsertDeelproject(parentId,ownerId,client,data){
+  const{licenties,...row}=data;
+  const{data:p,error}=await sb.from('mc_projects').insert({...row,parent_id:parentId,owner_id:ownerId,client}).select().single();
+  if(error)throw new Error(error.message);
+  await Promise.all([
+    licenties&&licenties.length&&sb.from('mc_licenties').insert(licenties.map((l,i)=>({...l,project_id:p.id,sort_order:i}))),
+    sb.from('mc_phases').insert(PHASE_DEFS.map((d,i)=>({project_id:p.id,key:d.key,status:'g',note:'',sort_order:i}))),
+  ]);
+  return{...p,offerte_total:Number(p.offerte_total||0),licentie_jr:Number(p.licentie_jr||0),licenties:licenties||[],phases:PHASE_DEFS.map((d,i)=>({project_id:p.id,key:d.key,status:'g',note:'',sort_order:i,updated_at:new Date().toISOString()})),notes:[],oos_items:[]};
+}
+
+async function dbUpdateProject(p){
+  const{licenties,phases,notes,oos_items,deelprojecten,...row}=p;
+  const{error}=await sb.from('mc_projects').upsert(row);
+  if(error)throw new Error(error.message);
+}
+async function dbSyncLicenties(projectId,lics){
+  await sb.from('mc_licenties').delete().eq('project_id',projectId);
+  if(lics.length)await sb.from('mc_licenties').insert(lics.map((l,i)=>({...l,project_id:projectId,sort_order:i})));
+  await sb.from('mc_projects').update({licentie_jr:lics.reduce((s,l)=>s+l.cost,0),last_updated:new Date().toISOString()}).eq('id',projectId);
+}
+async function dbUpdateGauges(projectId,gauges,ps){
+  await sb.from('mc_projects').update({...gauges,project_status:ps,last_updated:new Date().toISOString()}).eq('id',projectId);
+}
+async function dbUpdatePhase(projectId,key,data){
+  await sb.from('mc_phases').update({...data,updated_at:new Date().toISOString()}).eq('project_id',projectId).eq('key',key);
+  // Only count non-done phases for timeline status rollup
+  const{data:phases}=await sb.from('mc_phases').select('status,done').eq('project_id',projectId);
+  const active=(phases??[]).filter(p=>!p.done);
+  const ss=active.length>0?active.map(p=>p.status):(phases??[]).map(p=>p.status);
+  const tl=ss.includes('r')?'r':ss.includes('a')?'a':'g';
+  await sb.from('mc_projects').update({timeline_status:tl,last_updated:new Date().toISOString()}).eq('id',projectId);
+  return tl;
+}
+async function dbAddNote(projectId,text){const{data}=await sb.from('mc_notes').insert({project_id:projectId,text}).select().single();return data;}
+async function dbAddOOS(projectId,item){const{data}=await sb.from('mc_oos_items').insert({project_id:projectId,...item}).select().single();return{...data,price:Number(data.price)};}
+async function dbDeleteOOS(id){await sb.from('mc_oos_items').delete().eq('id',id);}
+async function dbDeleteProject(id){await sb.from('mc_projects').delete().eq('id',id);}
+
+// ── Helpers ───────────────────────────────────────────────
+const eur=n=>n==null?'—':new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR',minimumFractionDigits:0,maximumFractionDigits:0}).format(n);
+const fdate=iso=>iso?new Date(iso).toLocaleDateString('nl-NL',{day:'numeric',month:'short',year:'numeric'}):'—';
+const fdshort=iso=>iso?new Date(iso).toLocaleDateString('nl-NL',{day:'numeric',month:'short'}):'—';
+function hcol(s){const cs=['linear-gradient(135deg,#576BFF,#8B5CF6)','linear-gradient(135deg,#0EA5E9,#14B8A6)','linear-gradient(135deg,#F59E0B,#EF4444)','linear-gradient(135deg,#10B981,#059669)','linear-gradient(135deg,#EC4899,#8B5CF6)','linear-gradient(135deg,#6366F1,#3B82F6)'];let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return cs[Math.abs(h)%cs.length];}
+const slbl=s=>({g:'Op koers',a:'Risico',r:'Kritiek',done:'Afgerond'}[s]||s);
+function projectDoneStatus(phases){
+  if(!phases||phases.length===0) return null;
+  const nonSupport=phases.filter(p=>p.key!=='Support');
+  const allDone=phases.every(p=>p.done);
+  const allExceptSupportDone=nonSupport.length>0&&nonSupport.every(p=>p.done);
+  return (allDone||allExceptSupportDone)?'done':null;
+}
+function drollup(g){const v=[g.gauge_timing,g.gauge_budget,g.gauge_scope];return v.includes('r')?'r':v.includes('a')?'a':'g';}
+function uid(){return Math.random().toString(36).slice(2)+Date.now().toString(36);}
+function gaugeClickZone(e,onSet){const rect=e.currentTarget.getBoundingClientRect();const x=e.clientX-rect.left;const w=rect.width;if(x<w/3)onSet('g');else if(x<2*w/3)onSet('a');else onSet('r');}
+function downscale(file,cb){const r=new FileReader();r.onload=e=>{const img=new Image();img.onload=()=>{const sz=256,rat=Math.min(sz/img.width,sz/img.height),c=document.createElement('canvas');c.width=img.width*rat;c.height=img.height*rat;c.getContext('2d').drawImage(img,0,0,c.width,c.height);cb(c.toDataURL('image/png'));};img.src=e.target.result;};r.readAsDataURL(file);}
+function halfMonthPeriods(year){const months=['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];const p=[];for(let m=0;m<12;m++){p.push({label:`${months[m]} 1-15`,value:`${year}-${String(m+1).padStart(2,'0')}-01`});const ld=new Date(year,m+1,0).getDate();p.push({label:`${months[m]} 16-${ld}`,value:`${year}-${String(m+1).padStart(2,'0')}-16`});}return p;}
+
+// ── Icons ─────────────────────────────────────────────────
+const Ic={
+  Search:()=><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+  Plus:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+  Edit:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+  Trash:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>,
+  Back:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15 18 9 12 15 6"/></svg>,
+  X:()=><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+  ChevronDown:()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="6 9 12 15 18 9"/></svg>,
+  ChevronRight:()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>,
+  Check:()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>,
+  Notes:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
+  Calendar:()=><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+  Activity:()=><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
+  Layers:()=><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>,
+  Target:()=><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
+  ExternalLink:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
+  Upload:()=><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>,
+  Warn:()=><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+  Refresh:()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>,
+};
+
+function Avatar({logo,client,size=36,rad=8}){
+  if(logo)return<img src={logo} alt={client} style={{width:size,height:size,borderRadius:rad,objectFit:'cover',border:'1px solid var(--s200)',flexShrink:0}}/>;
+  const ini=(client||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  return<div style={{width:size,height:size,borderRadius:rad,background:hcol(client||''),display:'flex',alignItems:'center',justifyContent:'center',fontSize:size*.33,fontWeight:700,color:'#fff',flexShrink:0}}>{ini}</div>;
+}
+function Pill({status,label,onClick}){
+  return<span className={`pill ${status}`} onClick={e=>{e.stopPropagation();onClick&&onClick();}} style={{cursor:onClick?'pointer':'default'}}>
+    <span className="pill-dot"/>{label||slbl(status)}
+  </span>;
+}
+
+// ── Speedometer Gauge ─────────────────────────────────────
+function SpeedoGauge({label,sublabel,status,onSet}){
+  const color={g:'#22c55e',a:'#f59e0b',r:'#ef4444'}[status];
+  const txt={g:'OP SCHEMA',a:'RISICO',r:'KRITIEK'}[status];
+  const cx=110,cy=108,R=88,tR=74;
+  const p=d=>{const a=d*Math.PI/180;return[cx+R*Math.cos(a),cy-R*Math.sin(a)];};
+  const tp=d=>{const a=d*Math.PI/180;return[cx+tR*Math.cos(a),cy-tR*Math.sin(a)];};
+  const[lx,ly]=p(180);const[rx,ry]=p(0);
+  const[tl,tlY]=tp(180);const[tg2,tg2Y]=tp(120);const[ta2,ta2Y]=tp(60);const[tr,trY]=tp(0);
+  const na={g:150,a:90,r:30}[status]*Math.PI/180;
+  const nLen=68,nTail=12;
+  const[nx2,ny2]=[cx+nLen*Math.cos(na),cy-nLen*Math.sin(na)];
+  const[nx3,ny3]=[cx+nTail*Math.cos(na+Math.PI),cy-nTail*Math.sin(na+Math.PI)];
+  return(
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:8,padding:'16px 12px 14px',border:'1px solid var(--s200)',borderRadius:14,position:'relative',userSelect:'none',cursor:'pointer',background:'#fff',transition:'border-color .15s'}}
+      onClick={e=>gaugeClickZone(e,onSet)}
+      onMouseEnter={e=>e.currentTarget.style.borderColor='var(--s300)'}
+      onMouseLeave={e=>e.currentTarget.style.borderColor='var(--s200)'}
+      title="← Op schema | Risico | Kritiek →">
+      <div style={{fontSize:11,fontWeight:700,textTransform:'uppercase',letterSpacing:'.7px',color:'var(--s400)'}}>{label}</div>
+      <svg width="220" height="116" viewBox="0 0 220 116" style={{display:'block'}}>
+        <defs>
+          <radialGradient id={`dg-${label}`} cx="50%" cy="100%" r="90%"><stop offset="0%" stopColor="#1e2d3d"/><stop offset="100%" stopColor="#0b1520"/></radialGradient>
+          <clipPath id={`cp-${label}`}><rect x="0" y="0" width="220" height="116"/></clipPath>
+        </defs>
+        <g clipPath={`url(#cp-${label})`}>
+          <path d={`M${lx} ${ly} A${R} ${R} 0 0 1 ${rx} ${ry} L${cx} ${cy} Z`} fill={`url(#dg-${label})`}/>
+          <path d={`M${lx} ${ly} A${R} ${R} 0 0 1 ${rx} ${ry}`} fill="none" stroke="#2a3f55" strokeWidth="1.5"/>
+          <path d={`M${tl} ${tlY} A${tR} ${tR} 0 0 1 ${tr} ${trY}`} fill="none" stroke="#172031" strokeWidth="11" strokeLinecap="butt"/>
+          <path d={`M${tl} ${tlY} A${tR} ${tR} 0 0 1 ${tg2} ${tg2Y}`} fill="none" stroke="#22c55e" strokeWidth="11" strokeOpacity={status==='g'?'1':'.28'} strokeLinecap="butt"/>
+          <path d={`M${tg2} ${tg2Y} A${tR} ${tR} 0 0 1 ${ta2} ${ta2Y}`} fill="none" stroke="#f59e0b" strokeWidth="11" strokeOpacity={status==='a'?'1':'.28'} strokeLinecap="butt"/>
+          <path d={`M${ta2} ${ta2Y} A${tR} ${tR} 0 0 1 ${tr} ${trY}`} fill="none" stroke="#ef4444" strokeWidth="11" strokeOpacity={status==='r'?'1':'.28'} strokeLinecap="butt"/>
+          {[180,150,120,90,60,30,0].map((deg,i)=>{const a=deg*Math.PI/180;return<line key={deg} x1={cx+(R-1)*Math.cos(a)} y1={cy-(R-1)*Math.sin(a)} x2={cx+(R-9)*Math.cos(a)} y2={cy-(R-9)*Math.sin(a)} stroke="#3a5272" strokeWidth={i%3===0?1.8:1}/>;} )}
+          <text x={cx} y={cy-28} textAnchor="middle" fill={color} fontSize="11" fontWeight="800" fontFamily="DM Sans,sans-serif" letterSpacing="1">{txt}</text>
+          <line x1={nx3} y1={ny3} x2={nx2} y2={ny2} stroke={color} strokeWidth="3" strokeLinecap="round" style={{transition:'all .4s cubic-bezier(.34,1.1,.64,1)'}}/>
+          <line x1={cx} y1={cy} x2={nx3} y2={ny3} stroke={color} strokeWidth="2" strokeLinecap="round" strokeOpacity=".35"/>
+          <circle cx={cx} cy={cy} r="7" fill="#1a2a3a" stroke="#2a3f55" strokeWidth="1.5"/>
+          <circle cx={cx} cy={cy} r="3.5" fill={color}/>
+        </g>
+      </svg>
+      <div style={{fontSize:11,color:'var(--s500)',marginTop:-2}}>{sublabel}</div>
+      <div style={{fontSize:10,color:'#c0ccd8',position:'absolute',bottom:5,right:9}}>← ● →</div>
+    </div>
+  );
+}
+
+function PhaseCard({phase,onClick,onToggleDone}){
+  const def=PHASE_DEFS.find(d=>d.key===phase.key)||{icon:'📌'};
+  const updAt=phase.updated_at||phase.created_at;
+  const done=phase.done;
+  return(
+    <div className={`phase-card ${done?'done':phase.status}`} onClick={onClick}
+      style={{opacity:done?.7:1,background:done?'var(--s50)':'#fff',borderColor:done?'var(--s200)':undefined,position:'relative'}}>
+      {/* Done checkbox — top right, stops propagation so it doesn't open modal */}
+      <div onClick={e=>{e.stopPropagation();onToggleDone&&onToggleDone(!done);}}
+        style={{position:'absolute',top:10,right:10,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',
+          width:18,height:18,borderRadius:5,border:done?'none':'1.5px solid var(--s300)',
+          background:done?'var(--green)':'#fff',transition:'all .15s',flexShrink:0}}
+        title={done?'Markeer als actief':'Markeer als afgerond'}>
+        {done&&<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+      </div>
+      <div className="phase-card-name" style={{paddingRight:24}}>
+        <span style={{fontSize:16}}>{done?'✓':def.icon}</span>
+        <span style={{flex:1,minWidth:0,overflow:'hidden',textOverflow:'ellipsis',textDecoration:done?'line-through':'none',color:done?'var(--s400)':'inherit'}}>{phase.key}</span>
+      </div>
+      {done
+        ?<div style={{fontSize:11,fontWeight:700,color:'var(--s400)',textTransform:'uppercase',letterSpacing:'.5px',marginBottom:8}}>Afgerond</div>
+        :<div className="phase-card-status"><Pill status={phase.status}/></div>}
+      <div className="phase-card-date">{updAt?fdshort(updAt)+', '+new Date(updAt).toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'}):'—'}</div>
+    </div>
+  );
+}
+
+function MilestoneModal({phase,onSave,onCancel}){
+  const year=new Date().getFullYear();
+  const periods=halfMonthPeriods(year);
+  const[startVal,setStartVal]=useState(phase.start_date||'');
+  const[endVal,setEndVal]=useState(phase.end_date||'');
+  const[status,setStatus]=useState(phase.status||'g');
+  const[note,setNote]=useState(phase.note||'');
+  const[done,setDone]=useState(phase.done||false);
+  return(
+    <div className="modal-backdrop" onClick={onCancel}>
+      <div className="modal" onClick={e=>e.stopPropagation()}>
+        <div className="mhdr"><div className="mhdr-icon"><Ic.Calendar/></div><div className="mhdr-text"><div className="mhdr-sup">Tijdlijn</div><div className="mtitle">Mijlpaal bewerken</div></div><button className="mhdr-close" onClick={onCancel}><Ic.X/></button></div>
+        <div className="mbody">
+          <div className="field"><label>Naam</label><input value={phase.key} readOnly style={{background:'var(--s50)',color:'var(--s600)'}}/></div>
+          {[['Van (Startdatum)',startVal,setStartVal],['Tot (Einddatum)',endVal,setEndVal]].map(([title,val,setVal])=>(
+            <div key={title}>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:6}}>
+                <label style={{fontSize:11,fontWeight:700,color:'var(--s500)',textTransform:'uppercase',letterSpacing:'.6px'}}>{title}</label>
+                {val&&<button style={{background:'none',border:'none',color:'var(--primary)',fontSize:12,fontWeight:600,cursor:'pointer'}} onClick={()=>setVal('')}>Wissen</button>}
+              </div>
+              <div className="date-grid" style={{marginBottom:14}}>{periods.map(p=><div key={p.value} className={`date-chip${val===p.value?' selected':''}`} onClick={()=>setVal(val===p.value?'':p.value)}>{p.label}</div>)}</div>
+            </div>
+          ))}
+          <div className="field" style={{marginBottom:10}}>
+            <label>Status</label>
+            <div className="status-chips">
+              {[{s:'g',label:'Op koers',dot:'#22c55e'},{s:'a',label:'Risico',dot:'#f59e0b'},{s:'r',label:'Kritiek',dot:'#ef4444'}].map(({s,label,dot})=>(
+                <div key={s} className={`status-chip${status===s?` selected-${s}`:''}`} onClick={()=>setStatus(s)}><span className="status-chip-dot" style={{background:dot}}/>{label}</div>
+              ))}
+            </div>
+          </div>
+          <div className="field"><label>Notitie (optioneel)</label><textarea value={note} onChange={e=>setNote(e.target.value)} placeholder="Toelichting bij deze mijlpaal..."/></div>
+          <div style={{border:'1px solid var(--s200)',borderRadius:'var(--rlg)',padding:'12px 16px',display:'flex',alignItems:'center',gap:12,background:done?'var(--gbg)':'#fff',transition:'background .2s'}}>
+            <span style={{fontSize:20}}>{done?'✅':'⬜'}</span>
+            <div style={{flex:1}}>
+              <div style={{fontSize:13.5,fontWeight:600,color:'var(--s800)'}}>Fase afgerond</div>
+              <div style={{fontSize:12,color:'var(--s500)',marginTop:1}}>Markeert de fase als klaar — wordt grijs weergegeven</div>
+            </div>
+            <button type="button" className={`toggle-switch ${done?'on':'off'}`} onClick={()=>setDone(d=>!d)}><div className="toggle-knob"/></button>
+          </div>
+        </div>
+        <div className="mftr"><button className="btn bg" onClick={onCancel}>Annuleren</button><button className="btn bp" onClick={()=>onSave({status,start_date:startVal,end_date:endVal,note,done})}><Ic.Calendar/> Opslaan</button></div>
+      </div>
+    </div>
+  );
+}
+
+function GanttChart({phases,onPhaseClick}){
+  const today=new Date();const year=today.getFullYear();
+  const months=['JAN','FEB','MRT','APR','MEI','JUN','JUL','AUG','SEP','OKT','NOV','DEC'];
+  const hw=36;
+  const d2h=ds=>{if(!ds)return null;const d=new Date(ds);return d.getMonth()*2+(d.getDate()<=15?0:1);};
+  const todayH=today.getMonth()*2+(today.getDate()<=15?0:1);
+  const todayOff=(today.getDate()<=15?(today.getDate()-1)/15:(today.getDate()-16)/15)*hw;
+  const bc={g:'#22c55e',a:'#f59e0b',r:'#ef4444'};
+  return(
+    <div className="gantt-wrap">
+      <table className="gantt-table">
+        <thead>
+          <tr className="gantt-months">
+            <th style={{width:150,textAlign:'left',paddingLeft:4}}></th>
+            {months.map((m,i)=><th key={i} colSpan={2} style={{borderLeft:'1px solid var(--s100)',paddingBottom:8}}>{m} {year}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          <tr className="gantt-row">
+            <td style={{paddingLeft:4}}><span style={{fontSize:12,fontWeight:700,color:'var(--green)'}}>Vandaag</span></td>
+            {Array.from({length:24},(_,i)=>(
+              <td key={i} className="gantt-cell" style={{position:'relative',width:hw}}>
+                {i===todayH&&<>
+                  <div style={{position:'absolute',top:0,bottom:0,left:todayOff,width:2,background:'var(--green)',zIndex:4}}/>
+                  <div style={{position:'absolute',top:0,left:todayOff,transform:'translateX(-50%)'}}>
+                    <div style={{background:'#fff',border:'1.5px solid var(--green)',borderRadius:999,fontSize:10,fontWeight:700,color:'var(--gtxt)',padding:'1px 7px',whiteSpace:'nowrap',marginTop:-20}}>vandaag</div>
+                  </div>
+                </>}
+              </td>
+            ))}
+          </tr>
+          {phases.map(phase=>{
+            const def=PHASE_DEFS.find(d=>d.key===phase.key)||{icon:'📌'};
+            const sh=d2h(phase.start_date);const eh=d2h(phase.end_date);
+            const done=phase.done;
+            const barColor=done?'#94a3b8':bc[phase.status];
+            return(
+              <tr key={phase.key} className="gantt-row">
+                <td><div className="gantt-label" style={{opacity:done?.6:1}}>
+                  <span style={{fontSize:13}}>{done?'✓':def.icon}</span>
+                  <span style={{textDecoration:done?'line-through':'none',color:done?'var(--s400)':'inherit'}}>{phase.key}</span>
+                </div></td>
+                {Array.from({length:24},(_,i)=>(
+                  <td key={i} className="gantt-cell" style={{width:hw}}>
+                    {sh!==null&&i===sh&&eh!==null&&(
+                      <div className="gantt-bar" style={{background:barColor,left:0,width:`${(eh-sh+1)*hw}px`,opacity:done?.7:1}} onClick={()=>onPhaseClick(phase)}>
+                        {done?'✓ ':''}{phase.key}
+                      </div>
+                    )}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function OOSCard({items,onAdd,onRemove}){
+  const[f,setF]=useState({title:'',description:'',price:''});
+  const total=items.reduce((s,i)=>s+i.price,0);
+  return(
+    <div className="section-card">
+      <div className="section-header">
+        <div><div className="section-title-row"><span style={{color:'var(--amber)'}}><Ic.Warn/></span><span className="section-title">Out of scope verzoeken</span></div><div style={{fontSize:12.5,color:'var(--s400)',marginTop:3}}>{items.length} verzoeken</div></div>
+        <span style={{background:'var(--abg)',color:'var(--atxt)',border:'1px solid var(--aborder)',borderRadius:999,padding:'4px 13px',fontSize:12.5,fontWeight:600}}>Totaal {eur(total)}</span>
+      </div>
+      {items.length>0&&<table className="oot" style={{marginBottom:16}}><thead><tr><th>Titel</th><th>Omschrijving</th><th style={{textAlign:'right'}}>Prijs</th><th></th></tr></thead><tbody>{items.map(it=><tr key={it.id}><td style={{fontWeight:600}}>{it.title}</td><td style={{color:'var(--s500)'}}>{it.description}</td><td style={{textAlign:'right'}}>{eur(it.price)}</td><td><button className="bi" style={{padding:4}} onClick={()=>onRemove(it.id)}><Ic.Trash/></button></td></tr>)}</tbody></table>}
+      <div className="oos-form">
+        <div className="field" style={{marginBottom:10}}><label>Titel</label><input value={f.title} onChange={e=>setF(p=>({...p,title:e.target.value}))} placeholder="bijv. Extra rapportage module"/></div>
+        <div className="field" style={{marginBottom:10}}><label>Beschrijving</label><textarea value={f.description} onChange={e=>setF(p=>({...p,description:e.target.value}))} placeholder="Gedetailleerde beschrijving..." style={{minHeight:60}}/></div>
+        <div className="field" style={{marginBottom:10}}><label>Indicatieve prijs (optioneel)</label><input type="number" value={f.price} onChange={e=>setF(p=>({...p,price:e.target.value}))} placeholder="0"/></div>
+        <div style={{display:'flex',gap:8,justifyContent:'flex-end'}}>
+          <button className="btn bg bsm" onClick={()=>setF({title:'',description:'',price:''})}>Annuleren</button>
+          <button className="btn btn-amber bsm" disabled={!f.title.trim()} onClick={async()=>{await onAdd({title:f.title,description:f.description,price:parseFloat(f.price)||0});setF({title:'',description:'',price:''});}}><Ic.Plus/> Toevoegen</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LogoUploader({value,onChange}){
+  const ref=useRef();
+  if(value)return<div style={{display:'flex',alignItems:'center',gap:12}}><img src={value} style={{width:52,height:52,borderRadius:8,objectFit:'cover',border:'1px solid var(--s200)'}}/><div><div style={{fontSize:13,color:'var(--s600)',marginBottom:6}}>Logo ingesteld</div><button className="btn bg bsm" onClick={()=>onChange(null)}>Verwijderen</button></div></div>;
+  return<div><input ref={ref} type="file" accept="image/*" style={{display:'none'}} onChange={e=>{const f=e.target.files[0];if(f)downscale(f,onChange);}}/><div style={{display:'flex',alignItems:'center',gap:10}}><div style={{width:52,height:52,borderRadius:8,border:'1.5px dashed var(--s300)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--s300)',fontSize:22,flexShrink:0}}>?</div><div><button className="btn bg bsm" onClick={()=>ref.current.click()}><Ic.Upload/> Logo uploaden</button><div style={{fontSize:11.5,color:'var(--s400)',marginTop:4}}>PNG of JPG, automatisch verkleind tot 256px</div></div></div></div>;
+}
+
+function LicEditor({rows,onChange}){
+  const total=rows.reduce((s,l)=>s+(Number(l.cost)||0),0);
+  return<div>
+    {rows.length>0&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr auto',gap:'0 9px',marginBottom:4}}>
+      <div style={{fontSize:10,fontWeight:700,color:'var(--s400)',textTransform:'uppercase',letterSpacing:'.6px'}}>Type</div>
+      <div style={{fontSize:10,fontWeight:700,color:'var(--s400)',textTransform:'uppercase',letterSpacing:'.6px'}}>Kosten/jr (€)</div>
+      <div/>
+    </div>}
+    {rows.map((l,i)=>{
+      const isCustom=l.custom||(!LICENSE_TYPES.includes(l.type)&&l.type!=='');
+      return<div key={i} style={{display:'grid',gridTemplateColumns:'1fr 1fr auto',gap:9,alignItems:'center',marginBottom:8}}>
+        <div style={{display:'flex',flexDirection:'column',gap:4}}>
+          {!isCustom
+            ?<select value={l.type} onChange={e=>{const n=[...rows];if(e.target.value==='__custom__'){n[i]={...n[i],type:'',custom:true};}else{n[i]={...n[i],type:e.target.value,custom:false};}onChange(n);}} style={{padding:'8px 10px',border:'1px solid var(--s200)',borderRadius:'var(--rmd)',fontSize:13,color:'var(--s800)',outline:'none',background:'#fff',width:'100%'}}>
+              <option value="">Selecteer type...</option>
+              {LICENSE_TYPES.map(t=><option key={t} value={t}>{t}</option>)}
+              <option value="__custom__">+ Toevoegen...</option>
+            </select>
+            :<div style={{display:'flex',gap:5,alignItems:'center'}}>
+              <input value={l.type} onChange={e=>{const n=[...rows];n[i]={...n[i],type:e.target.value};onChange(n);}} placeholder="Naam licentie..." style={{padding:'8px 10px',border:'1px solid var(--primary)',borderRadius:'var(--rmd)',fontSize:13,color:'var(--s800)',outline:'none',width:'100%',boxShadow:'0 0 0 3px rgba(87,107,255,.1)'}} autoFocus/>
+              <button className="bi" style={{padding:5,flexShrink:0}} title="Terug naar lijst" onClick={()=>{const n=[...rows];n[i]={...n[i],type:'',custom:false};onChange(n);}}><Ic.Back/></button>
+            </div>
+          }
+        </div>
+        <input type="number" value={l.cost===0?'':l.cost} onChange={e=>{const n=[...rows];n[i]={...n[i],cost:e.target.value===''?0:parseFloat(e.target.value)||0};onChange(n);}} placeholder="0" style={{padding:'8px 10px',border:'1px solid var(--s200)',borderRadius:'var(--rmd)',fontSize:13,color:'var(--s800)',outline:'none',width:'100%'}}/>
+        <button className="bi" style={{padding:5}} onClick={()=>onChange(rows.filter((_,j)=>j!==i))}><Ic.X/></button>
+      </div>;
+    })}
+    <button className="lic-add-btn" onClick={()=>onChange([...rows,{type:'',cost:0,custom:false}])}><Ic.Plus/> Licentie toevoegen</button>
+    {rows.length>0&&<div style={{fontSize:12.5,color:'var(--s500)',textAlign:'right',paddingTop:8}}>Totaal: <strong style={{color:'var(--s800)'}}>{eur(total)}/jr</strong></div>}
+  </div>;
+}
+
+// ProjectForm — used for both new root projects and new deelprojecten
+function ProjectForm({initial,activeAM,title,onSave,onCancel}){
+  const[f,setF]=useState(initial?{
+    client:initial.client,name:initial.name,logo:initial.logo,
+    offerte_total:initial.offerte_total,owner_id:initial.owner_id,
+    licenties:initial.licenties.map(l=>({type:l.type,cost:l.cost})),
+  }:{client:'',name:'',logo:null,offerte_total:'',owner_id:activeAM,licenties:[]});
+  const set=(k,v)=>setF(p=>({...p,[k]:v}));
+  const valid=f.name.trim()&&(initial||f.client.trim());
+  return<>
+    <div className="mbody">
+      {!initial&&<div className="fr2" style={{marginBottom:0}}>
+        <div className="field"><label>Klantnaam</label><input value={f.client} onChange={e=>set('client',e.target.value)} placeholder="bijv. Acme BV" autoFocus/></div>
+        <div className="field"><label>Projectnaam</label><input value={f.name} onChange={e=>set('name',e.target.value)} placeholder="bijv. ERP Implementatie"/></div>
+      </div>}
+      {initial&&<div className="field"><label>Naam nieuw project</label><input value={f.name} onChange={e=>set('name',e.target.value)} placeholder="bijv. Fase 2" autoFocus/></div>}
+      <div className="field"><label>Klant logo (optioneel)</label><LogoUploader value={f.logo} onChange={v=>set('logo',v)}/></div>
+      <div className="field"><label>Offerte totaal</label>
+        <div style={{position:'relative'}}><span style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',color:'var(--s500)',fontSize:14}}>€</span>
+        <input type="number" value={f.offerte_total===0?'':f.offerte_total} onChange={e=>set('offerte_total',e.target.value===''?'':parseFloat(e.target.value)||0)} placeholder="0" style={{paddingLeft:26}}/></div>
+      </div>
+      <div className="field"><label>Jaarlijkse licenties</label><LicEditor rows={f.licenties} onChange={v=>set('licenties',v)}/></div>
+      <div className="field" style={{marginBottom:0}}><label>Getekende offerte</label>
+        <div className="logo-upload-area"><Ic.Upload/><div style={{fontSize:13.5,fontWeight:500,color:'var(--s600)'}}>Sleep bestand hierheen of klik om te uploaden</div><div style={{fontSize:12,color:'var(--s400)'}}>PDF, Word of afbeelding</div></div>
+      </div>
+    </div>
+    <div className="mftr"><button className="btn bg" onClick={onCancel}>Annuleren</button><button className="btn bp" disabled={!valid} onClick={()=>onSave(f)}>{title||'Project starten'}</button></div>
+  </>;
+}
+
+function DeleteModal({name,onConfirm,onCancel}){
+  return<div className="modal-backdrop" onClick={onCancel}>
+    <div className="modal modal-sm" onClick={e=>e.stopPropagation()}>
+      <div className="mhdr"><div style={{width:42,height:42,background:'var(--rbg)',borderRadius:12,display:'flex',alignItems:'center',justifyContent:'center',color:'var(--red)',flexShrink:0}}><Ic.Warn/></div><div className="mhdr-text"><div className="mhdr-sup">Bevestiging</div><div className="mtitle">Verwijderen?</div></div><button className="mhdr-close" onClick={onCancel}><Ic.X/></button></div>
+      <div className="mbody"><p style={{fontSize:13.5,color:'var(--s500)',lineHeight:1.6}}><strong style={{color:'var(--s800)'}}>{name}</strong> wordt permanent verwijderd inclusief alle data.</p></div>
+      <div className="mftr"><button className="btn bg" onClick={onCancel}>Annuleren</button><button className="btn bd" onClick={onConfirm}>Verwijderen</button></div>
+    </div>
+  </div>;
+}
+
+function AMDropdown({ams,activeAM,onSwitch,onAddAM,onClose}){
+  const[adding,setAdding]=useState(false);
+  const[newName,setNewName]=useState('');
+  const ref=useRef();
+  useEffect(()=>{const h=e=>{if(ref.current&&!ref.current.contains(e.target))onClose();};document.addEventListener('mousedown',h);return()=>document.removeEventListener('mousedown',h);},[onClose]);
+  return<div className="am-dropdown" ref={ref}>
+    <div className="am-section-label">Account Manager</div>
+    {ams.map(a=><div key={a.id} className={`am-option${activeAM===a.id?' active':''}`} onClick={()=>{onSwitch(a.id);onClose();}}>
+      <div className="am-av" style={{background:a.gradient}}>{a.initials}</div>
+      <span className="am-option-name">{a.name}</span>
+      {activeAM===a.id&&<span className="am-check"><Ic.Check/></span>}
+    </div>)}
+    {!adding
+      ?<div className="am-add" onClick={()=>setAdding(true)}><Ic.Plus/> Nieuwe AM toevoegen</div>
+      :<div style={{padding:'8px 14px',borderTop:'1px solid var(--s200)'}}>
+        <input autoFocus value={newName} onChange={e=>setNewName(e.target.value)} placeholder="Naam accountmanager..." style={{width:'100%',padding:'7px 10px',border:'1px solid var(--s200)',borderRadius:'var(--rmd)',fontSize:13,outline:'none',marginBottom:7}} onKeyDown={async e=>{if(e.key==='Enter'&&newName.trim()){const a=await dbInsertAM(newName);onAddAM(a);setAdding(false);setNewName('');}if(e.key==='Escape')setAdding(false);}}/>
+        <div style={{display:'flex',gap:6}}><button className="btn bg bsm" style={{flex:1}} onClick={()=>setAdding(false)}>Annuleren</button><button className="btn bp bsm" style={{flex:1}} disabled={!newName.trim()} onClick={async()=>{const a=await dbInsertAM(newName);onAddAM(a);setAdding(false);setNewName('');}}>Toevoegen</button></div>
+      </div>
+    }
+  </div>;
+}
+
+// ── Single project tab content ────────────────────────────
+function ProjectTabContent({p,onUpdate}){
+  const[editPhase,setEditPhase]=useState(null);
+  const[noteTxt,setNoteTxt]=useState('');
+  const upd=patch=>onUpdate({...p,...patch});
+
+  const setGauge=async(k,v)=>{
+    const gauges={gauge_timing:p.gauge_timing,gauge_budget:p.gauge_budget,gauge_scope:p.gauge_scope,[k]:v};
+    const ps=drollup(gauges);
+    await dbUpdateGauges(p.id,gauges,ps);
+    upd({...gauges,project_status:ps});
+  };
+  const handlePhase=async(key,data)=>{
+    const tl=await dbUpdatePhase(p.id,key,data);
+    const phases=p.phases.map(ph=>ph.key===key?{...ph,...data,updated_at:new Date().toISOString()}:ph);
+    upd({phases,timeline_status:tl});
+  };
+
+  const phaseStats=p.phases.reduce((a,ph)=>{a[ph.status]=(a[ph.status]||0)+1;return a;},{g:0,a:0,r:0});
+  const lastUpdated=p.phases.reduce((l,ph)=>{const d=ph.updated_at||'';return d>l?d:l;},'');
+
+  return<>
+    {/* Gauges */}
+    <div className="section-card">
+      <div className="section-header" style={{marginBottom:8}}>
+        <div style={{flex:1}}>
+          <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:4,flexWrap:'wrap'}}>
+            <div style={{fontSize:17,fontWeight:700,color:'var(--s900)',letterSpacing:'-.2px'}}>{p.name}</div>
+            {(()=>{
+              const doneOverride=projectDoneStatus(p.phases);
+              const tlStatus=p.timeline_status||'g';
+              const psStatus=p.project_status||'g';
+              return<>
+                <Pill status={doneOverride?'done':tlStatus} label={`Timeline: ${doneOverride?'Afgerond':slbl(tlStatus)}`}/>
+                <Pill status={doneOverride?'done':psStatus} label={`Status: ${doneOverride?'Afgerond':slbl(psStatus)}`}/>
+              </>;
+            })()}
+          </div>
+          <div className="section-subtitle">Klik links/midden/rechts op een meter om de status direct in te stellen.</div>
+        </div>
+        <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:2,flexShrink:0}}>
+          <div style={{fontSize:10,fontWeight:700,color:'var(--s400)',textTransform:'uppercase',letterSpacing:'.6px',display:'flex',gap:20}}><span>OFFERTE</span><span>LICENTIE/JR</span></div>
+          <div style={{fontSize:20,fontWeight:700,color:'var(--s900)',display:'flex',gap:20}}><span>{eur(p.offerte_total)}</span><span>{eur(p.licentie_jr)}</span></div>
+        </div>
+      </div>
+      <div className="gauge-grid">
+        <SpeedoGauge label="TIMING" sublabel="Tijdsplanning" status={p.gauge_timing||'g'} onSet={v=>setGauge('gauge_timing',v)}/>
+        <SpeedoGauge label="BUDGET" sublabel="Financieel" status={p.gauge_budget||'g'} onSet={v=>setGauge('gauge_budget',v)}/>
+        <SpeedoGauge label="SCOPE" sublabel="Omvang werk" status={p.gauge_scope||'g'} onSet={v=>setGauge('gauge_scope',v)}/>
+      </div>
+    </div>
+
+    {/* Phases */}
+    <div className="section-card">
+      <div className="section-header">
+        <div>
+          <div className="section-title-row"><span style={{color:'var(--primary)'}}><Ic.Target/></span><span className="section-title">Project overzicht · Fasen</span></div>
+          <div className="section-subtitle">Klik links/midden/rechts op een fase om de status direct in te stellen.</div>
+        </div>
+        {lastUpdated&&<div style={{fontSize:11,color:'var(--s400)',display:'flex',alignItems:'center',gap:4}}><Ic.Refresh/> Bijgewerkt {fdshort(lastUpdated)}</div>}
+      </div>
+      <div style={{height:5,borderRadius:999,background:'var(--s100)',display:'flex',overflow:'hidden',marginBottom:8}}>
+        {p.phases.map(ph=><div key={ph.key} style={{flex:1,background:ph.status==='g'?'var(--green)':ph.status==='a'?'var(--amber)':'var(--red)',margin:'0 1px'}}/>)}
+      </div>
+      <div style={{fontSize:11.5,color:'var(--s500)',marginBottom:12}}>{phaseStats.g}/{p.phases.length} op koers · {phaseStats.a} risico · {phaseStats.r} kritiek</div>
+      <div className="phase-cards">{p.phases.map(ph=><PhaseCard key={ph.key} phase={ph} onClick={()=>setEditPhase(ph)} onToggleDone={async(val)=>{
+        await handlePhase(ph.key,{...ph,done:val});
+      }}/>)}</div>
+    </div>
+
+    {/* Gantt */}
+    <div className="section-card">
+      <div className="section-header">
+        <div>
+          <div className="section-title-row"><span style={{color:'var(--primary)'}}><Ic.Calendar/></span><span className="section-title">Tijdlijn · Gantt</span></div>
+          <div className="section-subtitle">Klik op een balk om de mijlpaal te bewerken</div>
+        </div>
+      </div>
+      <GanttChart phases={p.phases} onPhaseClick={ph=>setEditPhase(ph)}/>
+    </div>
+
+    {/* Notes */}
+    <div className="section-card">
+      <div className="section-header">
+        <div><div className="section-title-row"><span style={{color:'var(--primary)'}}><Ic.Notes/></span><span className="section-title">Algemene notities</span></div></div>
+        <span style={{fontSize:12,color:'var(--s400)'}}>{p.notes.length} notities</span>
+      </div>
+      {p.notes.length>0&&<div className="notes-list">{[...p.notes].reverse().map(n=><div key={n.id} className="note-item"><div style={{fontSize:13.5,color:'var(--s700)',lineHeight:1.55}}>{n.text}</div><div style={{fontSize:11,color:'var(--s400)',marginTop:5}}>{fdate(n.created_at)}</div></div>)}</div>}
+      <textarea className="notes-input" value={noteTxt} onChange={e=>setNoteTxt(e.target.value)} placeholder="Voeg een notitie toe... (⌘+Enter om op te slaan)" onKeyDown={e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter'&&noteTxt.trim()){dbAddNote(p.id,noteTxt.trim()).then(n=>upd({notes:[...p.notes,n]}));setNoteTxt('');}}}/>
+      <div style={{display:'flex',justifyContent:'flex-end',marginTop:8}}>
+        <button className="btn bp bsm" disabled={!noteTxt.trim()} onClick={async()=>{const n=await dbAddNote(p.id,noteTxt.trim());upd({notes:[...p.notes,n]});setNoteTxt('');}}><Ic.Notes/> Opslaan</button>
+      </div>
+    </div>
+
+    {/* OOS */}
+    <OOSCard items={p.oos_items}
+      onAdd={async item=>{const o=await dbAddOOS(p.id,item);upd({oos_items:[...p.oos_items,o]});}}
+      onRemove={async id=>{await dbDeleteOOS(id);upd({oos_items:p.oos_items.filter(o=>o.id!==id)});}}/>
+
+    {editPhase&&<MilestoneModal phase={editPhase} onCancel={()=>setEditPhase(null)} onSave={async data=>{await handlePhase(editPhase.key,data);setEditPhase(null);}}/>}
+  </>;
+}
+
+// ── Project Detail (with tabs for deelprojecten) ──────────
+function ProjectDetail({project:init,siblings=[],ams,onBack,onChange,onAddProject,onSelectSibling}){
+  const[p,setP]=useState(init);
+  const[activeTab,setActiveTab]=useState(init.id); // default to main project tab
+  const[showEdit,setShowEdit]=useState(false);
+  const[showNewDeel,setShowNewDeel]=useState(false);
+  const[deleteDeelId,setDeleteDeelId]=useState(null);
+
+  const upd=patch=>{const np={...p,...patch};setP(np);onChange(np);};
+  const updDeel=deel=>{
+    const deelprojecten=p.deelprojecten.map(d=>d.id===deel.id?deel:d);
+    upd({deelprojecten});
+  };
+
+  const handleEditSave=async f=>{
+    const licentieJr=f.licenties.reduce((s,l)=>s+Number(l.cost),0);
+    const updated={...p,...f,licentie_jr:licentieJr,last_updated:new Date().toISOString()};
+    await dbUpdateProject(updated);
+    await dbSyncLicenties(p.id,f.licenties);
+    const licenties=f.licenties.map((l,i)=>({...l,id:l.id||uid(),project_id:p.id,sort_order:i}));
+    upd({...updated,licenties});
+    setShowEdit(false);
+  };
+
+  const handleNewDeel=async f=>{
+    try{
+      const licentieJr=f.licenties.reduce((s,l)=>s+Number(l.cost),0);
+      // Create as a NEW ROOT project (same client, no parent_id)
+      const newP=await dbInsertProject({
+        owner_id:p.owner_id,client:p.client,name:f.name,logo:f.logo||null,
+        offerte_total:Number(f.offerte_total)||0,licentie_jr:licentieJr,
+        gauge_timing:'g',gauge_budget:'g',gauge_scope:'g',
+        timeline_status:'g',project_status:'g',
+        created_at:new Date().toISOString(),last_updated:new Date().toISOString(),
+        licenties:f.licenties,
+      });
+      // Add to global project list so it appears in overview
+      onAddProject(newP);
+      setShowNewDeel(false);
+      // Navigate to the new project
+      setTimeout(()=>onBack(),100);
+    }catch(err){alert('Fout: '+err.message);}
+  };
+
+  const handleDeleteDeel=async()=>{
+    await dbDeleteProject(deleteDeelId);
+    const deelprojecten=p.deelprojecten.filter(d=>d.id!==deleteDeelId);
+    upd({deelprojecten});
+    if(activeTab===deleteDeelId)setActiveTab(p.id);
+    setDeleteDeelId(null);
+  };
+
+  const activeP=activeTab===p.id?p:p.deelprojecten.find(d=>d.id===activeTab)||p;
+  const isMainTab=activeTab===p.id;
+
+  return<div>
+    {/* Header — client level */}
+    <div className="dhdr">
+      <div className="dhdr-inner">
+        <button style={{display:'flex',alignItems:'center',gap:5,fontSize:12.5,color:'var(--s500)',padding:'5px 9px',borderRadius:'var(--rmd)',border:'1px solid var(--s200)',background:'transparent',cursor:'pointer'}} onClick={onBack}><Ic.Back/> Overzicht</button>
+        <Avatar logo={p.logo} client={p.client} size={44} rad={10}/>
+        <div>
+          <div style={{fontSize:22,fontWeight:700,color:'var(--s900)',letterSpacing:'-.3px'}}>{p.client}</div>
+          <div style={{fontSize:13,color:'var(--s500)',marginTop:1}}>
+            {[p,...siblings].length} project{[p,...siblings].length!==1?'en':''}
+            {' · '}{eur([p,...siblings].reduce((s,x)=>s+(x.offerte_total||0),0))} totaal offerte
+          </div>
+        </div>
+        <div style={{marginLeft:'auto'}}>
+          <button className="btn bg bsm" onClick={()=>setShowEdit(true)}><Ic.Edit/> Bewerken</button>
+        </div>
+      </div>
+      {/* Tab bar — all client projects sorted by created_at, current highlighted */}
+      <div style={{maxWidth:1180,margin:'0 auto',display:'flex',alignItems:'center',gap:8,paddingBottom:0,overflowX:'auto'}}>
+        <div className="tab-bar" style={{flexShrink:0}}>
+          {/* All client projects: current first, then siblings oldest→newest */}
+          {[p,...siblings].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at)).map(proj=>{
+            const isCurrent=proj.id===p.id;
+            const dot=projectDoneStatus(proj.phases)?'var(--green)':proj.project_status==='r'?'var(--red)':proj.project_status==='a'?'var(--amber)':'var(--green)';
+            return<button key={proj.id} className={`tab${isCurrent?' active':''}`}
+              onClick={()=>!isCurrent&&onSelectSibling&&onSelectSibling(proj.id)}>
+              <span style={{width:8,height:8,borderRadius:'50%',background:dot,flexShrink:0,display:'inline-block'}}/>
+              {proj.name}
+            </button>;
+          })}
+        </div>
+        <button className="btn bg bsm" style={{flexShrink:0}} onClick={()=>setShowNewDeel(true)}><Ic.Plus/> Nieuw project</button>
+      </div>
+    </div>
+
+    <div className="page" style={{paddingTop:24}}>
+      <ProjectTabContent
+        key={p.id}
+        p={p}
+        onUpdate={upd}
+      />
+    </div>
+
+    {/* Edit main project modal */}
+    {showEdit&&<div className="modal-backdrop"><div className="modal modal-lg" onClick={e=>e.stopPropagation()}>
+      <div className="mhdr"><div className="mhdr-icon"><Ic.Edit/></div><div className="mhdr-text"><div className="mhdr-sup">Project</div><div className="mtitle">Project bewerken</div></div><button className="mhdr-close" onClick={()=>setShowEdit(false)}><Ic.X/></button></div>
+      <ProjectForm initial={p} activeAM={p.owner_id} onSave={handleEditSave} onCancel={()=>setShowEdit(false)} title="Opslaan"/>
+    </div></div>}
+
+    {/* New deelproject modal */}
+    {showNewDeel&&<div className="modal-backdrop"><div className="modal modal-lg" onClick={e=>e.stopPropagation()}>
+      <div className="mhdr"><div className="mhdr-icon"><Ic.Layers/></div><div className="mhdr-text"><div className="mhdr-sup">{p.client}</div><div className="mtitle">Nieuw project</div></div><button className="mhdr-close" onClick={()=>setShowNewDeel(false)}><Ic.X/></button></div>
+      <ProjectForm initial={{name:'',logo:p.logo,offerte_total:'',owner_id:p.owner_id,licenties:[]}} activeAM={p.owner_id} onSave={handleNewDeel} onCancel={()=>setShowNewDeel(false)} title="Project aanmaken"/>
+    </div></div>}
+
+    {deleteDeelId&&<DeleteModal name={p.deelprojecten.find(d=>d.id===deleteDeelId)?.name||'Project'} onConfirm={handleDeleteDeel} onCancel={()=>setDeleteDeelId(null)}/>}
+  </div>;
+}
+
+// ── Overview ──────────────────────────────────────────────
+function Overview({projects,onSelect,onNew,onEdit,onDelete}){
+  const[q,setQ]=useState('');
+  const[collapsed,setCollapsed]=useState({});
+
+  const clients=useMemo(()=>{
+    const map={};
+    projects.forEach(p=>{if(!map[p.client])map[p.client]={name:p.client,logo:p.logo,projects:[]};map[p.client].projects.push(p);});
+    // Sort projects within each client oldest first
+    Object.values(map).forEach(cl=>cl.projects.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at)));
+    return Object.values(map).sort((a,b)=>a.name.localeCompare(b.name));
+  },[projects]);
+
+  const filtered=useMemo(()=>{
+    if(!q)return clients;
+    const ql=q.toLowerCase();
+    return clients.map(cl=>({...cl,projects:cl.projects.filter(p=>p.name.toLowerCase().includes(ql)||p.client.toLowerCase().includes(ql))})).filter(cl=>cl.projects.length>0);
+  },[clients,q]);
+
+  const cnt=useMemo(()=>{
+    const c={g:0,a:0,r:0,done:0};
+    projects.forEach(p=>{
+      if(projectDoneStatus(p.phases)) c.done=(c.done||0)+1;
+      else {const s=p.project_status||'g';c[s]=(c[s]||0)+1;}
+    });
+    return c;
+  },[projects]);
+
+  return<div className="page">
+    <div style={{marginBottom:28}}>
+      <div style={{fontSize:30,fontWeight:700,color:'var(--s900)',letterSpacing:'-.5px',marginBottom:4}}>Actieve projecten</div>
+      <div style={{fontSize:14,color:'var(--s500)'}}>Bewaar overzicht over de gezondheid van alle klantprojecten.</div>
+    </div>
+    <div className="kpi-grid" style={{gridTemplateColumns:'repeat(4,1fr)'}}>
+      <div className="kpi-card green"><div className="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg></div><div><div className="kpi-value">{cnt.g||0}</div><div className="kpi-label">Op koers</div></div></div>
+      <div className="kpi-card amber"><div className="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div><div className="kpi-value">{cnt.a||0}</div><div className="kpi-label">Waarschuwing</div></div></div>
+      <div className="kpi-card red"><div className="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div><div><div className="kpi-value">{cnt.r||0}</div><div className="kpi-label">Kritiek</div></div></div>
+      <div className="kpi-card" style={{'--kpi-tint':'linear-gradient(135deg,rgba(99,102,241,0.07),rgba(99,102,241,0.02) 60%)'}}><div className="kpi-icon" style={{background:'#eef2ff',color:'#4338ca',border:'1px solid #c7d2fe'}}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div><div className="kpi-value" style={{color:'#3730a3'}}>{cnt.done||0}</div><div className="kpi-label">Afgerond</div></div></div>
+    </div>
+    <div className="twrap">
+      <div className="tbar">
+        <div style={{position:'relative',flex:1,maxWidth:420}}>
+          <div style={{position:'absolute',left:11,top:'50%',transform:'translateY(-50%)',color:'var(--s400)',pointerEvents:'none'}}><Ic.Search/></div>
+          <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Zoek op project of klantnaam..." style={{width:'100%',padding:'8px 12px 8px 34px',border:'1px solid var(--s200)',borderRadius:'var(--rmd)',fontSize:13,outline:'none',color:'var(--s800)'}}/>
+        </div>
+        <span style={{fontSize:12.5,color:'var(--s400)',marginLeft:'auto',marginRight:10}}>{projects.length} project{projects.length!==1?'en':''}</span>
+        <button className="btn bp" onClick={onNew}><Ic.Plus/> Nieuw project</button>
+      </div>
+      {filtered.length===0&&<div className="empty-st"><div style={{fontSize:36,marginBottom:10}}>📋</div><p>{q?'Geen projecten gevonden.':'Nog geen projecten. Klik op "Nieuw project" om te starten.'}</p></div>}
+      {filtered.map(client=>(
+        <div key={client.name} className="client-group">
+          <div className="client-header">
+            <div style={{display:'flex',alignItems:'center',gap:10,flex:1,cursor:'pointer'}} onClick={()=>client.projects.length>0&&onSelect(client.projects[0].id)}>
+              <Avatar logo={client.logo} client={client.name} size={30} rad={6}/>
+              <span className="client-header-name">{client.name}</span>
+              <span className="client-header-count">{client.projects.length} project{client.projects.length!==1?'en':''}</span>
+            </div>
+            <span className={`client-chevron${collapsed[client.name]?'':' open'}`} style={{cursor:'pointer',padding:'4px 8px'}} onClick={e=>{e.stopPropagation();setCollapsed(prev=>({...prev,[client.name]:!prev[client.name]}));}}><Ic.ChevronRight/></span>
+          </div>
+          {!collapsed[client.name]&&<div className="client-projects">
+            {client.projects.map(proj=>(
+              <div key={proj.id} className="project-row" onClick={()=>onSelect(proj.id)}>
+                <div className={`project-status-bar ${proj.project_status||'g'}`}/>
+                <div className="project-info">
+                  <div className="project-name">{proj.name}</div>
+                  <div className="project-meta">{fdate(proj.created_at)} · {eur(proj.offerte_total)} offerte{proj.deelprojecten.length>0?` · ${proj.deelprojecten.length} deelproject${proj.deelprojecten.length!==1?'en':''}`:''}</div>
+                </div>
+                {(()=>{const d=projectDoneStatus(proj.phases);return<Pill status={d?'done':proj.project_status||'g'} label={d?'Afgerond':undefined}/>;})()}
+                <div onClick={e=>e.stopPropagation()} className="row-actions">
+                  <button className="bi" style={{padding:5}} onClick={e=>{e.stopPropagation();onEdit(proj.id);}}><Ic.Edit/></button>
+                  <button className="bi" style={{padding:5,color:'var(--rtxt)'}} onClick={e=>{e.stopPropagation();onDelete(proj.id);}}><Ic.Trash/></button>
+                </div>
+              </div>
+            ))}
+          </div>}
+        </div>
+      ))}
+    </div>
+  </div>;
+}
+
+// ── App ───────────────────────────────────────────────────
+function App(){
+  const[ams,setAms]=useState([]);
+  const[projects,setProjects]=useState([]);
+  const[activeAM,setActiveAM]=useState(()=>localStorage.getItem('mc-am')||'');
+  const[loading,setLoading]=useState(true);
+  const[view,setView]=useState('overview');
+  const[showNew,setShowNew]=useState(false);
+  const[editId,setEditId]=useState(null);
+  const[deleteId,setDeleteId]=useState(null);
+  const[showAMMenu,setShowAMMenu]=useState(false);
+
+  useEffect(()=>{
+    fetchAMs().then(data=>{
+      const enriched=data.length>0?data:FALLBACK_AMS;
+      setAms(enriched);
+      const saved=localStorage.getItem('mc-am');
+      const valid=enriched.find(a=>String(a.id)===saved);
+      setActiveAM(valid?saved:String(enriched[0].id));
+    }).catch(()=>{setAms(FALLBACK_AMS);setActiveAM(FALLBACK_AMS[0].id);setLoading(false);});
+  },[]);
+
+  useEffect(()=>{
+    if(!activeAM)return;
+    setLoading(true);
+    fetchProjects(activeAM).then(ps=>{setProjects(ps);setLoading(false);}).catch(err=>{console.error(err);setLoading(false);});
+  },[activeAM]);
+
+  const switchAM=id=>{setActiveAM(id);localStorage.setItem('mc-am',id);setView('overview');};
+
+  const handleNew=async f=>{
+    try{
+      const licentieJr=f.licenties.reduce((s,l)=>s+Number(l.cost),0);
+      const p=await dbInsertProject({
+        owner_id:f.owner_id||activeAM,client:f.client,name:f.name,logo:f.logo||null,
+        offerte_total:Number(f.offerte_total)||0,licentie_jr:licentieJr,
+        gauge_timing:'g',gauge_budget:'g',gauge_scope:'g',
+        timeline_status:'g',project_status:'g',
+        created_at:new Date().toISOString(),last_updated:new Date().toISOString(),
+        licenties:f.licenties,
+      });
+      setProjects(prev=>[p,...prev]);
+      setShowNew(false);
+    }catch(err){console.error(err);alert('Opslaan mislukt: '+(err.message||JSON.stringify(err)));}
+  };
+
+  const handleEditSave=async f=>{
+    const project=projects.find(p=>p.id===editId);
+    const licentieJr=f.licenties.reduce((s,l)=>s+Number(l.cost),0);
+    const updated={...project,...f,licentie_jr:licentieJr,last_updated:new Date().toISOString()};
+    await dbUpdateProject(updated);
+    await dbSyncLicenties(project.id,f.licenties);
+    const licenties=f.licenties.map((l,i)=>({...l,id:l.id||uid(),project_id:project.id,sort_order:i}));
+    setProjects(prev=>prev.map(p=>p.id===editId?{...updated,licenties}:p));
+    setEditId(null);
+  };
+
+  const handleDelete=async()=>{
+    await dbDeleteProject(deleteId);
+    setProjects(prev=>prev.filter(p=>p.id!==deleteId));
+    setDeleteId(null);
+    if(view===deleteId)setView('overview');
+  };
+
+  const curProject=projects.find(p=>p.id===view);
+  const activeAMObj=ams.find(a=>a.id===activeAM)||ams[0];
+
+  return<div>
+    <div className="topbar">
+      <img src="data:image/png;base64,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" alt="Aziri" style={{height:34,width:'auto',marginRight:12,flexShrink:0}}/>
+      <div style={{fontSize:14,fontWeight:700,color:'var(--s900)',letterSpacing:'-.2px'}}>Project Mission Control</div>
+      <div className="topbar-right">
+        <button className="am-btn" onClick={()=>setShowAMMenu(v=>!v)}>
+          {activeAMObj&&<div className="am-av" style={{background:activeAMObj.gradient}}>{activeAMObj.initials}</div>}
+          <div className="am-btn-inner"><div className="am-label">Account Manager</div><div className="am-name">{activeAMObj?.name||'Selecteer AM'}</div></div>
+          <div className={`am-chevron${showAMMenu?' open':''}`}><Ic.ChevronDown/></div>
+        </button>
+        {showAMMenu&&<AMDropdown ams={ams} activeAM={activeAM} onSwitch={switchAM} onAddAM={a=>setAms(prev=>[...prev,a])} onClose={()=>setShowAMMenu(false)}/>}
+      </div>
+    </div>
+    {loading&&<div className="loading"><Ic.Refresh/> Projecten laden...</div>}
+    {!loading&&view==='overview'&&<Overview projects={projects} onSelect={id=>setView(id)} onNew={()=>setShowNew(true)} onEdit={id=>setEditId(id)} onDelete={id=>setDeleteId(id)}/>}
+    {!loading&&view!=='overview'&&curProject&&<ProjectDetail
+        key={curProject.id}
+        project={curProject}
+        siblings={projects.filter(p=>p.client===curProject.client&&p.id!==curProject.id).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at))}
+        ams={ams}
+        onBack={()=>setView('overview')}
+        onChange={p=>setProjects(prev=>prev.map(x=>x.id===p.id?p:x))}
+        onAddProject={p=>{setProjects(prev=>[...prev,p]);setView(p.id);}}
+        onSelectSibling={id=>setView(id)}
+      />}
+
+    {showNew&&<div className="modal-backdrop"><div className="modal modal-lg" onClick={e=>e.stopPropagation()}>
+      <div className="mhdr"><div className="mhdr-icon"><Ic.Layers/></div><div className="mhdr-text"><div className="mhdr-sup">Nieuw project</div><div className="mtitle">Mission Control</div></div><button className="mhdr-close" onClick={()=>setShowNew(false)}><Ic.X/></button></div>
+      <ProjectForm activeAM={activeAM} onSave={handleNew} onCancel={()=>setShowNew(false)}/>
+    </div></div>}
+
+    {editId&&<div className="modal-backdrop"><div className="modal modal-lg" onClick={e=>e.stopPropagation()}>
+      <div className="mhdr"><div className="mhdr-icon"><Ic.Edit/></div><div className="mhdr-text"><div className="mhdr-sup">Project</div><div className="mtitle">Project bewerken</div></div><button className="mhdr-close" onClick={()=>setEditId(null)}><Ic.X/></button></div>
+      <ProjectForm initial={projects.find(p=>p.id===editId)} activeAM={activeAM} onSave={handleEditSave} onCancel={()=>setEditId(null)} title="Opslaan"/>
+    </div></div>}
+
+    {deleteId&&<DeleteModal name={projects.find(p=>p.id===deleteId)?.name||'Project'} onConfirm={handleDelete} onCancel={()=>setDeleteId(null)}/>}
+  </div>;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
