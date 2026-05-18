@@ -106,21 +106,23 @@ input,textarea,select{font-family:var(--font);}
 @media(max-width:768px){
   .topbar{padding:0 14px;height:52px;}
   .topbar img{height:26px;}
-  .topbar>div[style*="font-size:14px"]{font-size:12px;}
   .am-btn-inner .am-name{font-size:12px;}
   .am-btn{padding:5px 9px 5px 7px;gap:7px;}
-  .page{padding:16px 14px;}
-  .dhdr{padding:0 14px;}
-  .dhdr-inner{padding:12px 0;gap:10px;flex-wrap:wrap;}
-  .dhdr-inner>div[style*="font-size:22px"]{font-size:17px;}
-  .gauge-grid{grid-template-columns:1fr;}
+  .page{padding:12px 10px;}
+  .dhdr{padding:0 10px;}
+  .dhdr-inner{padding:10px 0;gap:8px;flex-wrap:wrap;}
+  .gauge-grid{grid-template-columns:repeat(3,1fr);gap:6px;}
+  .gauge-mobile{transform:scale(0.52);transform-origin:top center;margin-bottom:-54px;}
+  .gauge-wrap-mobile{padding:8px 4px 6px;border-radius:10px;}
   .phase-cards{flex-direction:column;}
   .phase-card{flex:none;width:100%;}
   .gantt-wrap{font-size:11px;}
-  .section-card{padding:14px;}
-  .kpi-value{font-size:24px;}
-  .kpi-card{padding:14px 16px;gap:12px;}
-  .kpi-icon{width:38px;height:38px;}
+  .section-card{padding:12px;}
+  .kpi-value{font-size:22px;}
+  .kpi-card{padding:12px 14px;gap:10px;}
+  .kpi-icon{width:34px;height:34px;}
+  .kpi-icon svg{width:18px;height:18px;}
+  .kpi-label{font-size:10px;}
   .tab-bar{flex-wrap:nowrap;overflow-x:auto;}
   .tab{font-size:12px;padding:5px 10px;}
   .fr2{grid-template-columns:1fr;}
@@ -167,7 +169,7 @@ input,textarea,select{font-family:var(--font);}
 .section-title-row{display:flex;align-items:center;gap:9px;}
 .section-title{font-size:15px;font-weight:700;color:var(--s900);}
 .section-subtitle{font-size:12.5px;color:var(--s500);margin-top:2px;}
-.gauge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.gauge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 .phase-cards{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;}
 .phase-card{flex:0 0 190px;border:1.5px solid var(--s200);border-radius:var(--rlg);padding:14px;cursor:pointer;transition:all .15s;background:#fff;}
 .phase-card:hover{border-color:var(--s300);background:var(--s50);}
@@ -398,13 +400,13 @@ function SpeedoGauge({label,sublabel,status,onSet}){
   const[nx2,ny2]=[cx+nLen*Math.cos(na),cy-nLen*Math.sin(na)];
   const[nx3,ny3]=[cx+nTail*Math.cos(na+Math.PI),cy-nTail*Math.sin(na+Math.PI)];
   return(
-    <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:8,padding:'16px 12px 14px',border:'1px solid var(--s200)',borderRadius:14,position:'relative',userSelect:'none',cursor:'pointer',background:'#fff',transition:'border-color .15s'}}
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4,padding:'10px 4px 8px',border:'1px solid var(--s200)',borderRadius:12,position:'relative',userSelect:'none',cursor:'pointer',background:'#fff',transition:'border-color .15s',overflow:'hidden'}}
       onClick={e=>gaugeClickZone(e,onSet)}
       onMouseEnter={e=>e.currentTarget.style.borderColor='var(--s300)'}
       onMouseLeave={e=>e.currentTarget.style.borderColor='var(--s200)'}
       title="← Op schema | Risico | Kritiek →">
-      <div style={{fontSize:11,fontWeight:700,textTransform:'uppercase',letterSpacing:'.7px',color:'var(--s400)'}}>{label}</div>
-      <svg width="220" height="116" viewBox="0 0 220 116" style={{display:'block'}}>
+      <div style={{fontSize:10,fontWeight:700,textTransform:'uppercase',letterSpacing:'.6px',color:'var(--s400)'}}>{label}</div>
+      <svg width="100%" height="auto" viewBox="0 0 220 116" style={{display:'block',maxWidth:220}}>
         <defs>
           <radialGradient id={`dg-${label}`} cx="50%" cy="100%" r="90%"><stop offset="0%" stopColor="#1e2d3d"/><stop offset="100%" stopColor="#0b1520"/></radialGradient>
           <clipPath id={`cp-${label}`}><rect x="0" y="0" width="220" height="116"/></clipPath>
@@ -424,8 +426,8 @@ function SpeedoGauge({label,sublabel,status,onSet}){
           <circle cx={cx} cy={cy} r="3.5" fill={color}/>
         </g>
       </svg>
-      <div style={{fontSize:11,color:'var(--s500)',marginTop:-2}}>{sublabel}</div>
-      <div style={{fontSize:10,color:'#c0ccd8',position:'absolute',bottom:5,right:9}}>← ● →</div>
+      <div style={{fontSize:10,color:'var(--s500)',marginTop:2}}>{sublabel}</div>
+      <div style={{fontSize:9,color:'#c0ccd8',position:'absolute',bottom:3,right:6}}>← ● →</div>
     </div>
   );
 }
