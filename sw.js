@@ -1,4 +1,4 @@
-const CACHE = 'mc-aziri-v3';
+const CACHE = 'mc-aziri-v4';
 const PRECACHE = [
   '/',
   '/index.html',
