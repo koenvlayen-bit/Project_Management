@@ -101,8 +101,8 @@ input,textarea,select{font-family:var(--font);}
 .kpi-card.amber .kpi-value{color:#D97706;}
 .kpi-card.red .kpi-value{color:#B91C1C;}
 .kpi-label{margin-top:6px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#64748B;}
-@media(max-width:640px){.kpi-grid{grid-template-columns:1fr 1fr;}}
-@media(max-width:420px){.kpi-grid{grid-template-columns:1fr;}}
+@media(max-width:768px){.kpi-grid{grid-template-columns:1fr 1fr !important;gap:8px;}}
+@media(max-width:380px){.kpi-grid{grid-template-columns:1fr !important;}}
 @media(max-width:768px){
   .topbar{padding:0 14px;height:52px;}
   .topbar img{height:26px;}
@@ -111,18 +111,18 @@ input,textarea,select{font-family:var(--font);}
   .page{padding:12px 10px;}
   .dhdr{padding:0 10px;}
   .dhdr-inner{padding:10px 0;gap:8px;flex-wrap:wrap;}
-  .gauge-grid{grid-template-columns:repeat(3,1fr);gap:6px;}
-  .gauge-mobile{transform:scale(0.52);transform-origin:top center;margin-bottom:-54px;}
-  .gauge-wrap-mobile{padding:8px 4px 6px;border-radius:10px;}
+  .gauge-grid{grid-template-columns:repeat(3,1fr) !important;gap:5px;}
+  .gauge-sublabel{display:none;}
+  .gauge-hint{display:none;}
   .phase-cards{flex-direction:column;}
   .phase-card{flex:none;width:100%;}
   .gantt-wrap{font-size:11px;}
   .section-card{padding:12px;}
-  .kpi-value{font-size:22px;}
-  .kpi-card{padding:12px 14px;gap:10px;}
-  .kpi-icon{width:34px;height:34px;}
-  .kpi-icon svg{width:18px;height:18px;}
-  .kpi-label{font-size:10px;}
+  .kpi-value{font-size:20px;}
+  .kpi-card{padding:10px 12px;gap:8px;}
+  .kpi-icon{width:32px;height:32px;border-radius:8px;}
+  .kpi-icon svg{width:16px;height:16px;}
+  .kpi-label{font-size:9.5px;letter-spacing:0.04em;}
   .tab-bar{flex-wrap:nowrap;overflow-x:auto;}
   .tab{font-size:12px;padding:5px 10px;}
   .fr2{grid-template-columns:1fr;}
@@ -131,6 +131,8 @@ input,textarea,select{font-family:var(--font);}
   .mbody{padding:14px 16px;}
   .mftr{padding:0 16px 16px;}
   .client-header{padding:10px 12px;}
+  .tbar{flex-wrap:wrap;gap:8px;}
+  .tbar input{min-width:0;}
   .project-row{padding:10px 12px 10px 16px;flex-wrap:wrap;gap:8px;}
   .project-name{font-size:13px;}
   .project-meta{font-size:11px;}
@@ -164,12 +166,13 @@ input,textarea,select{font-family:var(--font);}
 .tab-bar{display:flex;gap:2px;padding:4px;background:var(--s100);border-radius:var(--rmd);border:1px solid var(--s200);overflow-x:auto;max-width:100%;}
 .tab{padding:6px 14px;border-radius:7px;font-size:13px;font-weight:500;color:var(--s500);cursor:pointer;transition:all .12s;border:none;background:transparent;display:flex;align-items:center;gap:7px;white-space:nowrap;flex-shrink:0;}
 .tab.active{background:#fff;color:var(--s900);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.08);}
-.section-card{background:#fff;border:1px solid var(--s200);border-radius:var(--rlg);padding:22px;box-shadow:0 1px 3px rgba(0,0,0,.04);margin-bottom:16px;}
+.section-card{background:#fff;border:1px solid var(--s200);border-radius:var(--rlg);padding:22px;box-shadow:0 1px 3px rgba(0,0,0,.04);margin-bottom:16px;overflow:hidden;}
 .section-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
 .section-title-row{display:flex;align-items:center;gap:9px;}
 .section-title{font-size:15px;font-weight:700;color:var(--s900);}
 .section-subtitle{font-size:12.5px;color:var(--s500);margin-top:2px;}
-.gauge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.gauge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;}
+.gauge-grid>div{min-width:0;overflow:hidden;}
 .phase-cards{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;}
 .phase-card{flex:0 0 190px;border:1.5px solid var(--s200);border-radius:var(--rlg);padding:14px;cursor:pointer;transition:all .15s;background:#fff;}
 .phase-card:hover{border-color:var(--s300);background:var(--s50);}
@@ -426,8 +429,8 @@ function SpeedoGauge({label,sublabel,status,onSet}){
           <circle cx={cx} cy={cy} r="3.5" fill={color}/>
         </g>
       </svg>
-      <div style={{fontSize:10,color:'var(--s500)',marginTop:2}}>{sublabel}</div>
-      <div style={{fontSize:9,color:'#c0ccd8',position:'absolute',bottom:3,right:6}}>← ● →</div>
+      <div className="gauge-sublabel" style={{fontSize:10,color:'var(--s500)',marginTop:2}}>{sublabel}</div>
+      <div className="gauge-hint" style={{fontSize:9,color:'#c0ccd8',position:'absolute',bottom:3,right:6}}>← ● →</div>
     </div>
   );
 }
