@@ -1,1150 +1,1112 @@
 <!DOCTYPE html>
-<html lang="nl" data-theme="dark">
+<html lang="nl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<title>Itzu · Aziri</title>
-<meta name="theme-color" content="#6366F1">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Itzu">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Mission Control — Aziri</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
 <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#576BFF">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Mission Control">
 <link rel="apple-touch-icon" href="/icon-192.png">
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root,[data-theme="dark"]{
-  --bleu:#6366F1;--bleu-l:rgba(99,102,241,.15);--bleu-m:#818CF8;
-  --bg:#0D0D14;--surf:#16161F;--surf2:#1E1E2A;--bdr:rgba(255,255,255,.08);
-  --txt:#F0F0FF;--mut:rgba(255,255,255,.4);
-  --grn:#22C55E;--grn-b:rgba(34,197,94,.15);--grn-row:rgba(34,197,94,.06);
-  --amb:#F59E0B;--amb-b:rgba(245,158,11,.15);
-  --red:#F87171;--red-b:rgba(248,113,113,.15);--red-row:rgba(248,113,113,.06);
-  --nav-bg:rgba(13,13,20,.9);
-  --badge-grn-bg:rgba(34,197,94,.15);--badge-grn-txt:#4ADE80;
-  --badge-blu-bg:rgba(99,102,241,.2);--badge-blu-txt:#A5B4FC;
-  --badge-amb-bg:rgba(245,158,11,.15);--badge-amb-txt:#FCD34D;
-  --badge-gry-bg:rgba(255,255,255,.07);--badge-gry-txt:rgba(255,255,255,.45);
-  --badge-red-bg:rgba(248,113,113,.15);--badge-red-txt:#FCA5A5;
-  --geo-stroke:#6366F1;--r:8px;--nav-h:52px;
+:root{--primary:#576BFF;--primary-dim:#3a52e8;--primary-light:#eef0ff;--s50:#f8fafc;--s100:#f1f5f9;--s200:#e2e8f0;--s300:#cbd5e1;--s400:#94a3b8;--s500:#64748b;--s600:#475569;--s700:#334155;--s800:#1e293b;--s900:#0f172a;--green:#22c55e;--gbg:#f0fdf4;--gtxt:#166534;--gborder:#bbf7d0;--amber:#f59e0b;--abg:#fffbeb;--atxt:#92400e;--aborder:#fde68a;--red:#ef4444;--rbg:#fef2f2;--rtxt:#991b1b;--rborder:#fecaca;--rmd:10px;--rlg:14px;--rxl:20px;--font:'DM Sans','Segoe UI',system-ui,sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--s50);color:var(--s800);min-height:100vh;-webkit-font-smoothing:antialiased;}
+button{cursor:pointer;font-family:var(--font);}
+input,textarea,select{font-family:var(--font);}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-thumb{background:var(--s300);border-radius:3px;}
+.topbar{background:#fff;border-bottom:1px solid var(--s200);height:58px;display:flex;align-items:center;padding:0 28px;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.06);overflow:hidden;}
+.topbar-right{margin-left:auto;position:relative;}
+.am-btn{display:flex;align-items:center;gap:10px;padding:6px 12px 6px 8px;border-radius:var(--rlg);border:1px solid var(--s200);background:#fff;cursor:pointer;transition:all .15s;font-family:var(--font);}
+.am-btn:hover{background:var(--s50);border-color:var(--s300);}
+.am-btn-inner{display:flex;flex-direction:column;align-items:flex-start;gap:1px;}
+.am-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--s400);}
+.am-name{font-size:13px;font-weight:600;color:var(--s800);}
+.am-chevron{color:var(--s400);transition:transform .2s;}
+.am-chevron.open{transform:rotate(180deg);}
+.am-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+.am-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border:1px solid var(--s200);border-radius:var(--rlg);box-shadow:0 8px 24px rgba(0,0,0,.12);min-width:220px;z-index:300;overflow:hidden;animation:fadedown .15s ease;}
+@keyframes fadedown{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+.am-section-label{padding:10px 14px 6px;font-size:10px;font-weight:700;color:var(--s400);text-transform:uppercase;letter-spacing:.8px;}
+.am-option{display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer;transition:background .12s;}
+.am-option:hover{background:var(--s50);}
+.am-option.active{background:var(--primary-light);}
+.am-option-name{font-size:13.5px;font-weight:500;color:var(--s800);flex:1;}
+.am-check{color:var(--primary);flex-shrink:0;}
+.am-add{display:flex;align-items:center;gap:8px;padding:9px 14px;font-size:13px;color:var(--primary);font-weight:600;cursor:pointer;border-top:1px solid var(--s200);transition:background .12s;}
+.am-add:hover{background:var(--primary-light);}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--rmd);font-size:13.5px;font-weight:500;border:1px solid transparent;transition:all .15s;white-space:nowrap;cursor:pointer;}
+.bp{background:var(--primary);color:#fff;border-color:var(--primary);}
+.bp:hover{background:var(--primary-dim);}
+.bp:disabled{opacity:.4;cursor:not-allowed;}
+.bg{background:transparent;color:var(--s600);border-color:var(--s200);}
+.bg:hover{background:var(--s100);color:var(--s800);}
+.bd{background:var(--rbg);color:var(--rtxt);border-color:var(--rborder);}
+.bd:hover{background:#fee2e2;}
+.bsm{padding:5px 11px;font-size:12.5px;}
+.bi{padding:6px;border-radius:var(--rmd);background:transparent;border:1px solid var(--s200);color:var(--s500);transition:all .15s;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;}
+.bi:hover{background:var(--s100);color:var(--s700);}
+.btn-amber{background:#f59e0b;color:#fff;border-color:#f59e0b;}
+.btn-amber:hover{background:#d97706;}
+.btn-amber:disabled{opacity:.4;cursor:not-allowed;}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:4px 11px 4px 8px;border-radius:999px;font-size:12.5px;font-weight:600;white-space:nowrap;border:1px solid transparent;}
+.pill.g{background:var(--gbg);color:var(--gtxt);border-color:var(--gborder);}
+.pill.a{background:var(--abg);color:var(--atxt);border-color:var(--aborder);}
+.pill.r{background:var(--rbg);color:var(--rtxt);border-color:var(--rborder);}
+.pill.done{background:#f0f4ff;color:#3730a3;border-color:#c7d2fe;}
+.pill.done .pill-dot{background:#6366f1;}
+.pill-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.pill.g .pill-dot{background:var(--green);}
+.pill.a .pill-dot{background:var(--amber);}
+.pill.r .pill-dot{background:var(--red);}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--s500);margin-bottom:5px;text-transform:uppercase;letter-spacing:.6px;}
+.field input,.field textarea,.field select{width:100%;padding:10px 13px;border:1px solid var(--s200);border-radius:var(--rmd);font-size:13.5px;color:var(--s800);outline:none;transition:border-color .15s,box-shadow .15s;background:#fff;}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(87,107,255,.1);}
+.field textarea{resize:vertical;min-height:80px;}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:#fff;border-radius:var(--rxl);box-shadow:0 12px 40px rgba(0,0,0,.15);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;animation:slideup .18s ease;}
+.modal-lg{max-width:640px;}
+.modal-sm{max-width:420px;}
+@keyframes slideup{from{transform:translateY(12px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.mhdr{padding:24px 24px 0;display:flex;align-items:flex-start;gap:14px;}
+.mhdr-icon{width:42px;height:42px;background:var(--primary-light);border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--primary);flex-shrink:0;}
+.mhdr-text{flex:1;}
+.mhdr-sup{font-size:10px;font-weight:700;color:var(--s400);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px;}
+.mtitle{font-size:19px;font-weight:700;color:var(--s900);}
+.mhdr-close{color:var(--s400);cursor:pointer;padding:4px;border-radius:8px;border:none;background:transparent;transition:all .12s;display:flex;align-items:center;}
+.mhdr-close:hover{background:var(--s100);color:var(--s700);}
+.mbody{padding:20px 24px;}
+.mftr{padding:0 24px 24px;display:flex;gap:8px;justify-content:flex-end;}
+.page{max-width:1180px;margin:0 auto;padding:32px 28px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;}
+.kpi-card{position:relative;padding:22px 24px;border-radius:12px;border:1px solid #E2E8F0;background:#fff;display:flex;align-items:center;gap:16px;overflow:hidden;}
+.kpi-card::before{content:"";position:absolute;inset:0;background:var(--kpi-tint,transparent);opacity:.6;pointer-events:none;}
+.kpi-card>*{position:relative;}
+.kpi-card.green{--kpi-tint:linear-gradient(135deg,rgba(16,185,129,0.06),rgba(16,185,129,0.02) 60%);}
+.kpi-card.amber{--kpi-tint:linear-gradient(135deg,rgba(245,158,11,0.07),rgba(245,158,11,0.02) 60%);}
+.kpi-card.red{--kpi-tint:linear-gradient(135deg,rgba(239,68,68,0.06),rgba(239,68,68,0.02) 60%);}
+.kpi-icon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;flex-shrink:0;}
+.kpi-icon svg{width:22px;height:22px;}
+.kpi-card.green .kpi-icon{background:#ECFDF5;color:#059669;border:1px solid #A7F3D0;}
+.kpi-card.amber .kpi-icon{background:#FFFBEB;color:#D97706;border:1px solid #FDE68A;}
+.kpi-card.red .kpi-icon{background:#FEF2F2;color:#DC2626;border:1px solid #FECACA;}
+.kpi-value{font-size:32px;font-weight:700;letter-spacing:-0.02em;line-height:1;font-variant-numeric:tabular-nums;}
+.kpi-card.green .kpi-value{color:#047857;}
+.kpi-card.amber .kpi-value{color:#D97706;}
+.kpi-card.red .kpi-value{color:#B91C1C;}
+.kpi-label{margin-top:6px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#64748B;}
+@media(max-width:768px){.kpi-grid{grid-template-columns:1fr 1fr !important;gap:8px;}}
+@media(max-width:380px){.kpi-grid{grid-template-columns:1fr !important;}}
+@media(max-width:768px){
+  .topbar{padding:0 14px;height:52px;}
+  .topbar img{height:26px;}
+  .am-btn-inner .am-name{font-size:12px;}
+  .am-btn{padding:5px 9px 5px 7px;gap:7px;}
+  .page{padding:12px 10px;}
+  .dhdr{padding:0 10px;}
+  .dhdr-inner{padding:10px 0;gap:8px;flex-wrap:wrap;}
+  .gauge-grid{grid-template-columns:repeat(3,1fr) !important;gap:5px;}
+  .gauge-sublabel{display:none;}
+  .gauge-hint{display:none;}
+  .phase-cards{flex-direction:column;}
+  .phase-card{flex:none;width:100%;}
+  .gantt-wrap{font-size:11px;}
+  .section-card{padding:12px;}
+  .kpi-value{font-size:20px;}
+  .kpi-card{padding:10px 12px;gap:8px;}
+  .kpi-icon{width:32px;height:32px;border-radius:8px;}
+  .kpi-icon svg{width:16px;height:16px;}
+  .kpi-label{font-size:9.5px;letter-spacing:0.04em;}
+  .tab-bar{flex-wrap:nowrap;overflow-x:auto;}
+  .tab{font-size:12px;padding:5px 10px;}
+  .fr2{grid-template-columns:1fr;}
+  .modal{max-height:95vh;}
+  .mhdr{padding:16px 16px 0;}
+  .mbody{padding:14px 16px;}
+  .mftr{padding:0 16px 16px;}
+  .client-header{padding:10px 12px;}
+  .tbar{flex-wrap:wrap;gap:8px;}
+  .tbar input{min-width:0;}
+  .project-row{padding:10px 12px 10px 16px;flex-wrap:wrap;gap:8px;}
+  .project-name{font-size:13px;}
+  .project-meta{font-size:11px;}
+  .btn{font-size:12.5px;padding:7px 12px;}
+  .bsm{padding:5px 9px;font-size:11.5px;}
 }
-[data-theme="light"]{
-  --bleu:#4F46E5;--bleu-l:#EEF2FF;--bleu-m:#818CF8;
-  --bg:#F2F1EE;--surf:#fff;--surf2:#F8F8F6;--bdr:rgba(0,0,0,.09);
-  --txt:#0D0D0D;--mut:#6B6B6B;
-  --grn:#16A34A;--grn-b:#DCFCE7;--grn-row:#F0FDF4;
-  --amb:#D97706;--amb-b:#FEF3C7;
-  --red:#DC2626;--red-b:#FEE2E2;--red-row:#FEF2F2;
-  --nav-bg:rgba(255,255,255,.95);
-  --badge-grn-bg:#DCFCE7;--badge-grn-txt:#15803D;
-  --badge-blu-bg:#DBEAFE;--badge-blu-txt:#1D4ED8;
-  --badge-amb-bg:#FEF3C7;--badge-amb-txt:#D97706;
-  --badge-gry-bg:#F1F5F9;--badge-gry-txt:#475569;
-  --badge-red-bg:#FEE2E2;--badge-red-txt:#DC2626;
-  --geo-stroke:#4F46E5;--r:8px;--nav-h:52px;
-}
-html,body{font-family:'Bricolage Grotesque',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh}
-.nav{height:var(--nav-h);background:var(--nav-bg);backdrop-filter:blur(12px);border-bottom:1px solid var(--bdr);display:flex;align-items:center;padding:0 28px;gap:10px;position:sticky;top:0;z-index:100;transition:background .3s,border-color .3s}
-.nav-back{display:none;align-items:center;gap:5px;background:none;border:none;cursor:pointer;font:500 13px 'Bricolage Grotesque',sans-serif;color:var(--mut);padding:5px 8px 5px 4px;border-radius:6px;transition:background .15s,color .15s}
-.nav-back:hover{background:var(--surf2);color:var(--txt)}
-.nav-back.visible{display:flex}
-.nav-logos{display:flex;align-items:center}
-.nav-logo-aziri{font-size:16px;font-weight:800;letter-spacing:-.4px;color:var(--bleu-m)}
-.nav-divider{width:1px;height:18px;background:var(--bdr);margin:0 10px}
-.nav-logo-itzu{font-size:15px;font-weight:700;color:var(--txt);letter-spacing:-.3px}
-.nav-module-label{font-size:11px;font-weight:700;letter-spacing:.6px;color:var(--mut);text-transform:uppercase;padding:3px 10px;border:1px solid var(--bdr);border-radius:20px;margin-left:8px}
-.nav-spacer{flex:1}
-.nav-live{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--grn)}
-.live-dot{width:6px;height:6px;border-radius:50%;background:var(--grn);animation:pulse 2s infinite;display:inline-block}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,.4)}70%{box-shadow:0 0 0 6px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
-.theme-toggle{background:none;border:1px solid var(--bdr);border-radius:20px;cursor:pointer;padding:5px 11px;display:flex;align-items:center;gap:6px;color:var(--mut);font:600 11px 'Bricolage Grotesque',sans-serif;transition:all .15s;margin-left:8px;white-space:nowrap}
-.theme-toggle:hover{background:var(--surf2);color:var(--txt)}
-.lock-btn{background:none;border:none;cursor:pointer;padding:5px 6px;color:var(--mut);opacity:.35;transition:opacity .2s,color .15s;margin-left:4px;display:flex;align-items:center}
-.lock-btn:hover{opacity:.8;color:var(--txt)}
-.lock-btn.unlocked{opacity:.7;color:var(--grn)}
-.btn-icon{background:none;border:1px solid var(--bdr);border-radius:8px;cursor:pointer;padding:6px 7px;display:flex;align-items:center;justify-content:center;color:var(--mut);transition:all .15s;margin-left:6px}
-.btn-icon:hover{background:var(--surf2);color:var(--txt)}
-.btn-p{border:none;cursor:pointer;font:600 13px 'Bricolage Grotesque',sans-serif;padding:8px 18px;border-radius:20px;background:var(--bleu);color:#fff;transition:opacity .15s,transform .1s}
-.btn-p:hover{opacity:.85;transform:translateY(-1px)}
-.btn-d{border:none;cursor:pointer;font:600 13px 'Bricolage Grotesque',sans-serif;padding:8px 18px;border-radius:20px;background:var(--txt);color:var(--bg);transition:opacity .15s}
-.btn-d:hover{opacity:.85}
-.view{display:none;animation:fadeIn .2s ease}.view.active{display:block}
-@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-
-/* ===== LANDING ===== */
-.landing-wrap{position:relative;min-height:calc(100vh - var(--nav-h));overflow:hidden;background:var(--bg);transition:background .3s}
-.landing-inner{position:relative;z-index:2;max-width:700px;margin:0 auto;padding:80px 32px 100px}
-.landing-crumb{font-size:11px;font-weight:600;letter-spacing:1.3px;color:var(--mut);text-transform:uppercase;margin-bottom:20px}
-.landing-title{font-size:clamp(52px,8vw,88px);font-weight:800;line-height:.92;letter-spacing:-3px;color:var(--txt);margin-bottom:40px;transition:color .3s}
-.landing-title span{color:var(--bleu-m)}
-.landing-week{position:fixed;bottom:28px;right:32px;font-size:11px;font-weight:600;color:var(--mut)}
-
-/* ===== PO DASHBOARD ===== */
-.po-header{max-width:1100px;margin:0 auto;padding:32px 28px 18px;display:flex;align-items:flex-end;justify-content:space-between}
-.po-title{font-size:24px;font-weight:800;letter-spacing:-.5px;color:var(--txt)}
-.po-meta{font-size:12px;color:var(--mut);text-align:right}
-.po-grid{max-width:1100px;margin:0 auto;padding:0 28px 60px;display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
-.proj-card{background:var(--surf);border:1.5px solid var(--bdr);border-radius:14px;padding:22px;cursor:pointer;transition:transform .18s,box-shadow .18s,border-color .18s,background .3s;display:flex;flex-direction:column;gap:14px}
-[data-theme="dark"] .proj-card:hover{transform:translateY(-3px);box-shadow:0 10px 40px rgba(99,102,241,.2);border-color:rgba(129,140,248,.3)}
-[data-theme="light"] .proj-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(79,70,229,.13);border-color:var(--bleu-m)}
-.card-name{font-size:24px;font-weight:800;letter-spacing:-.4px;line-height:1.1;color:var(--txt)}
-.card-sub{font-size:13px;color:var(--mut);font-weight:500;margin-top:3px}
-.badge-strip{display:flex;flex-wrap:wrap;gap:5px}
-.badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
-.badge-grn{background:var(--badge-grn-bg);color:var(--badge-grn-txt)}
-.badge-blu{background:var(--badge-blu-bg);color:var(--badge-blu-txt)}
-.badge-amb{background:var(--badge-amb-bg);color:var(--badge-amb-txt)}
-.badge-gry{background:var(--badge-gry-bg);color:var(--badge-gry-txt)}
-.badge-red{background:var(--badge-red-bg);color:var(--badge-red-txt)}
-.card-stats{display:flex;gap:14px}
-.card-stat{flex:1}
-.card-stat-val{font-size:22px;font-weight:800;color:var(--txt)}
-.c-grn{color:var(--grn)}.c-red{color:var(--red)}
-.card-stat-lbl{font-size:11px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.3px}
-.card-rows{display:flex;flex-direction:column}
-.card-row{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;padding:6px 0;border-top:1px solid var(--bdr);font-size:13px;min-width:0}
-.card-row:first-child{border-top:none;padding-top:0}
-.card-row-desc{font-weight:500;color:var(--txt);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;margin-right:8px}
-.card-row-right{display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0;gap:2px}
-.card-row-date{font-size:10px;color:var(--mut);font-weight:600}
-.card-footer{display:flex;justify-content:flex-end;padding-top:12px;border-top:1px solid var(--bdr)}
-.card-cta{font-size:11px;font-weight:700;color:var(--bleu-m)}
-
-/* ===== PO DETAIL ===== */
-.detail-wrap{max-width:1060px;margin:0 auto;padding:32px 28px 80px}
-.detail-crumb{font-size:11px;font-weight:700;letter-spacing:1.4px;color:var(--mut);text-transform:uppercase;margin-bottom:10px}
-.detail-title{font-size:34px;font-weight:800;letter-spacing:-.6px;margin-bottom:24px;color:var(--txt)}
-.hero-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px}
-.hero-stat{background:var(--surf);border:1.5px solid var(--bdr);border-radius:var(--r);padding:16px 18px;transition:background .3s,border-color .3s}
-.hero-stat-val{font-size:36px;font-weight:800;line-height:1;margin-bottom:4px;color:var(--txt)}
-.hero-stat-lbl{font-size:11px;font-weight:600;color:var(--mut);text-transform:uppercase}
-.table-section{background:var(--surf);border:1.5px solid var(--bdr);border-radius:12px;overflow:hidden;transition:background .3s,border-color .3s}
-.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.table-scroll table{min-width:640px}
-.table-section-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--bdr)}
-.table-section-title{font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.4px}
-.btn-add{font:600 12px 'Bricolage Grotesque',sans-serif;background:var(--bleu-l);color:var(--bleu-m);border:none;padding:6px 14px;border-radius:20px;cursor:pointer}
-table{width:100%;border-collapse:collapse}
-th{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--mut);padding:11px 16px;text-align:left;border-bottom:1px solid var(--bdr);background:var(--surf2);transition:background .3s}
-td{padding:11px 16px;font-size:14px;border-bottom:1px solid var(--bdr);vertical-align:middle;color:var(--txt)}
-tr:last-child td{border-bottom:none}
-tr.row-grn{background:var(--grn-row)}
-tr.row-red{background:var(--red-row)}
-[contenteditable]{outline:none;border-radius:4px;padding:1px 4px;transition:background .15s;min-width:40px;display:inline-block;color:var(--txt)}
-[contenteditable]:focus{background:var(--bleu-l)}
-.status-sel{font:600 12px 'Bricolage Grotesque',sans-serif;border:none;background:none;cursor:pointer;padding:4px 9px;border-radius:20px;outline:none;-webkit-appearance:none;appearance:none}
-.actie-toggle{font:700 12px 'Bricolage Grotesque',sans-serif;border:1.5px solid var(--bdr);background:transparent;color:var(--mut);padding:4px 10px;border-radius:20px;cursor:pointer;transition:all .15s}
-.actie-toggle.ja{background:var(--badge-red-bg);color:var(--badge-red-txt);border-color:var(--red)}
-.btn-del{background:none;border:none;cursor:pointer;color:var(--mut);font-size:14px;padding:2px 6px;border-radius:4px}
-.btn-del:hover{color:var(--red)}
-
-/* ===== DO MODULE ===== */
-.do-wrap{max-width:1200px;margin:0 auto;padding:32px 28px 80px}
-.do-hero{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:28px}
-.do-hero-card{background:var(--surf);border:1.5px solid var(--bdr);border-radius:14px;padding:22px 26px}
-.do-hero-num{font-size:52px;font-weight:800;letter-spacing:-2px;line-height:1}
-.do-hero-num.blue{color:var(--bleu-m)}
-.do-hero-sub{font-size:12px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin-top:6px}
-.do-desc{font-size:13px;color:var(--mut);padding:16px 0;border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);margin-bottom:24px;line-height:1.6}
-.do-budget-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}
-.do-budget-card{background:var(--surf);border:1.5px solid var(--bdr);border-radius:12px;padding:16px}
-.do-budget-title{font-size:14px;font-weight:800;color:var(--txt);margin-bottom:3px}
-.do-budget-rate{font-size:11px;color:var(--mut);margin-bottom:12px}
-.do-bar-label{font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;margin-top:8px}
-.do-bar-track{height:5px;background:var(--bdr);border-radius:3px;overflow:hidden;margin-bottom:4px}
-.do-bar-fill{height:100%;border-radius:3px;transition:width .4s}
-.do-bar-fill.normal{background:var(--bleu-m)}
-.do-bar-fill.warn{background:var(--amb)}
-.do-bar-fill.danger{background:var(--red)}
-.do-bar-val{font-size:11px;color:var(--mut)}
-.do-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
-.do-section-title{font-size:40px;font-weight:800;letter-spacing:-1.5px;color:var(--txt)}
-.do-section-meta{font-size:12px;font-weight:600;color:var(--mut);letter-spacing:.4px;text-transform:uppercase}
-.do-filter-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px;flex-wrap:wrap}
-.do-filters{display:flex;gap:6px}
-.do-filter-pill{font:600 12px 'Bricolage Grotesque',sans-serif;padding:5px 14px;border-radius:20px;border:1.5px solid var(--bdr);background:none;color:var(--mut);cursor:pointer;transition:all .15s}
-.do-filter-pill.active{background:var(--bleu-l);color:var(--bleu-m);border-color:var(--bleu-m)}
-.do-toolbar{display:flex;gap:8px}
-.do-group{margin-bottom:8px;border-radius:12px;overflow:hidden;border:1.5px solid var(--bdr)}
-.do-table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.do-group-header{background:#1C1C1C;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
-[data-theme="light"] .do-group-header{background:#1C1C1C}
-.do-group-title{font-size:13px;font-weight:700;color:var(--bleu-m);text-transform:uppercase;letter-spacing:.5px}
-.do-group-count{font-size:11px;color:rgba(255,255,255,.4);margin-left:8px}
-.do-group-go{font-size:12px;color:rgba(255,255,255,.5)}
-.do-col-header{display:grid;grid-template-columns:36px 110px 1fr 58px 58px 110px 48px 160px 32px;background:var(--surf2);padding:0}
-.do-col-header span{font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--mut);padding:8px 8px}
-.do-ticket-row{display:grid;grid-template-columns:36px 110px 1fr 58px 58px 110px 48px 160px 32px;background:var(--surf);border-top:1px solid var(--bdr);transition:background .15s;align-items:center}
-.do-ticket-row:hover{background:var(--surf2)}
-.do-ticket-row.no-go-expanded{background:var(--red-row)}
-.do-ticket-cell{padding:9px 8px;font-size:13px;color:var(--txt)}
-.do-ticket-num{color:var(--mut);font-weight:700;font-size:12px}
-.do-board{color:var(--bleu-m);font-weight:700;cursor:text}
-.do-num-input{width:100%;background:transparent;border:none;outline:none;font:400 13px 'Bricolage Grotesque',sans-serif;color:var(--txt);text-align:right;padding:0}
-.do-num-input:focus{background:var(--bleu-l);border-radius:4px}
-.do-total{font-weight:700;color:var(--txt);text-align:right}
-.do-val-btns{display:flex;gap:4px}
-.do-val-btn{font:700 11px 'Bricolage Grotesque',sans-serif;padding:4px 10px;border-radius:20px;border:1.5px solid var(--bdr);background:transparent;color:var(--mut);cursor:pointer;transition:all .15s;white-space:nowrap}
-.do-val-btn.go-active{background:#16A34A;color:#fff;border-color:#16A34A}
-.do-val-btn.nogo-active{background:#DC2626;color:#fff;border-color:#DC2626}
-.do-ticket-row.done-row{background:rgba(34,197,94,.07);}
-[data-theme="light"] .do-ticket-row.done-row{background:#F0FDF4;}
-.do-done-cb{width:14px;height:14px;cursor:pointer;accent-color:var(--grn)}
-.do-nogo-row{display:none;background:var(--red-row);border-top:1px solid var(--red-b)}
-.do-nogo-row.visible{display:flex;padding:8px 16px;gap:8px;align-items:flex-start}
-.do-nogo-textarea{flex:1;background:transparent;border:1px solid var(--red);border-radius:6px;padding:6px 10px;font:400 12px 'Bricolage Grotesque',sans-serif;color:var(--txt);resize:none;outline:none;min-height:48px}
-.do-group-footer{display:grid;grid-template-columns:36px 110px 1fr 58px 58px 110px 48px 160px 32px;background:#1C1C1C;padding:0}
-.do-group-footer span{font-size:12px;font-weight:700;color:rgba(255,255,255,.6);padding:9px 8px}
-.do-group-footer .do-total-cell{color:#fff}
-.do-grand-total{display:grid;grid-template-columns:36px 110px 1fr 58px 58px 110px 48px 160px 32px;background:#1C1C1C;padding:0;border-radius:0 0 12px 12px;margin-top:8px}
-.do-grand-total span{font-size:13px;font-weight:800;color:rgba(255,255,255,.6);padding:12px 8px}
-.do-grand-total .do-total-cell{color:#fff}
-
-/* ===== MODAL ===== */
-.modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);align-items:center;justify-content:center}
-.modal-overlay.open{display:flex}
-.modal{background:var(--surf2);border:1px solid var(--bdr);border-radius:14px;padding:26px;width:460px;max-width:calc(100vw - 32px);box-shadow:0 24px 60px rgba(0,0,0,.3);animation:modalIn .2s ease;transition:background .3s;max-height:80vh;overflow-y:auto}
-@keyframes modalIn{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:none}}
-.modal-title{font-size:18px;font-weight:800;margin-bottom:18px;color:var(--txt)}
-.modal-field{margin-bottom:14px}
-.modal-label{font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;display:block}
-.modal-input,.modal-select,.modal-textarea{width:100%;font:400 13px 'Bricolage Grotesque',sans-serif;border:1.5px solid var(--bdr);border-radius:var(--r);padding:8px 11px;background:var(--bg);color:var(--txt);outline:none;transition:border-color .15s}
-.modal-input:focus,.modal-select:focus,.modal-textarea:focus{border-color:var(--bleu-m)}
-.modal-input[disabled]{opacity:.35}
-.modal-textarea{resize:vertical;min-height:64px}
-.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
-.btn-cancel{font:600 12px 'Bricolage Grotesque',sans-serif;background:transparent;border:1.5px solid var(--bdr);color:var(--mut);padding:7px 16px;border-radius:20px;cursor:pointer;transition:all .15s}
-.btn-cancel:hover{background:var(--surf);color:var(--txt)}
-.modal-total{font-size:20px;font-weight:800;color:var(--bleu-m);text-align:right;margin-top:4px}
-.budget-modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-
-/* ===== TOAST ===== */
-.toast{position:fixed;bottom:24px;right:24px;background:var(--surf2);border:1px solid var(--bdr);color:var(--txt);font-size:12px;font-weight:600;padding:10px 18px;border-radius:20px;opacity:0;transition:all .3s;pointer-events:none;z-index:999;white-space:nowrap;transform:translateY(8px)}
-.toast.show{opacity:1;transform:translateY(0)}
-
-@media(max-width:700px){.po-grid{grid-template-columns:1fr}.landing-title{font-size:44px}.do-budget-grid{grid-template-columns:1fr 1fr}.do-hero{grid-template-columns:1fr}.detail-wrap{padding:20px 14px 60px}.detail-title{font-size:26px}}
+.twrap{background:#fff;border:1px solid var(--s200);border-radius:var(--rlg);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.tbar{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--s100);}
+.client-group{border-bottom:1px solid var(--s100);}
+.client-group:last-child{border-bottom:none;}
+.client-header{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;user-select:none;transition:background .12s;background:#fff;}
+.client-header:hover{background:var(--s50);}
+.client-header-name{font-size:14px;font-weight:700;color:var(--s900);flex:1;}
+.client-header-count{font-size:12px;color:var(--s400);margin-right:4px;}
+.client-chevron{color:var(--s400);transition:transform .2s;display:flex;align-items:center;}
+.client-chevron.open{transform:rotate(90deg);}
+.client-projects{border-top:1px solid var(--s100);}
+.project-row{display:flex;align-items:center;gap:14px;padding:13px 16px 13px 20px;border-bottom:1px solid var(--s100);cursor:pointer;transition:background .12s;position:relative;}
+.project-row:last-child{border-bottom:none;}
+.project-row:hover{background:var(--s50);}
+.project-status-bar{position:absolute;left:0;top:0;bottom:0;width:3px;}
+.project-status-bar.g{background:var(--green);}
+.project-status-bar.a{background:var(--amber);}
+.project-status-bar.r{background:var(--red);}
+.project-info{flex:1;min-width:0;}
+.project-name{font-size:14px;font-weight:600;color:var(--s900);}
+.project-meta{font-size:12px;color:var(--s500);margin-top:2px;}
+.row-actions{display:flex;gap:5px;}
+.dhdr{background:#fff;border-bottom:1px solid var(--s200);padding:0 28px;box-shadow:0 1px 4px rgba(0,0,0,.05);}
+.dhdr-inner{max-width:1180px;margin:0 auto;padding:16px 0;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.tab-bar{display:flex;gap:2px;padding:4px;background:var(--s100);border-radius:var(--rmd);border:1px solid var(--s200);overflow-x:auto;max-width:100%;}
+.tab{padding:6px 14px;border-radius:7px;font-size:13px;font-weight:500;color:var(--s500);cursor:pointer;transition:all .12s;border:none;background:transparent;display:flex;align-items:center;gap:7px;white-space:nowrap;flex-shrink:0;}
+.tab.active{background:#fff;color:var(--s900);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+.section-card{background:#fff;border:1px solid var(--s200);border-radius:var(--rlg);padding:22px;box-shadow:0 1px 3px rgba(0,0,0,.04);margin-bottom:16px;overflow:hidden;}
+.section-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
+.section-title-row{display:flex;align-items:center;gap:9px;}
+.section-title{font-size:15px;font-weight:700;color:var(--s900);}
+.section-subtitle{font-size:12.5px;color:var(--s500);margin-top:2px;}
+.gauge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;}
+.gauge-grid>div{min-width:0;overflow:hidden;}
+.phase-cards{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;}
+.phase-card{flex:0 0 190px;border:1.5px solid var(--s200);border-radius:var(--rlg);padding:14px;cursor:pointer;transition:all .15s;background:#fff;}
+.phase-card:hover{border-color:var(--s300);background:var(--s50);}
+.phase-card.g{border-color:var(--gborder);}
+.phase-card.a{border-color:var(--aborder);}
+.phase-card.r{border-color:var(--rborder);}
+.phase-card-name{font-size:13.5px;font-weight:600;color:var(--s800);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:7px;}
+.phase-card-status{margin-bottom:8px;}
+.phase-card-date{font-size:11px;color:var(--s400);}
+.gantt-wrap{overflow-x:auto;}
+.gantt-table{min-width:800px;border-collapse:collapse;}
+.gantt-table td,.gantt-table th{border:none;padding:0;}
+.gantt-months th{font-size:10.5px;font-weight:700;color:var(--s500);text-transform:uppercase;letter-spacing:.5px;padding:6px 0;text-align:center;}
+.gantt-half-hdr{font-size:10px;color:var(--s400);padding:2px 0;text-align:center;border-left:1px solid var(--s100);}
+.gantt-row td{height:38px;border-bottom:1px solid var(--s100);}
+.gantt-row:last-child td{border-bottom:none;}
+.gantt-label{font-size:12.5px;color:var(--s600);font-weight:500;padding-right:12px;white-space:nowrap;display:flex;align-items:center;gap:6px;min-width:150px;}
+.gantt-cell{position:relative;border-left:1px solid var(--s100);}
+.gantt-bar{position:absolute;top:7px;height:22px;border-radius:5px;cursor:pointer;transition:filter .12s;display:flex;align-items:center;padding:0 8px;font-size:11px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;z-index:2;}
+.gantt-bar:hover{filter:brightness(1.08);}
+.date-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px;}
+.date-chip{padding:7px 4px;border:1px solid var(--s200);border-radius:var(--rmd);font-size:12px;text-align:center;cursor:pointer;transition:all .12s;background:#fff;color:var(--s700);}
+.date-chip:hover{border-color:var(--primary);color:var(--primary);}
+.date-chip.selected{background:var(--primary);color:#fff;border-color:var(--primary);}
+.status-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.status-chip{display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;border:1.5px solid var(--s200);cursor:pointer;font-size:13px;font-weight:500;color:var(--s600);background:#fff;transition:all .12s;}
+.status-chip.selected-g{border-color:var(--green);background:var(--gbg);color:var(--gtxt);}
+.status-chip.selected-a{border-color:var(--amber);background:var(--abg);color:var(--atxt);}
+.status-chip.selected-r{border-color:var(--red);background:var(--rbg);color:var(--rtxt);}
+.status-chip-dot{width:8px;height:8px;border-radius:50%;}
+.notes-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;max-height:200px;overflow-y:auto;}
+.note-item{background:var(--s50);border:1px solid var(--s200);border-radius:var(--rmd);padding:12px 14px;}
+.notes-input{width:100%;padding:11px 13px;border:1px solid var(--s200);border-radius:var(--rmd);font-size:13.5px;resize:none;height:80px;outline:none;transition:border-color .15s,box-shadow .15s;color:var(--s800);}
+.notes-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(87,107,255,.1);}
+.oos-form{background:var(--s50);border:1px solid var(--s200);border-radius:var(--rlg);padding:16px;}
+.oot{width:100%;font-size:13px;border-collapse:collapse;}
+.oot th{text-align:left;padding:8px 10px;font-size:10.5px;font-weight:700;color:var(--s400);border-bottom:1px solid var(--s200);text-transform:uppercase;letter-spacing:.5px;}
+.oot td{padding:10px;border-bottom:1px solid var(--s100);vertical-align:top;}
+.oot tr:last-child td{border-bottom:none;}
+.lic-add-btn{width:100%;padding:10px;border:1.5px dashed var(--s300);border-radius:var(--rmd);background:transparent;color:var(--s500);font-size:13px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.lic-add-btn:hover{border-color:var(--primary);color:var(--primary);}
+.logo-upload-area{border:2px dashed var(--s300);border-radius:var(--rlg);padding:18px;text-align:center;cursor:pointer;transition:border-color .15s;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.logo-upload-area:hover{border-color:var(--primary);}
+.toggle-switch{width:38px;height:22px;border-radius:999px;border:none;cursor:pointer;padding:2px;transition:background .2s;flex-shrink:0;}
+.toggle-switch.off{background:var(--s200);}
+.toggle-switch.on{background:var(--primary);}
+.toggle-knob{width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.toggle-switch.on .toggle-knob{transform:translateX(16px);}
+.empty-st{text-align:center;padding:48px 20px;color:var(--s400);}
+.loading{display:flex;align-items:center;justify-content:center;height:200px;color:var(--s400);font-size:14px;gap:8px;}
 </style>
 </head>
 <body>
-<div class="toast" id="toast"></div>
-<nav class="nav">
-  <button class="nav-back" id="navBack" onclick="goBack()">
-    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-    Terug
-  </button>
-  <div class="nav-logos">
-    <span class="nav-logo-aziri">AZIRI</span>
-    <div class="nav-divider"></div>
-    <span class="nav-logo-itzu" id="navLogoItzu">itzu <svg width="14" height="11" viewBox="0 0 14 11" fill="none" style="vertical-align:middle;margin-bottom:1px"><path d="M3 1C3 1 1 4 3.5 6.5C3.5 6.5 2 9 4 10" stroke="#F59E0B" stroke-width="1.6" stroke-linecap="round"/><path d="M11 1C11 1 13 4 10.5 6.5C10.5 6.5 12 9 10 10" stroke="#F59E0B" stroke-width="1.6" stroke-linecap="round"/></svg></span>
-    <span class="nav-module-label" id="navModuleLabel" style="display:none"></span>
-  </div>
-  <div class="nav-spacer"></div>
-  <span class="nav-live"><span class="live-dot"></span>LIVE</span>
-  <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
-    <svg id="themeIcon" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-    <span id="themeLabel">Light</span>
-  </button>
-  <!-- Hidden lock — barely visible -->
-  <button class="lock-btn" id="lockBtn" onclick="handleLockClick()" title="">
-    <svg id="lockIcon" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-  </button>
-  <button class="btn-icon" onclick="openCsvImport()" title="CSV Import" id="csvImportBtn">
-    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-  </button>
-  <button class="btn-icon" onclick="logout()" title="Terug naar landing" style="margin-left:4px">
-    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-  </button>
-</nav>
+<div id="root"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.24.0/babel.min.js"></script>
+<script type="text/babel">
+const { useState, useEffect, useRef, useMemo } = React;
+const { createClient } = supabase;
+const sb = createClient(
+  'https://oblubcxkuuohpwjfaenx.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ibHViY3hrdXVvaHB3amZhZW54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2ODY0MTEsImV4cCI6MjA5NDI2MjQxMX0.Vdf7y1t5K493hUNkUtEPG4P4gC6ASAokU603UtSBrLU'
+);
 
-<!-- ===== LANDING ===== -->
-<div class="view active" id="vLanding">
-  <div class="landing-wrap">
-    <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
-      <circle cx="720" cy="400" r="320" fill="none" stroke="var(--geo-stroke)" stroke-width="0.7" opacity="0.2"/>
-      <circle cx="720" cy="400" r="220" fill="none" stroke="var(--geo-stroke)" stroke-width="0.7" opacity="0.15"/>
-      <circle cx="720" cy="400" r="120" fill="none" stroke="var(--bleu-m)" stroke-width="0.8" opacity="0.18"/>
-      <circle cx="720" cy="400" r="40" fill="var(--geo-stroke)" opacity="0.06"/>
-      <circle cx="80" cy="680" r="200" fill="none" stroke="var(--geo-stroke)" stroke-width="0.5" opacity="0.1"/>
-      <circle cx="80" cy="680" r="120" fill="none" stroke="var(--bleu-m)" stroke-width="0.5" opacity="0.08"/>
-      <rect x="580" y="500" width="140" height="140" rx="8" fill="none" stroke="var(--geo-stroke)" stroke-width="0.6" opacity="0.13" transform="rotate(18 650 570)"/>
-      <line x1="0" y1="300" x2="1200" y2="700" stroke="var(--geo-stroke)" stroke-width="0.4" opacity="0.05"/>
-      <circle cx="160" cy="240" r="4" fill="var(--bleu-m)" opacity="0.3"/>
-      <circle cx="320" cy="80" r="2.5" fill="var(--geo-stroke)" opacity="0.35"/>
-      <line x1="160" y1="240" x2="320" y2="80" stroke="var(--bleu-m)" stroke-width="0.5" opacity="0.14"/>
-    </svg>
-    <div class="landing-inner">
-      <div class="landing-crumb">ITZU · AZIRI</div>
-      <h1 class="landing-title">Project<br><span>Overzicht</span></h1>
-      <button class="btn-p" style="font-size:15px;padding:13px 30px" onclick="openLogin()">Launch →</button>
-    </div>
-    <div class="landing-week" id="landingWeek"></div>
-  </div>
-</div>
-
-<!-- ===== PO DASHBOARD ===== -->
-<div class="view" id="vPo">
-  <div class="po-header"><div class="po-title">Project Overzicht</div><div style="display:flex;align-items:center;gap:10px"><button class="btn-icon" onclick="exportPoCsv()" title="Export naar CSV"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg></button><div class="po-meta" id="poMeta"></div></div></div>
-  <div class="po-grid" id="poGrid"></div>
-</div>
-
-<!-- ===== PO DETAIL ===== -->
-<div class="view" id="vPoDetail"><div class="detail-wrap" id="detailWrap"></div></div>
-
-<!-- ===== DO MODULE ===== -->
-<div class="view" id="vDo">
-  <div class="do-wrap">
-    <!-- Hero stats -->
-    <div class="do-hero" id="doHero"></div>
-    <!-- Description -->
-    <p class="do-desc">Wekelijkse ticketvalidatie per project. Geef GO of NO-GO per ticket en voeg opmerkingen toe waar nodig.</p>
-    <!-- Budget cards -->
-    <div class="do-budget-grid" id="doBudgetGrid"></div>
-    <!-- Divider -->
-    <hr style="border:none;border-top:1px solid var(--bdr);margin-bottom:28px">
-    <!-- Tickets header -->
-    <div class="do-section-header">
-      <div class="do-section-title">TICKETS</div>
-      <div class="do-section-meta" id="doTicketMeta"></div>
-    </div>
-    <!-- Filter + toolbar -->
-    <div class="do-filter-bar">
-      <div class="do-filters" id="doFilters"></div>
-      <div class="do-toolbar">
-        <button class="btn-icon" onclick="doExportCsv()" title="CSV Export"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg></button>
-        <button class="btn-p" onclick="openDoTicketModal()">+ Ticket</button>
-      </div>
-    </div>
-    <!-- Ticket groups -->
-    <div id="doTicketGroups"></div>
-  </div>
-</div>
-
-<!-- ===== MODALS ===== -->
-<!-- PO Add row -->
-<div class="modal-overlay" id="addModal">
-  <div class="modal">
-    <div class="modal-title">Nieuwe regel toevoegen</div>
-    <div class="modal-field"><label class="modal-label">Project naam</label><input class="modal-input" id="mProj" disabled></div>
-    <div class="modal-field"><label class="modal-label">Beschrijving</label><input class="modal-input" id="mDesc" placeholder="Beschrijving"></div>
-    <div class="modal-field"><label class="modal-label">Status</label><select class="modal-select" id="mStatus"><option>Afgerond</option><option>On track</option><option selected>Aankomend</option><option>Ingepland</option><option>Geblokkeerd</option></select></div>
-    <div class="modal-field"><label class="modal-label">Verwachte oplevering</label><input class="modal-input" id="mDate" placeholder="bv. 30/06"></div>
-    <div class="modal-field"><label class="modal-label">Commentaar</label><textarea class="modal-textarea" id="mComment"></textarea></div>
-    <div class="modal-field"><label class="modal-label">Actie nodig van Itzu?</label><select class="modal-select" id="mActie"><option value="false">Nee</option><option value="true">Ja</option></select></div>
-    <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('addModal')">Annuleren</button><button class="btn-p" onclick="saveNewRow()">Toevoegen</button></div>
-  </div>
-</div>
-
-<!-- PO CSV Import -->
-<div class="modal-overlay" id="csvImportModal">
-  <div class="modal">
-    <div class="modal-title">CSV Import</div>
-    <p style="font-size:12px;color:var(--mut);margin-bottom:16px">Selecteer een CSV-bestand in het weekoverzicht formaat. Bestaande trajecten worden vervangen.</p>
-    <div id="csvDropZone" style="border:2px dashed var(--bdr);border-radius:var(--r);padding:32px 20px;text-align:center;cursor:pointer;transition:border-color .15s" onclick="document.getElementById('csvFileInput').click()" ondragover="event.preventDefault();this.style.borderColor='var(--bleu-m)'" ondragleave="this.style.borderColor='var(--bdr)'" ondrop="handleCsvDrop(event)">
-      <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="color:var(--mut);margin-bottom:8px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-      <div style="font-size:13px;font-weight:600;color:var(--mut)">Klik of sleep een CSV hier</div>
-      <div id="csvFileName" style="font-size:11px;color:var(--bleu-m);margin-top:6px;display:none"></div>
-    </div>
-    <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="handleCsvFile(this)">
-    <div id="csvImportStatus" style="font-size:12px;margin-top:12px;display:none"></div>
-    <div class="modal-footer">
-      <button class="btn-cancel" onclick="closeModal('csvImportModal')">Annuleren</button>
-      <button class="btn-p" id="csvImportBtn2" onclick="doFileImport()" disabled style="opacity:.4">Importeren</button>
-    </div>
-  </div>
-</div>
-
-<!-- Lock password modal -->
-<div class="modal-overlay" id="lockModal">
-  <div class="modal" style="width:360px">
-    <div class="modal-title">🔒 Intern toegang</div>
-    <div class="modal-field">
-      <label class="modal-label">Wachtwoord</label>
-      <input class="modal-input" id="lockPass" type="password" placeholder="Wachtwoord" autocomplete="current-password">
-    </div>
-    <div id="lockError" style="font-size:12px;color:var(--red);display:none;margin-top:-8px">Onjuist wachtwoord.</div>
-    <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('lockModal')">Annuleren</button><button class="btn-p" onclick="submitLock()">Toegang</button></div>
-  </div>
-</div>
-
-<!-- DO Add ticket modal -->
-<div class="modal-overlay" id="doTicketModal">
-  <div class="modal">
-    <div class="modal-title">Nieuw ticket toevoegen</div>
-    <div class="modal-field"><label class="modal-label">Project</label><select class="modal-select" id="dtProject"></select></div>
-    <div class="modal-field"><label class="modal-label">Board Nr</label><input class="modal-input" id="dtBoard" placeholder="TL-"></div>
-    <div class="modal-field"><label class="modal-label">Omschrijving</label><input class="modal-input" id="dtInh" placeholder="Omschrijving van het ticket"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="modal-field"><label class="modal-label">Dev uren</label><input class="modal-input" id="dtDev" type="number" min="0" step="0.5" value="0"></div>
-      <div class="modal-field"><label class="modal-label">PO uren</label><input class="modal-input" id="dtPo" type="number" min="0" step="0.5" value="0"></div>
-    </div>
-    <div class="modal-field"><label class="modal-label">Totaal €</label><div class="modal-total" id="dtTotal">€ 0</div></div>
-    <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('doTicketModal')">Annuleren</button><button class="btn-p" onclick="saveDoTicket()">Toevoegen</button></div>
-  </div>
-</div>
-
-<!-- DO Budget modal -->
-<div class="modal-overlay" id="doBudgetModal">
-  <div class="modal">
-    <div class="modal-title">⚙ Budget beheren</div>
-    <div id="doBudgetModalContent"></div>
-    <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('doBudgetModal')">Annuleren</button><button class="btn-p" onclick="saveDoBudget()">Opslaan</button></div>
-  </div>
-</div>
-
-<!-- DO Reset confirm -->
-<div class="modal-overlay" id="doResetModal">
-  <div class="modal" style="width:360px">
-    <div class="modal-title">↺ Reset bevestigen</div>
-    <p style="font-size:13px;color:var(--mut);margin-bottom:18px">Alle ticketdata wordt gewist en teruggezet naar standaard. Dit kan niet ongedaan worden gemaakt.</p>
-    <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('doResetModal')">Annuleren</button><button class="btn-p" style="background:var(--red)" onclick="confirmDoReset()">Reset</button></div>
-  </div>
-</div>
-
-<script>
-// ============================================================
-// CONSTANTS & CONFIG
-// ============================================================
-const DO_PASS='Aziri';
-const CLIENT_PASS='Itzu';
-const THEME_KEY='itzu_theme';
-const SUPABASE_URL='https://jxzysikivfivvaziervi.supabase.co';
-const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp4enlzaWtpdmZpdnZhemllcnZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MTg0NjEsImV4cCI6MjA5NDA5NDQ2MX0.BErlAMzGQ0oDkKGgbT9kKEf7ZyxxcBUbCe__c8aIJdM';
-const DEV_RATE=115, PO_RATE=140;
-
-// ============================================================
-// STATE
-// ============================================================
-let poData=[], viewStack=['vLanding'], currentProjId=null, addModalProjId=null, nextId=100;
-let doUnlocked=false, doMode='intern', doFilter='ALLE'; // doMode: 'intern' | 'client'
-let doProjects=[], doTickets=[];
-
-// ============================================================
-// SUPABASE
-// ============================================================
-function getDb(){const{createClient}=window.supabase||{};if(!createClient)return null;return createClient(SUPABASE_URL,SUPABASE_ANON_KEY)}
-
-// PO data
-async function loadPoData(){
-  const db=getDb();if(!db)return false;
-  const{data:projects,error:pErr}=await db.from('projects').select('*').order('sort_order');
-  if(pErr)return false;
-  const{data:trajecten,error:tErr}=await db.from('trajecten').select('*').order('sort_order');
-  if(tErr)return false;
-  poData=projects.map(p=>({id:p.slug,dbId:p.id,name:p.name,rows:trajecten.filter(t=>t.project_id===p.id).map(t=>({id:t.id,desc:t.beschrijving,status:t.status,date:t.oplevering,comment:t.commentaar,actie:t.actie_itzu}))}));
-  return true;
-}
-async function updateTraject(rowId,fields){try{const db=getDb();if(!db)return;const m={};if('desc'in fields)m.beschrijving=fields.desc;if('status'in fields)m.status=fields.status;if('date'in fields)m.oplevering=fields.date;if('comment'in fields)m.commentaar=fields.comment;if('actie'in fields)m.actie_itzu=fields.actie;await db.from('trajecten').update(m).eq('id',rowId);}catch(e){}}
-async function insertTraject(projectDbId,fields,sortOrder){try{const db=getDb();if(!db)return null;const{data:row}=await db.from('trajecten').insert({project_id:projectDbId,beschrijving:fields.desc||'',status:fields.status||'Aankomend',oplevering:fields.date||'',commentaar:fields.comment||'',actie_itzu:fields.actie||false,sort_order:sortOrder}).select().single();return row;}catch(e){return null}}
-async function deleteTraject(rowId){try{const db=getDb();if(!db)return;await db.from('trajecten').delete().eq('id',rowId);}catch(e){}}
-
-// DO data
-const DO_FALLBACK_PROJECTS=[
-  {id:'ss',name:'Staffsync',d_budget:100,p_budget:40},
-  {id:'fu',name:'FlexU',d_budget:120,p_budget:40},
-  {id:'sv',name:'Suivo APP (Eazer)',d_budget:80,p_budget:20},
-  {id:'rt',name:'Recruteringstools',d_budget:40,p_budget:16}
-];
-const DO_FALLBACK_TICKETS=[
-  {id:'t1',pid:'ss',board:'TL-',inh:'',dev:0,po:0,status:'TE VALIDEREN',comment:'',done:false},
-  {id:'t2',pid:'fu',board:'TL-',inh:'',dev:0,po:0,status:'TE VALIDEREN',comment:'',done:false},
-  {id:'t3',pid:'sv',board:'TL-4571',inh:'',dev:0,po:0,status:'TE VALIDEREN',comment:'',done:false},
-  {id:'t4',pid:'rt',board:'TL-4534',inh:'',dev:0,po:0,status:'TE VALIDEREN',comment:'',done:false},
+const PHASE_DEFS=[{key:'Analyse',icon:'🔍'},{key:'Implementatie',icon:'⚡'},{key:'Test',icon:'🧪'},{key:'Go-live',icon:'🚀'},{key:'Support',icon:'🔄'}];
+const LICENSE_TYPES=['Zoho Creator','Xano/WeWeb','Claude','N8N'];
+const FALLBACK_AMS=[
+  {id:'am1',name:'Koen Vlayen',initials:'KV',gradient:'linear-gradient(135deg,#576BFF,#8B5CF6)'},
+  {id:'am2',name:'Maxim Daels',initials:'MD',gradient:'linear-gradient(135deg,#0EA5E9,#14B8A6)'},
 ];
 
-async function loadDoData(){
-  const db=getDb();if(!db){doProjects=DO_FALLBACK_PROJECTS.map(p=>({...p}));doTickets=DO_FALLBACK_TICKETS.map(t=>({...t}));return;}
-  try{
-    const{data:proj,error:pErr}=await db.from('do_projects').select('*').order('sort_order');
-    if(pErr)throw pErr;
-    const{data:tick,error:tErr}=await db.from('do_tickets').select('*').order('sort_order');
-    if(tErr)throw tErr;
-    doProjects=proj.map(p=>({id:p.id,name:p.name,d_budget:p.d_budget,p_budget:p.p_budget}));
-    doTickets=tick.map(t=>({id:t.id,pid:t.pid,board:t.board,inh:t.inh,dev:Number(t.dev),po:Number(t.po),status:t.status,comment:t.comment,done:t.done||false}));
-  }catch(e){
-    doProjects=DO_FALLBACK_PROJECTS.map(p=>({...p}));
-    doTickets=DO_FALLBACK_TICKETS.map(t=>({...t}));
-  }
+// ── DB ────────────────────────────────────────────────────
+async function fetchAMs(){
+  const{data}=await sb.from('mc_account_managers').select('*').order('id');
+  return(data??[]).map(a=>({...a,initials:a.initials||(a.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(),gradient:a.gradient||hcol(a.name||'')}));
 }
-async function updateDoTicket(id,fields){
-  try{const db=getDb();if(!db)return;await db.from('do_tickets').update(fields).eq('id',id);}catch(e){}
-}
-async function insertDoTicket(fields){
-  try{
-    const db=getDb();if(!db){const nt={id:'l'+(Date.now()),pid:fields.pid,board:fields.board,inh:fields.inh,dev:fields.dev,po:fields.po,status:'TE VALIDEREN',comment:'',done:false};doTickets.push(nt);return nt;}
-    const{data:row}=await db.from('do_tickets').insert({pid:fields.pid,board:fields.board,inh:fields.inh,dev:fields.dev,po:fields.po,status:'TE VALIDEREN',comment:'',done:false,sort_order:doTickets.filter(t=>t.pid===fields.pid).length+1}).select().single();
-    if(row){const nt={id:row.id,pid:row.pid,board:row.board,inh:row.inh,dev:Number(row.dev),po:Number(row.po),status:row.status,comment:row.comment,done:row.done||false};doTickets.push(nt);return nt;}
-  }catch(e){}return null;
-}
-async function deleteDoTicket(id){
-  try{const db=getDb();if(!db){doTickets=doTickets.filter(t=>t.id!==id);return;}await db.from('do_tickets').delete().eq('id',id);doTickets=doTickets.filter(t=>t.id!==id);}catch(e){}
-}
-async function updateDoBudget(id,d_budget,p_budget){
-  try{const db=getDb();if(!db)return;await db.from('do_projects').update({d_budget,p_budget}).eq('id',id);}catch(e){}
+async function dbInsertAM(name){
+  const initials=name.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const gradients=['linear-gradient(135deg,#576BFF,#8B5CF6)','linear-gradient(135deg,#0EA5E9,#14B8A6)','linear-gradient(135deg,#F59E0B,#EF4444)','linear-gradient(135deg,#10B981,#059669)'];
+  const gradient=gradients[Math.floor(Math.random()*gradients.length)];
+  let r=await sb.from('mc_account_managers').insert({name:name.trim(),initials,gradient}).select().single();
+  if(r.error)r=await sb.from('mc_account_managers').insert({name:name.trim()}).select().single();
+  const d=r.data;
+  return d?{...d,initials:d.initials||initials,gradient:d.gradient||gradient}:{id:uid(),name:name.trim(),initials,gradient};
 }
 
-// ============================================================
-// INIT
-// ============================================================
-async function init(){
-  applyTheme(getTheme());
-  try{
-    const ok=await loadPoData();
-    if(!ok)poData=[];
-  }catch(e){poData=[];}
-  setWeekInfo();
-}
-
-function openLogin(){
-  // BUG FIX: always reload PO data fresh on login
-  loadPoData().then(ok=>{
-    if(!ok&&poData.length===0)poData=[];
-    showView('vPo');
-  }).catch(()=>showView('vPo'));
-}
-function logout(){
-  // Reset DO module state so lock requires password again
-  doUnlocked=false;doMode='intern';doProjects=[];doTickets=[];
-  document.getElementById('lockIcon').innerHTML='<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>';
-  document.getElementById('lockBtn').classList.remove('unlocked');
-  viewStack=['vLanding'];
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.getElementById('vLanding').classList.add('active');
-  document.getElementById('navBack').classList.remove('visible');
-  updateNavForView('vLanding');
-}
-
-// ============================================================
-// LOCK / DO ACCESS
-// ============================================================
-function handleLockClick(){
-  if(doUnlocked){
-    // Already unlocked — go to DO module
-    showView('vDo');
-  } else {
-    document.getElementById('lockPass').value='';
-    document.getElementById('lockError').style.display='none';
-    document.getElementById('lockModal').classList.add('open');
-    setTimeout(()=>document.getElementById('lockPass').focus(),100);
-  }
-}
-function submitLock(){
-  const val=document.getElementById('lockPass').value;
-  if(val===DO_PASS||val===CLIENT_PASS){
-    doUnlocked=true;
-    doMode=val===DO_PASS?'intern':'client';
-    closeModal('lockModal');
-    const lockIcon=document.getElementById('lockIcon');
-    lockIcon.innerHTML='<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0"/>';
-    document.getElementById('lockBtn').classList.add('unlocked');
-    loadDoData().then(()=>{showView('vDo');renderDo();});
-    showToast(doMode==='intern'?'🔓 Intern module ontgrendeld':'👁 Klantweergave geopend');
-  } else {
-    document.getElementById('lockError').style.display='block';
-    document.getElementById('lockPass').value='';
-    document.getElementById('lockPass').focus();
-  }
-}
-document.addEventListener('keydown',e=>{
-  if(e.key==='Enter'&&document.getElementById('lockModal').classList.contains('open'))submitLock();
-});
-
-// ============================================================
-// THEME
-// ============================================================
-function getTheme(){return localStorage.getItem(THEME_KEY)||'dark'}
-function applyTheme(t){
-  document.documentElement.setAttribute('data-theme',t);
-  const icon=document.getElementById('themeIcon'),label=document.getElementById('themeLabel');
-  if(t==='dark'){label.textContent='Light';icon.innerHTML='<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';}
-  else{label.textContent='Dark';icon.innerHTML='<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';}
-  if(currentProjId&&document.getElementById('vPoDetail').classList.contains('active'))
-    document.querySelectorAll('.status-sel').forEach(sel=>{sel.style.cssText=statusSelectStyle(sel.value)});
-}
-function toggleTheme(){const next=getTheme()==='dark'?'light':'dark';localStorage.setItem(THEME_KEY,next);applyTheme(next);}
-
-// ============================================================
-// NAVIGATION
-// ============================================================
-function showView(viewId,projId){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.getElementById(viewId).classList.add('active');
-  viewStack.push(viewId);
-  document.getElementById('navBack').classList.toggle('visible',viewStack.length>1&&viewStack[viewStack.length-2]!=='vLanding'||viewStack.some(v=>v==='vPoDetail'));
-  if(viewId==='vPo')renderDashboard();
-  if(viewId==='vPoDetail'){currentProjId=projId;renderDetail(projId);}
-  if(viewId==='vDo')renderDo();
-  updateNavForView(viewId);
-  setWeekInfo();
-}
-function goBack(){
-  if(viewStack.length<=1)return;
-  viewStack.pop();
-  const prev=viewStack[viewStack.length-1];
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.getElementById(prev).classList.add('active');
-  const showBack=viewStack.length>1&&prev!=='vLanding';
-  document.getElementById('navBack').classList.toggle('visible',showBack);
-  if(prev==='vPo')renderDashboard();
-  if(prev==='vDo')renderDo();
-  updateNavForView(prev);
-}
-function updateNavForView(viewId){
-  const lbl=document.getElementById('navModuleLabel');
-  const csvBtn=document.getElementById('csvImportBtn');
-  if(viewId==='vDo'){
-    lbl.textContent='Doorlopende Ontwikkelingen';lbl.style.display='';
-    csvBtn.style.display='none';
-  } else {
-    lbl.style.display='none';
-    csvBtn.style.display=viewId==='vLanding'?'none':'';
-  }
-  document.getElementById('navBack').classList.toggle('visible',viewStack.length>1&&viewId!=='vLanding');
-}
-
-// ============================================================
-// TOAST
-// ============================================================
-function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800)}
-
-// ============================================================
-// WEEK INFO
-// ============================================================
-function setWeekInfo(){
-  const now=new Date(),start=new Date(now.getFullYear(),0,1);
-  const week=Math.ceil(((now-start)/86400000+start.getDay()+1)/7);
-  const months=['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
-  const lw=document.getElementById('landingWeek');if(lw)lw.textContent=`Week ${week} · ${months[now.getMonth()]} ${now.getFullYear()}`;
-  const pm=document.getElementById('poMeta');if(pm)pm.innerHTML=`<div>Week ${week}</div><div>${months[now.getMonth()]} ${now.getFullYear()}</div>`;
-}
-
-// ============================================================
-// PO HELPERS
-// ============================================================
-function statusClass(s){if(s==='Afgerond')return'badge-grn';if(s==='On track')return'badge-blu';if(s==='Aankomend')return'badge-amb';if(s==='Ingepland')return'badge-gry';if(s==='Geblokkeerd')return'badge-red';return'badge-gry'}
-function rowClass(s){if(s==='Afgerond')return'row-grn';if(s==='Geblokkeerd')return'row-red';return''}
-function statusSelectStyle(s){
-  const d=getTheme()==='dark';
-  if(s==='Afgerond')return d?'background:rgba(34,197,94,.15);color:#4ADE80':'background:#DCFCE7;color:#15803D';
-  if(s==='On track')return d?'background:rgba(99,102,241,.2);color:#A5B4FC':'background:#DBEAFE;color:#1D4ED8';
-  if(s==='Aankomend')return d?'background:rgba(245,158,11,.15);color:#FCD34D':'background:#FEF3C7;color:#D97706';
-  if(s==='Ingepland')return d?'background:rgba(255,255,255,.08);color:rgba(255,255,255,.45)':'background:#F1F5F9;color:#475569';
-  if(s==='Geblokkeerd')return d?'background:rgba(248,113,113,.15);color:#FCA5A5':'background:#FEE2E2;color:#DC2626';
-  return'';
-}
-function countByStatus(rows,s){return rows.filter(r=>r.status===s).length}
-
-// ============================================================
-// PO DASHBOARD
-// ============================================================
-function renderDashboard(){
-  const grid=document.getElementById('poGrid');grid.innerHTML='';
-  poData.forEach(proj=>{
-    const rows=proj.rows,afg=countByStatus(rows,'Afgerond'),actie=rows.filter(r=>r.actie).length,gebl=countByStatus(rows,'Geblokkeerd'),total=rows.length;
-    const badgeHtml=['Afgerond','On track','Aankomend','Ingepland','Geblokkeerd'].map(s=>{const c=countByStatus(rows,s);return c?`<span class="badge ${statusClass(s)}">${s} ×${c}</span>`:''}).join('');
-    const afgerond=rows.filter(r=>r.status==='Afgerond');
-    const rest=rows.filter(r=>r.status!=='Afgerond');
-    const sortedRows=[...afgerond,...rest];
-    const allRowsHtml=sortedRows.map(r=>`<div class="card-row"><span class="card-row-desc">${r.desc}</span><div class="card-row-right"><span class="badge ${statusClass(r.status)}" style="font-size:9px">${r.status}</span></div></div>`).join('');
-    const card=document.createElement('div');card.className='proj-card';
-    card.innerHTML=`<div><div class="card-name">${proj.name}</div><div class="card-sub">${total} traject${total!==1?'en':''}</div></div><div class="badge-strip">${badgeHtml}</div><div class="card-stats"><div class="card-stat"><div class="card-stat-val c-grn">${afg}</div><div class="card-stat-lbl">Afgerond</div></div><div class="card-stat"><div class="card-stat-val ${actie>0?'c-red':''}">${actie}</div><div class="card-stat-lbl">Actie Itzu</div></div><div class="card-stat"><div class="card-stat-val ${gebl>0?'c-red':''}">${gebl}</div><div class="card-stat-lbl">Geblokkeerd</div></div></div><div class="card-rows">${allRowsHtml}</div><div class="card-footer"><span class="card-cta">Details &amp; bewerken →</span></div>`;
-    card.addEventListener('click',()=>showView('vPoDetail',proj.id));
-    grid.appendChild(card);
+async function fetchProjects(ownerId){
+  // Fetch root projects (parent_id IS NULL) — these are the "main" projects shown in overview
+  const{data:roots,error}=await sb.from('mc_projects').select('*').eq('owner_id',ownerId).is('parent_id',null).order('created_at',{ascending:false});
+  if(error)throw new Error(error.message);
+  if(!roots?.length)return[];
+  // Also fetch sub-projects (deelprojecten) for each root
+  const rootIds=roots.map(p=>p.id);
+  const{data:subs}=await sb.from('mc_projects').select('*').eq('owner_id',ownerId).in('parent_id',rootIds).order('created_at',{ascending:true});
+  // Collect all IDs for related data
+  const allIds=[...rootIds,...(subs??[]).map(s=>s.id)];
+  const[l,ph,n,o]=await Promise.all([
+    sb.from('mc_licenties').select('*').in('project_id',allIds).order('sort_order'),
+    sb.from('mc_phases').select('*').in('project_id',allIds).order('sort_order'),
+    sb.from('mc_notes').select('*').in('project_id',allIds).order('created_at'),
+    sb.from('mc_oos_items').select('*').in('project_id',allIds).order('created_at'),
+  ]);
+  const enrich=p=>({
+    ...p,offerte_total:Number(p.offerte_total||0),licentie_jr:Number(p.licentie_jr||0),
+    licenties:(l.data??[]).filter(x=>x.project_id===p.id).map(x=>({...x,cost:Number(x.cost)})),
+    phases:(ph.data??[]).filter(x=>x.project_id===p.id),
+    notes:(n.data??[]).filter(x=>x.project_id===p.id),
+    oos_items:(o.data??[]).filter(x=>x.project_id===p.id).map(x=>({...x,price:Number(x.price)})),
   });
+  return roots.map(r=>({...enrich(r),deelprojecten:(subs??[]).filter(s=>s.parent_id===r.id).map(enrich)}));
 }
 
-// ============================================================
-// PO DETAIL
-// ============================================================
-function renderDetail(projId){
-  const proj=poData.find(p=>p.id===projId);if(!proj)return;
-  const rows=proj.rows,total=rows.length,actie=rows.filter(r=>r.actie).length,gebl=countByStatus(rows,'Geblokkeerd');
-  const afgerond=rows.filter(r=>r.status==='Afgerond');
-  const rest=rows.filter(r=>r.status!=='Afgerond');
-  const sortedRows=[...afgerond,...rest];
-  const tableRows=sortedRows.map((r,i)=>`<tr class="${rowClass(r.status)}" id="tr-${r.id}"><td style="color:var(--mut);font-weight:700;width:28px">${i+1}</td><td><span contenteditable="true" data-id="${r.id}" data-field="desc" onblur="saveField(this)">${r.desc}</span></td><td><select class="status-sel" style="${statusSelectStyle(r.status)}" data-id="${r.id}" onchange="saveStatus(this)">${['Afgerond','On track','Aankomend','Ingepland','Geblokkeerd'].map(s=>`<option ${s===r.status?'selected':''}>${s}</option>`).join('')}</select></td><td><span contenteditable="true" data-id="${r.id}" data-field="date" onblur="saveField(this)">${r.date}</span></td><td><span contenteditable="true" data-id="${r.id}" data-field="comment" onblur="saveField(this)">${r.comment}</span></td><td><button class="actie-toggle ${r.actie?'ja':''}" data-id="${r.id}" onclick="toggleActie(this)">${r.actie?'Ja':'Nee'}</button></td><td><button class="btn-del" data-proj="${projId}" data-id="${r.id}" onclick="deleteRow(this)">✕</button></td></tr>`).join('');
-  document.getElementById('detailWrap').innerHTML=`<div class="detail-crumb">PROJECT · ITZU // ${proj.name.toUpperCase()}</div><div class="detail-title">${proj.name}</div><div class="hero-stats"><div class="hero-stat"><div class="hero-stat-val" style="color:${actie>0?'var(--red)':'var(--txt)'}">${actie}</div><div class="hero-stat-lbl">Actie Itzu</div></div><div class="hero-stat"><div class="hero-stat-val" style="color:${gebl>0?'var(--red)':'var(--txt)'}">${gebl}</div><div class="hero-stat-lbl">Geblokkeerd</div></div></div><div class="table-section"><div class="table-section-header"><span class="table-section-title">Trajecten · ${total}</span><button class="btn-add" onclick="openAddModal('${projId}')">+ Regel toevoegen</button></div><div class="table-scroll"><table><thead><tr><th>#</th><th>Beschrijving</th><th>Status</th><th>Oplevering</th><th>Commentaar</th><th>Actie Itzu?</th><th></th></tr></thead><tbody>${tableRows}</tbody></table></div></div>`;
-}
-function getLocalRow(id){for(const p of poData){const r=p.rows.find(r=>r.id===id);if(r)return r;}return null}
-function saveField(el){const r=getLocalRow(el.dataset.id);if(!r)return;r[el.dataset.field]=el.innerText.trim();updateTraject(el.dataset.id,{[el.dataset.field]:r[el.dataset.field]})}
-function saveStatus(sel){const r=getLocalRow(sel.dataset.id);if(!r)return;r.status=sel.value;sel.style.cssText=statusSelectStyle(sel.value);const tr=document.getElementById(`tr-${sel.dataset.id}`);if(tr)tr.className=rowClass(sel.value);updateTraject(sel.dataset.id,{status:sel.value});refreshHeroStats(currentProjId)}
-function toggleActie(btn){const r=getLocalRow(btn.dataset.id);if(!r)return;r.actie=!r.actie;btn.classList.toggle('ja',r.actie);btn.textContent=r.actie?'Ja':'Nee';updateTraject(btn.dataset.id,{actie:r.actie});refreshHeroStats(currentProjId)}
-async function deleteRow(btn){const proj=poData.find(p=>p.id===btn.dataset.proj);if(!proj)return;proj.rows=proj.rows.filter(r=>r.id!==btn.dataset.id);await deleteTraject(btn.dataset.id);renderDetail(btn.dataset.proj);showToast('Regel verwijderd')}
-function refreshHeroStats(projId){const proj=poData.find(p=>p.id===projId);if(!proj)return;const rows=proj.rows,actie=rows.filter(r=>r.actie).length,gebl=countByStatus(rows,'Geblokkeerd');const stats=document.querySelectorAll('.hero-stat');if(stats[0]){stats[0].querySelector('.hero-stat-val').style.color=actie>0?'var(--red)':'var(--txt)';stats[0].querySelector('.hero-stat-val').textContent=actie}if(stats[1]){stats[1].querySelector('.hero-stat-val').style.color=gebl>0?'var(--red)':'var(--txt)';stats[1].querySelector('.hero-stat-val').textContent=gebl}}
-function openAddModal(projId){addModalProjId=projId;const proj=poData.find(p=>p.id===projId);document.getElementById('mProj').value=proj?proj.name:'';document.getElementById('mDesc').value='';document.getElementById('mStatus').value='Aankomend';document.getElementById('mDate').value='';document.getElementById('mComment').value='';document.getElementById('mActie').value='false';document.getElementById('addModal').classList.add('open');setTimeout(()=>document.getElementById('mDesc').focus(),100)}
-async function saveNewRow(){
-  const proj=poData.find(p=>p.id===addModalProjId);if(!proj)return;
-  const fields={desc:document.getElementById('mDesc').value.trim(),status:document.getElementById('mStatus').value,date:document.getElementById('mDate').value.trim(),comment:document.getElementById('mComment').value.trim(),actie:document.getElementById('mActie').value==='true'};
-  const row=await insertTraject(proj.dbId,fields,proj.rows.length+1);
-  if(row)proj.rows.push({id:row.id,desc:row.beschrijving,status:row.status,date:row.oplevering,comment:row.commentaar,actie:row.actie_itzu});
-  else proj.rows.push({id:'n'+(nextId++),desc:fields.desc,status:fields.status,date:fields.date,comment:fields.comment,actie:fields.actie});
-  closeModal('addModal');renderDetail(addModalProjId);showToast('Regel toegevoegd ✓');
-}
-function exportPoCsv(){
-  const now=new Date();
-  const start=new Date(now.getFullYear(),0,1);
-  const week=Math.ceil(((now-start)/86400000+start.getDay()+1)/7);
-  const aoa=[];
-  aoa.push(['Itzu – wekelijkse projectupdate','','','','','']);
-  aoa.push(['Doel: Liesbeth en het Itzu-team elke vrijdag een kort, helder overzicht geven van status, voortgang en acties die langs hun kant nodig zijn.','','','','','']);
-  aoa.push(['Project','Beschrijving','Status','Verwachte oplevering','Comment','Actie nodig van Itzu?']);
-  poData.forEach(proj=>{
-    aoa.push([proj.name,'','','','','']);
-    proj.rows.forEach(r=>{
-      aoa.push(['',r.desc||'',r.status||'',r.date||'',r.comment||'',r.actie?'Ja':'Nee']);
-    });
-  });
-  function doExport(){
-    const XLSX=window.XLSX;
-    const ws=XLSX.utils.aoa_to_sheet(aoa);
-    ws['!cols']=[{wch:28},{wch:40},{wch:16},{wch:18},{wch:45},{wch:22}];
-    const wb=XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb,ws,'Project Overzicht');
-    XLSX.writeFile(wb,`Itzu_Project_Overview_W${week}.xlsx`);
-    showToast('Excel geëxporteerd ✓');
-  }
-  if(window.XLSX){doExport();}
-  else{
-    const sc=document.createElement('script');
-    sc.src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
-    sc.onload=doExport;
-    sc.onerror=()=>showToast('Export mislukt — probeer opnieuw');
-    document.head.appendChild(sc);
-  }
-}
-function openCsvImport(){
-  document.getElementById('csvFileName').style.display='none';
-  document.getElementById('csvFileName').textContent='';
-  document.getElementById('csvImportStatus').style.display='none';
-  document.getElementById('csvImportBtn2').disabled=true;
-  document.getElementById('csvImportBtn2').style.opacity='.4';
-  document.getElementById('csvFileInput').value='';
-  window._csvParsed=null;
-  document.getElementById('csvImportModal').classList.add('open');
-}
-function handleCsvDrop(e){
-  e.preventDefault();
-  document.getElementById('csvDropZone').style.borderColor='var(--bdr)';
-  const file=e.dataTransfer.files[0];
-  if(file)processCsvFile(file);
-}
-function handleCsvFile(input){
-  const file=input.files[0];
-  if(file)processCsvFile(file);
-}
-function processCsvFile(file){
-  if(!file.name.endsWith('.csv')){
-    showCsvStatus('⚠ Alleen .csv bestanden zijn toegestaan.','var(--red)');return;
-  }
-  document.getElementById('csvFileName').textContent=file.name;
-  document.getElementById('csvFileName').style.display='block';
-  const reader=new FileReader();
-  reader.onload=e=>{
-    try{
-      const parsed=parseCsvContent(e.target.result);
-      window._csvParsed=parsed;
-      let count=0;parsed.forEach(p=>count+=p.rows.length);
-      showCsvStatus(`✓ ${parsed.length} projecten, ${count} trajecten gevonden — klaar om te importeren.`,'var(--grn)');
-      document.getElementById('csvImportBtn2').disabled=false;
-      document.getElementById('csvImportBtn2').style.opacity='1';
-    }catch(err){
-      showCsvStatus('⚠ Bestand kon niet worden gelezen. Controleer het formaat.','var(--red)');
-    }
-  };
-  reader.readAsText(file,'UTF-8');
-}
-function showCsvStatus(msg,color){
-  const el=document.getElementById('csvImportStatus');
-  el.textContent=msg;el.style.color=color;el.style.display='block';
-}
-function parseCsvContent(raw){
-  const lines=raw.split('\n').map(l=>l.trim()).filter(l=>l);
-  const projects=[];
-  let currentProj=null;
-  for(const line of lines){
-    // Skip header lines
-    if(line.startsWith('Itzu –')||line.startsWith('Doel:')||line.startsWith('Project,'))continue;
-    // Parse CSV line respecting quoted fields
-    const cols=parseCsvLine(line);
-    if(!cols||cols.length<2)continue;
-    const first=cols[0].trim();
-    const second=cols[1].trim();
-    if(first&&!second){
-      // Project header row
-      currentProj={name:first,rows:[]};
-      projects.push(currentProj);
-    } else if(!first&&second&&currentProj){
-      // Trajectory row
-      currentProj.rows.push({
-        desc:second,
-        status:cols[2]?.trim()||'Aankomend',
-        date:cols[3]?.trim()||'',
-        comment:cols[4]?.trim()||'',
-        actie:(cols[5]?.trim()||'').toLowerCase()==='ja'
-      });
-    }
-  }
-  return projects;
-}
-function parseCsvLine(line){
-  const result=[];let cur='';let inQ=false;
-  for(let i=0;i<line.length;i++){
-    const c=line[i];
-    if(c==='"'){inQ=!inQ;}
-    else if(c===','&&!inQ){result.push(cur);cur='';}
-    else{cur+=c;}
-  }
-  result.push(cur);
-  return result;
-}
-async function doFileImport(){
-  const parsed=window._csvParsed;
-  if(!parsed){showCsvStatus('Geen bestand geselecteerd.','var(--red)');return;}
-  showCsvStatus('Bezig met importeren…','var(--mut)');
-  let imported=0;
-  for(const csvProj of parsed){
-    const proj=poData.find(p=>p.name.toLowerCase()===csvProj.name.toLowerCase());
-    if(!proj)continue;
-    // Delete existing trajecten from Supabase
-    for(const row of proj.rows){await deleteTraject(row.id);}
-    proj.rows=[];
-    // Insert new ones
-    for(let i=0;i<csvProj.rows.length;i++){
-      const r=csvProj.rows[i];
-      const row=await insertTraject(proj.dbId,r,i+1);
-      if(row)proj.rows.push({id:row.id,desc:row.beschrijving,status:row.status,date:row.oplevering,comment:row.commentaar,actie:row.actie_itzu});
-      else proj.rows.push({id:'n'+(nextId++),desc:r.desc,status:r.status,date:r.date,comment:r.comment,actie:r.actie});
-      imported++;
-    }
-  }
-  closeModal('csvImportModal');
-  renderDashboard();
-  showToast(`Import voltooid — ${imported} trajecten geladen ✓`);
+async function dbInsertProject(data){
+  const{licenties,...row}=data;
+  const{data:p,error}=await sb.from('mc_projects').insert({...row,parent_id:null}).select().single();
+  if(error)throw new Error(error.message);
+  await Promise.all([
+    licenties.length&&sb.from('mc_licenties').insert(licenties.map((l,i)=>({...l,project_id:p.id,sort_order:i}))),
+    sb.from('mc_phases').insert(PHASE_DEFS.map((d,i)=>({project_id:p.id,key:d.key,status:'g',note:'',sort_order:i}))),
+  ]);
+  return{...p,offerte_total:Number(p.offerte_total||0),licentie_jr:Number(p.licentie_jr||0),licenties:[],phases:[],notes:[],oos_items:[],deelprojecten:[]};
 }
 
-// ============================================================
-// DO MODULE — RENDER
-// ============================================================
-function fmt(n){return new Intl.NumberFormat('nl-NL').format(Math.round(n))}
-
-function renderDo(){
-  // Client banner
-  let banner=document.getElementById('doClientBanner');
-  if(!banner){
-    banner=document.createElement('div');
-    banner.id='doClientBanner';
-    banner.style.cssText='background:rgba(99,102,241,.15);border-bottom:1px solid rgba(99,102,241,.25);padding:10px 28px;font-size:13px;font-weight:600;color:var(--bleu-m);display:none';
-    banner.textContent='👁 Klantweergave — Klik GO of NO-GO per ticket.';
-    document.getElementById('vDo').prepend(banner);
-  }
-  banner.style.display=doMode==='client'?'block':'none';
-
-  // Nav module label color
-  const lbl=document.getElementById('navModuleLabel');
-  if(lbl)lbl.style.color=doMode==='client'?'var(--bleu-m)':'var(--mut)';
-
-  // Toolbar visibility
-  const toolbar=document.querySelector('.do-toolbar');
-  if(toolbar)toolbar.style.display=doMode==='client'?'none':'flex';
-
-  renderDoHero();
-  renderDoBudget();
-  renderDoFilters();
-  renderDoTickets();
+async function dbInsertDeelproject(parentId,ownerId,client,data){
+  const{licenties,...row}=data;
+  const{data:p,error}=await sb.from('mc_projects').insert({...row,parent_id:parentId,owner_id:ownerId,client}).select().single();
+  if(error)throw new Error(error.message);
+  await Promise.all([
+    licenties&&licenties.length&&sb.from('mc_licenties').insert(licenties.map((l,i)=>({...l,project_id:p.id,sort_order:i}))),
+    sb.from('mc_phases').insert(PHASE_DEFS.map((d,i)=>({project_id:p.id,key:d.key,status:'g',note:'',sort_order:i}))),
+  ]);
+  return{...p,offerte_total:Number(p.offerte_total||0),licentie_jr:Number(p.licentie_jr||0),licenties:licenties||[],phases:PHASE_DEFS.map((d,i)=>({project_id:p.id,key:d.key,status:'g',note:'',sort_order:i,updated_at:new Date().toISOString()})),notes:[],oos_items:[]};
 }
 
-function renderDoHero(){
-  const teVal=doTickets.filter(t=>t.status==='TE VALIDEREN').length;
-  const goTickets=doTickets.filter(t=>t.status==='GO');
-  const spent=goTickets.reduce((s,t)=>s+t.dev*DEV_RATE+t.po*PO_RATE,0);
-  const totalBudget=doProjects.reduce((s,p)=>s+(p.d_budget*DEV_RATE+p.p_budget*PO_RATE),0);
-  document.getElementById('doHero').innerHTML=`
-    <div class="do-hero-card">
-      <div class="do-hero-num blue">${String(teVal).padStart(2,'0')}</div>
-      <div class="do-hero-sub">Te valideren · tickets open</div>
+async function dbUpdateProject(p){
+  const{licenties,phases,notes,oos_items,deelprojecten,...row}=p;
+  const{error}=await sb.from('mc_projects').upsert(row);
+  if(error)throw new Error(error.message);
+}
+async function dbSyncLicenties(projectId,lics){
+  await sb.from('mc_licenties').delete().eq('project_id',projectId);
+  if(lics.length)await sb.from('mc_licenties').insert(lics.map((l,i)=>({...l,project_id:projectId,sort_order:i})));
+  await sb.from('mc_projects').update({licentie_jr:lics.reduce((s,l)=>s+l.cost,0),last_updated:new Date().toISOString()}).eq('id',projectId);
+}
+async function dbUpdateGauges(projectId,gauges,ps){
+  await sb.from('mc_projects').update({...gauges,project_status:ps,last_updated:new Date().toISOString()}).eq('id',projectId);
+}
+async function dbUpdatePhase(projectId,key,data){
+  await sb.from('mc_phases').update({...data,updated_at:new Date().toISOString()}).eq('project_id',projectId).eq('key',key);
+  // Only count non-done phases for timeline status rollup
+  const{data:phases}=await sb.from('mc_phases').select('status,done').eq('project_id',projectId);
+  const active=(phases??[]).filter(p=>!p.done);
+  const ss=active.length>0?active.map(p=>p.status):(phases??[]).map(p=>p.status);
+  const tl=ss.includes('r')?'r':ss.includes('a')?'a':'g';
+  await sb.from('mc_projects').update({timeline_status:tl,last_updated:new Date().toISOString()}).eq('id',projectId);
+  return tl;
+}
+async function dbAddNote(projectId,text){const{data}=await sb.from('mc_notes').insert({project_id:projectId,text}).select().single();return data;}
+async function dbAddOOS(projectId,item){const{data}=await sb.from('mc_oos_items').insert({project_id:projectId,...item}).select().single();return{...data,price:Number(data.price)};}
+async function dbDeleteOOS(id){await sb.from('mc_oos_items').delete().eq('id',id);}
+async function dbDeleteProject(id){await sb.from('mc_projects').delete().eq('id',id);}
+
+// ── Helpers ───────────────────────────────────────────────
+const eur=n=>n==null?'—':new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR',minimumFractionDigits:0,maximumFractionDigits:0}).format(n);
+const fdate=iso=>iso?new Date(iso).toLocaleDateString('nl-NL',{day:'numeric',month:'short',year:'numeric'}):'—';
+const fdshort=iso=>iso?new Date(iso).toLocaleDateString('nl-NL',{day:'numeric',month:'short'}):'—';
+function hcol(s){const cs=['linear-gradient(135deg,#576BFF,#8B5CF6)','linear-gradient(135deg,#0EA5E9,#14B8A6)','linear-gradient(135deg,#F59E0B,#EF4444)','linear-gradient(135deg,#10B981,#059669)','linear-gradient(135deg,#EC4899,#8B5CF6)','linear-gradient(135deg,#6366F1,#3B82F6)'];let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return cs[Math.abs(h)%cs.length];}
+const slbl=s=>({g:'Op koers',a:'Risico',r:'Kritiek',done:'Afgerond'}[s]||s);
+function projectDoneStatus(phases){
+  if(!phases||phases.length===0) return null;
+  const nonSupport=phases.filter(p=>p.key!=='Support');
+  const allDone=phases.every(p=>p.done);
+  const allExceptSupportDone=nonSupport.length>0&&nonSupport.every(p=>p.done);
+  return (allDone||allExceptSupportDone)?'done':null;
+}
+function drollup(g){const v=[g.gauge_timing,g.gauge_budget,g.gauge_scope];return v.includes('r')?'r':v.includes('a')?'a':'g';}
+function uid(){return Math.random().toString(36).slice(2)+Date.now().toString(36);}
+function gaugeClickZone(e,onSet){const rect=e.currentTarget.getBoundingClientRect();const x=e.clientX-rect.left;const w=rect.width;if(x<w/3)onSet('g');else if(x<2*w/3)onSet('a');else onSet('r');}
+function downscale(file,cb){const r=new FileReader();r.onload=e=>{const img=new Image();img.onload=()=>{const sz=256,rat=Math.min(sz/img.width,sz/img.height),c=document.createElement('canvas');c.width=img.width*rat;c.height=img.height*rat;c.getContext('2d').drawImage(img,0,0,c.width,c.height);cb(c.toDataURL('image/png'));};img.src=e.target.result;};r.readAsDataURL(file);}
+function halfMonthPeriods(year){const months=['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];const p=[];for(let m=0;m<12;m++){p.push({label:`${months[m]} 1-15`,value:`${year}-${String(m+1).padStart(2,'0')}-01`});const ld=new Date(year,m+1,0).getDate();p.push({label:`${months[m]} 16-${ld}`,value:`${year}-${String(m+1).padStart(2,'0')}-16`});}return p;}
+
+// ── Icons ─────────────────────────────────────────────────
+const Ic={
+  Search:()=><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+  Plus:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+  Edit:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+  Trash:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>,
+  Back:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15 18 9 12 15 6"/></svg>,
+  X:()=><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+  ChevronDown:()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="6 9 12 15 18 9"/></svg>,
+  ChevronRight:()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>,
+  Check:()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>,
+  Notes:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
+  Calendar:()=><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+  Activity:()=><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
+  Layers:()=><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>,
+  Target:()=><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
+  ExternalLink:()=><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
+  Upload:()=><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>,
+  Warn:()=><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+  Refresh:()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>,
+};
+
+function Avatar({logo,client,size=36,rad=8}){
+  if(logo)return<img src={logo} alt={client} style={{width:size,height:size,borderRadius:rad,objectFit:'cover',border:'1px solid var(--s200)',flexShrink:0}}/>;
+  const ini=(client||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  return<div style={{width:size,height:size,borderRadius:rad,background:hcol(client||''),display:'flex',alignItems:'center',justifyContent:'center',fontSize:size*.33,fontWeight:700,color:'#fff',flexShrink:0}}>{ini}</div>;
+}
+function Pill({status,label,onClick}){
+  return<span className={`pill ${status}`} onClick={e=>{e.stopPropagation();onClick&&onClick();}} style={{cursor:onClick?'pointer':'default'}}>
+    <span className="pill-dot"/>{label||slbl(status)}
+  </span>;
+}
+
+// ── Speedometer Gauge ─────────────────────────────────────
+function SpeedoGauge({label,sublabel,status,onSet}){
+  const color={g:'#22c55e',a:'#f59e0b',r:'#ef4444'}[status];
+  const txt={g:'OP SCHEMA',a:'RISICO',r:'KRITIEK'}[status];
+  const cx=110,cy=108,R=88,tR=74;
+  const p=d=>{const a=d*Math.PI/180;return[cx+R*Math.cos(a),cy-R*Math.sin(a)];};
+  const tp=d=>{const a=d*Math.PI/180;return[cx+tR*Math.cos(a),cy-tR*Math.sin(a)];};
+  const[lx,ly]=p(180);const[rx,ry]=p(0);
+  const[tl,tlY]=tp(180);const[tg2,tg2Y]=tp(120);const[ta2,ta2Y]=tp(60);const[tr,trY]=tp(0);
+  const na={g:150,a:90,r:30}[status]*Math.PI/180;
+  const nLen=68,nTail=12;
+  const[nx2,ny2]=[cx+nLen*Math.cos(na),cy-nLen*Math.sin(na)];
+  const[nx3,ny3]=[cx+nTail*Math.cos(na+Math.PI),cy-nTail*Math.sin(na+Math.PI)];
+  return(
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:4,padding:'10px 4px 8px',border:'1px solid var(--s200)',borderRadius:12,position:'relative',userSelect:'none',cursor:'pointer',background:'#fff',transition:'border-color .15s',overflow:'hidden'}}
+      onClick={e=>gaugeClickZone(e,onSet)}
+      onMouseEnter={e=>e.currentTarget.style.borderColor='var(--s300)'}
+      onMouseLeave={e=>e.currentTarget.style.borderColor='var(--s200)'}
+      title="← Op schema | Risico | Kritiek →">
+      <div style={{fontSize:10,fontWeight:700,textTransform:'uppercase',letterSpacing:'.6px',color:'var(--s400)'}}>{label}</div>
+      <svg width="100%" height="auto" viewBox="0 0 220 116" style={{display:'block',maxWidth:220}}>
+        <defs>
+          <radialGradient id={`dg-${label}`} cx="50%" cy="100%" r="90%"><stop offset="0%" stopColor="#1e2d3d"/><stop offset="100%" stopColor="#0b1520"/></radialGradient>
+          <clipPath id={`cp-${label}`}><rect x="0" y="0" width="220" height="116"/></clipPath>
+        </defs>
+        <g clipPath={`url(#cp-${label})`}>
+          <path d={`M${lx} ${ly} A${R} ${R} 0 0 1 ${rx} ${ry} L${cx} ${cy} Z`} fill={`url(#dg-${label})`}/>
+          <path d={`M${lx} ${ly} A${R} ${R} 0 0 1 ${rx} ${ry}`} fill="none" stroke="#2a3f55" strokeWidth="1.5"/>
+          <path d={`M${tl} ${tlY} A${tR} ${tR} 0 0 1 ${tr} ${trY}`} fill="none" stroke="#172031" strokeWidth="11" strokeLinecap="butt"/>
+          <path d={`M${tl} ${tlY} A${tR} ${tR} 0 0 1 ${tg2} ${tg2Y}`} fill="none" stroke="#22c55e" strokeWidth="11" strokeOpacity={status==='g'?'1':'.28'} strokeLinecap="butt"/>
+          <path d={`M${tg2} ${tg2Y} A${tR} ${tR} 0 0 1 ${ta2} ${ta2Y}`} fill="none" stroke="#f59e0b" strokeWidth="11" strokeOpacity={status==='a'?'1':'.28'} strokeLinecap="butt"/>
+          <path d={`M${ta2} ${ta2Y} A${tR} ${tR} 0 0 1 ${tr} ${trY}`} fill="none" stroke="#ef4444" strokeWidth="11" strokeOpacity={status==='r'?'1':'.28'} strokeLinecap="butt"/>
+          {[180,150,120,90,60,30,0].map((deg,i)=>{const a=deg*Math.PI/180;return<line key={deg} x1={cx+(R-1)*Math.cos(a)} y1={cy-(R-1)*Math.sin(a)} x2={cx+(R-9)*Math.cos(a)} y2={cy-(R-9)*Math.sin(a)} stroke="#3a5272" strokeWidth={i%3===0?1.8:1}/>;} )}
+          <text x={cx} y={cy-28} textAnchor="middle" fill={color} fontSize="11" fontWeight="800" fontFamily="DM Sans,sans-serif" letterSpacing="1">{txt}</text>
+          <line x1={nx3} y1={ny3} x2={nx2} y2={ny2} stroke={color} strokeWidth="3" strokeLinecap="round" style={{transition:'all .4s cubic-bezier(.34,1.1,.64,1)'}}/>
+          <line x1={cx} y1={cy} x2={nx3} y2={ny3} stroke={color} strokeWidth="2" strokeLinecap="round" strokeOpacity=".35"/>
+          <circle cx={cx} cy={cy} r="7" fill="#1a2a3a" stroke="#2a3f55" strokeWidth="1.5"/>
+          <circle cx={cx} cy={cy} r="3.5" fill={color}/>
+        </g>
+      </svg>
+      <div className="gauge-sublabel" style={{fontSize:10,color:'var(--s500)',marginTop:2}}>{sublabel}</div>
+      <div className="gauge-hint" style={{fontSize:9,color:'#c0ccd8',position:'absolute',bottom:3,right:6}}>← ● →</div>
     </div>
-    <div class="do-hero-card">
-      <div class="do-hero-num">${String(goTickets.length).padStart(2,'0')}</div>
-      <div class="do-hero-sub">Goedgekeurd · € ${fmt(spent)} verbruikt van € ${fmt(totalBudget)}</div>
-    </div>`;
+  );
 }
 
-function renderDoBudget(){
-  const grid=document.getElementById('doBudgetGrid');grid.innerHTML='';
-  doProjects.forEach(proj=>{
-    const tickets=doTickets.filter(t=>t.pid===proj.id&&t.status==='GO');
-    const devUsed=tickets.reduce((s,t)=>s+t.dev,0);
-    const poUsed=tickets.reduce((s,t)=>s+t.po,0);
-    const devPct=Math.min(100,proj.d_budget?Math.round(devUsed/proj.d_budget*100):0);
-    const poPct=Math.min(100,proj.p_budget?Math.round(poUsed/proj.p_budget*100):0);
-    const budgetSpent=devUsed*DEV_RATE+poUsed*PO_RATE;
-    const budgetTotal=proj.d_budget*DEV_RATE+proj.p_budget*PO_RATE;
-    const budgetPct=Math.min(100,budgetTotal?Math.round(budgetSpent/budgetTotal*100):0);
-    const barClass=p=>p>=90?'danger':p>=70?'warn':'normal';
-    const card=document.createElement('div');card.className='do-budget-card';
-    card.innerHTML=`
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:2px">
-        <div class="do-budget-title">${proj.name}</div>
-        ${doMode==='intern'?`<button class="btn-icon" style="margin-left:4px;padding:3px 5px" onclick="openDoBudgetModal()" title="Budget beheren"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg></button>`:''}
+function PhaseCard({phase,onClick,onToggleDone}){
+  const def=PHASE_DEFS.find(d=>d.key===phase.key)||{icon:'📌'};
+  const updAt=phase.updated_at||phase.created_at;
+  const done=phase.done;
+  return(
+    <div className={`phase-card ${done?'done':phase.status}`} onClick={onClick}
+      style={{opacity:done?.7:1,background:done?'var(--s50)':'#fff',borderColor:done?'var(--s200)':undefined,position:'relative'}}>
+      {/* Done checkbox — top right, stops propagation so it doesn't open modal */}
+      <div onClick={e=>{e.stopPropagation();onToggleDone&&onToggleDone(!done);}}
+        style={{position:'absolute',top:10,right:10,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',
+          width:18,height:18,borderRadius:5,border:done?'none':'1.5px solid var(--s300)',
+          background:done?'var(--green)':'#fff',transition:'all .15s',flexShrink:0}}
+        title={done?'Markeer als actief':'Markeer als afgerond'}>
+        {done&&<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
       </div>
-      <div class="do-budget-rate">€${DEV_RATE}/u DEV · €${PO_RATE}/u PO</div>
-      <div class="do-bar-label">DEV UREN</div>
-      <div class="do-bar-track"><div class="do-bar-fill ${barClass(devPct)}" style="width:${devPct}%"></div></div>
-      <div class="do-bar-val">${devUsed}u / ${proj.d_budget}u</div>
-      <div class="do-bar-label">PO UREN</div>
-      <div class="do-bar-track"><div class="do-bar-fill ${barClass(poPct)}" style="width:${poPct}%"></div></div>
-      <div class="do-bar-val">${poUsed}u / ${proj.p_budget}u</div>
-      <div class="do-bar-label">BUDGET</div>
-      <div class="do-bar-track"><div class="do-bar-fill ${barClass(budgetPct)}" style="width:${budgetPct}%"></div></div>
-      <div class="do-bar-val">€ ${fmt(budgetSpent)} / € ${fmt(budgetTotal)}</div>`;
-    grid.appendChild(card);
-  });
+      <div className="phase-card-name" style={{paddingRight:24}}>
+        <span style={{fontSize:16}}>{done?'✓':def.icon}</span>
+        <span style={{flex:1,minWidth:0,overflow:'hidden',textOverflow:'ellipsis',textDecoration:done?'line-through':'none',color:done?'var(--s400)':'inherit'}}>{phase.key}</span>
+      </div>
+      {done
+        ?<div style={{fontSize:11,fontWeight:700,color:'var(--s400)',textTransform:'uppercase',letterSpacing:'.5px',marginBottom:8}}>Afgerond</div>
+        :<div className="phase-card-status"><Pill status={phase.status}/></div>}
+      <div className="phase-card-date">{updAt?fdshort(updAt)+', '+new Date(updAt).toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'}):'—'}</div>
+    </div>
+  );
 }
 
-function renderDoFilters(){
-  const counts={ALLE:doTickets.length,'TE VALIDEREN':0,'GO':0,'NO-GO':0};
-  doTickets.forEach(t=>{if(t.status in counts)counts[t.status]++;});
-  const bar=document.getElementById('doFilters');bar.innerHTML='';
-  ['ALLE','TE VALIDEREN','GO','NO-GO'].forEach(f=>{
-    const btn=document.createElement('button');
-    btn.className='do-filter-pill'+(doFilter===f?' active':'');
-    btn.textContent=`${f} ${counts[f]}`;
-    btn.onclick=()=>{doFilter=f;renderDoFilters();renderDoTickets();};
-    bar.appendChild(btn);
-  });
-  // meta
-  const go=counts['GO'],tv=counts['TE VALIDEREN'],tot=counts['ALLE'];
-  document.getElementById('doTicketMeta').textContent=`${tot} TOTAAL · ${go} GOEDGEKEURD · ${tv} OPEN`;
-}
-
-function renderDoTickets(){
-  const container=document.getElementById('doTicketGroups');container.innerHTML='';
-  let grandDev=0,grandPo=0,grandTotal=0;
-  doProjects.forEach(proj=>{
-    let tickets=doTickets.filter(t=>t.pid===proj.id);
-    if(doFilter!=='ALLE')tickets=tickets.filter(t=>t.status===doFilter);
-    if(tickets.length===0)return;
-    const goDev=tickets.filter(t=>t.status==='GO').reduce((s,t)=>s+t.dev,0);
-    const goPo=tickets.filter(t=>t.status==='GO').reduce((s,t)=>s+t.po,0);
-    const goTotal=goDev*DEV_RATE+goPo*PO_RATE;
-    grandDev+=goDev;grandPo+=goPo;grandTotal+=goTotal;
-    const group=document.createElement('div');group.className='do-group';
-    // Header
-    const hdr=document.createElement('div');hdr.className='do-group-header';
-    hdr.innerHTML=`<div><span class="do-group-title">${proj.name}</span><span class="do-group-count">${tickets.length} ticket${tickets.length!==1?'s':''}</span></div><div class="do-group-go">Go: ${goDev}u DEV · ${goPo}u PO · € ${fmt(goTotal)}</div>`;
-    group.appendChild(hdr);
-    const isClient=doMode==='client';
-    const gridCols=isClient?'36px 110px 1fr 58px 58px 110px 48px 160px':'36px 110px 1fr 58px 58px 110px 48px 160px 32px 32px';
-    const scrollWrap=document.createElement('div');scrollWrap.className='do-table-scroll';
-    const ch=document.createElement('div');ch.className='do-col-header';ch.style.gridTemplateColumns=gridCols;
-    ch.innerHTML=`<span>#</span><span>Boardnr</span><span>Omschrijving</span><span style="text-align:right">DEV</span><span style="text-align:right">PO</span><span style="text-align:right">Totaal (€)</span><span></span><span>Validatie</span>${isClient?'':`<span style="text-align:center;color:var(--grn)" title="Afgerond">✓</span><span></span>`}`;
-    scrollWrap.appendChild(ch);
-    // Rows
-    let rowIdx=0;
-    tickets.forEach(t=>{
-      rowIdx++;
-      const row=document.createElement('div');
-      row.className='do-ticket-row'+(t.status==='NO-GO'?' no-go-expanded':'')+(t.done?' done-row':'');
-      row.id=`do-row-${t.id}`;
-      row.style.gridTemplateColumns=gridCols;
-      const tot=t.dev*DEV_RATE+t.po*PO_RATE;
-      row.innerHTML=`
-        <div class="do-ticket-cell do-ticket-num">${String(rowIdx).padStart(2,'0')}</div>
-        <div class="do-ticket-cell"><span class="do-board" ${isClient?'':'contenteditable="true"'} onblur="${isClient?'':'saveDoField(\''+t.id+'\',\'board\',this)'}">${t.board}</span></div>
-        <div class="do-ticket-cell"><span ${isClient?'':'contenteditable="true"'} onblur="${isClient?'':'saveDoField(\''+t.id+'\',\'inh\',this)'}">${t.inh}</span></div>
-        <div class="do-ticket-cell">${isClient?`<span style="text-align:right;display:block;color:var(--txt)">${t.dev}</span>`:`<input class="do-num-input" type="number" min="0" step="0.5" value="${t.dev}" onfocus="if(this.value==='0')this.value=''" onblur="restoreZero(this);saveDoNum('${t.id}','dev',this)" onchange="calcDoTotal('${t.id}')">`}</div>
-        <div class="do-ticket-cell">${isClient?`<span style="text-align:right;display:block;color:var(--txt)">${t.po}</span>`:`<input class="do-num-input" type="number" min="0" step="0.5" value="${t.po}" onfocus="if(this.value==='0')this.value=''" onblur="restoreZero(this);saveDoNum('${t.id}','po',this)" onchange="calcDoTotal('${t.id}')">`}</div>
-        <div class="do-ticket-cell do-total" id="do-total-${t.id}" style="text-align:right">€ ${fmt(tot)}</div>
-        <div class="do-ticket-cell"></div>
-        <div class="do-ticket-cell">
-          <div class="do-val-btns">
-            <button class="do-val-btn ${t.status==='GO'?'go-active':''}" onclick="setDoStatus('${t.id}','GO')">GO</button>
-            <button class="do-val-btn ${t.status==='NO-GO'?'nogo-active':''}" onclick="setDoStatus('${t.id}','NO-GO')">NO-GO</button>
+function MilestoneModal({phase,onSave,onCancel}){
+  const year=new Date().getFullYear();
+  const periods=halfMonthPeriods(year);
+  const[startVal,setStartVal]=useState(phase.start_date||'');
+  const[endVal,setEndVal]=useState(phase.end_date||'');
+  const[status,setStatus]=useState(phase.status||'g');
+  const[note,setNote]=useState(phase.note||'');
+  const[done,setDone]=useState(phase.done||false);
+  return(
+    <div className="modal-backdrop" onClick={onCancel}>
+      <div className="modal" onClick={e=>e.stopPropagation()}>
+        <div className="mhdr"><div className="mhdr-icon"><Ic.Calendar/></div><div className="mhdr-text"><div className="mhdr-sup">Tijdlijn</div><div className="mtitle">Mijlpaal bewerken</div></div><button className="mhdr-close" onClick={onCancel}><Ic.X/></button></div>
+        <div className="mbody">
+          <div className="field"><label>Naam</label><input value={phase.key} readOnly style={{background:'var(--s50)',color:'var(--s600)'}}/></div>
+          {[['Van (Startdatum)',startVal,setStartVal],['Tot (Einddatum)',endVal,setEndVal]].map(([title,val,setVal])=>(
+            <div key={title}>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:6}}>
+                <label style={{fontSize:11,fontWeight:700,color:'var(--s500)',textTransform:'uppercase',letterSpacing:'.6px'}}>{title}</label>
+                {val&&<button style={{background:'none',border:'none',color:'var(--primary)',fontSize:12,fontWeight:600,cursor:'pointer'}} onClick={()=>setVal('')}>Wissen</button>}
+              </div>
+              <div className="date-grid" style={{marginBottom:14}}>{periods.map(p=><div key={p.value} className={`date-chip${val===p.value?' selected':''}`} onClick={()=>setVal(val===p.value?'':p.value)}>{p.label}</div>)}</div>
+            </div>
+          ))}
+          <div className="field" style={{marginBottom:10}}>
+            <label>Status</label>
+            <div className="status-chips">
+              {[{s:'g',label:'Op koers',dot:'#22c55e'},{s:'a',label:'Risico',dot:'#f59e0b'},{s:'r',label:'Kritiek',dot:'#ef4444'}].map(({s,label,dot})=>(
+                <div key={s} className={`status-chip${status===s?` selected-${s}`:''}`} onClick={()=>setStatus(s)}><span className="status-chip-dot" style={{background:dot}}/>{label}</div>
+              ))}
+            </div>
+          </div>
+          <div className="field"><label>Notitie (optioneel)</label><textarea value={note} onChange={e=>setNote(e.target.value)} placeholder="Toelichting bij deze mijlpaal..."/></div>
+          <div style={{border:'1px solid var(--s200)',borderRadius:'var(--rlg)',padding:'12px 16px',display:'flex',alignItems:'center',gap:12,background:done?'var(--gbg)':'#fff',transition:'background .2s'}}>
+            <span style={{fontSize:20}}>{done?'✅':'⬜'}</span>
+            <div style={{flex:1}}>
+              <div style={{fontSize:13.5,fontWeight:600,color:'var(--s800)'}}>Fase afgerond</div>
+              <div style={{fontSize:12,color:'var(--s500)',marginTop:1}}>Markeert de fase als klaar — wordt grijs weergegeven</div>
+            </div>
+            <button type="button" className={`toggle-switch ${done?'on':'off'}`} onClick={()=>setDone(d=>!d)}><div className="toggle-knob"/></button>
           </div>
         </div>
-        ${isClient?'':`<div class="do-ticket-cell" style="text-align:center"><input type="checkbox" class="do-done-cb" ${t.done?'checked':''} onchange="toggleDoDone('${t.id}',this)"></div>`}
-        ${isClient?'':`<div class="do-ticket-cell"><button class="btn-del" onclick="removeDoTicket('${t.id}')">✕</button></div>`}`;
-      scrollWrap.appendChild(row);
-      // NO-GO comment row
-      const nrow=document.createElement('div');
-      nrow.className='do-nogo-row'+(t.status==='NO-GO'?' visible':'');
-      nrow.id=`do-nogo-${t.id}`;
-      nrow.innerHTML=`<textarea class="do-nogo-textarea" placeholder="Reden voor NO-GO…" onblur="saveDoComment('${t.id}',this)">${t.comment}</textarea>`;
-      scrollWrap.appendChild(nrow);
+        <div className="mftr"><button className="btn bg" onClick={onCancel}>Annuleren</button><button className="btn bp" onClick={()=>onSave({status,start_date:startVal,end_date:endVal,note,done})}><Ic.Calendar/> Opslaan</button></div>
+      </div>
+    </div>
+  );
+}
+
+function GanttChart({phases,onPhaseClick}){
+  const today=new Date();const year=today.getFullYear();
+  const months=['JAN','FEB','MRT','APR','MEI','JUN','JUL','AUG','SEP','OKT','NOV','DEC'];
+  const hw=36;
+  const d2h=ds=>{if(!ds)return null;const d=new Date(ds);return d.getMonth()*2+(d.getDate()<=15?0:1);};
+  const todayH=today.getMonth()*2+(today.getDate()<=15?0:1);
+  const todayOff=(today.getDate()<=15?(today.getDate()-1)/15:(today.getDate()-16)/15)*hw;
+  const bc={g:'#22c55e',a:'#f59e0b',r:'#ef4444'};
+  return(
+    <div className="gantt-wrap">
+      <table className="gantt-table">
+        <thead>
+          <tr className="gantt-months">
+            <th style={{width:150,textAlign:'left',paddingLeft:4}}></th>
+            {months.map((m,i)=><th key={i} colSpan={2} style={{borderLeft:'1px solid var(--s100)',paddingBottom:8}}>{m} {year}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          <tr className="gantt-row">
+            <td style={{paddingLeft:4}}><span style={{fontSize:12,fontWeight:700,color:'var(--green)'}}>Vandaag</span></td>
+            {Array.from({length:24},(_,i)=>(
+              <td key={i} className="gantt-cell" style={{position:'relative',width:hw}}>
+                {i===todayH&&<>
+                  <div style={{position:'absolute',top:0,bottom:0,left:todayOff,width:2,background:'var(--green)',zIndex:4}}/>
+                  <div style={{position:'absolute',top:0,left:todayOff,transform:'translateX(-50%)'}}>
+                    <div style={{background:'#fff',border:'1.5px solid var(--green)',borderRadius:999,fontSize:10,fontWeight:700,color:'var(--gtxt)',padding:'1px 7px',whiteSpace:'nowrap',marginTop:-20}}>vandaag</div>
+                  </div>
+                </>}
+              </td>
+            ))}
+          </tr>
+          {phases.map(phase=>{
+            const def=PHASE_DEFS.find(d=>d.key===phase.key)||{icon:'📌'};
+            const sh=d2h(phase.start_date);const eh=d2h(phase.end_date);
+            const done=phase.done;
+            const barColor=done?'#94a3b8':bc[phase.status];
+            return(
+              <tr key={phase.key} className="gantt-row">
+                <td><div className="gantt-label" style={{opacity:done?.6:1}}>
+                  <span style={{fontSize:13}}>{done?'✓':def.icon}</span>
+                  <span style={{textDecoration:done?'line-through':'none',color:done?'var(--s400)':'inherit'}}>{phase.key}</span>
+                </div></td>
+                {Array.from({length:24},(_,i)=>(
+                  <td key={i} className="gantt-cell" style={{width:hw}}>
+                    {sh!==null&&i===sh&&eh!==null&&(
+                      <div className="gantt-bar" style={{background:barColor,left:0,width:`${(eh-sh+1)*hw}px`,opacity:done?.7:1}} onClick={()=>onPhaseClick(phase)}>
+                        {done?'✓ ':''}{phase.key}
+                      </div>
+                    )}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function OOSCard({items,onAdd,onRemove}){
+  const[f,setF]=useState({title:'',description:'',price:''});
+  const total=items.reduce((s,i)=>s+i.price,0);
+  return(
+    <div className="section-card">
+      <div className="section-header">
+        <div><div className="section-title-row"><span style={{color:'var(--amber)'}}><Ic.Warn/></span><span className="section-title">Out of scope verzoeken</span></div><div style={{fontSize:12.5,color:'var(--s400)',marginTop:3}}>{items.length} verzoeken</div></div>
+        <span style={{background:'var(--abg)',color:'var(--atxt)',border:'1px solid var(--aborder)',borderRadius:999,padding:'4px 13px',fontSize:12.5,fontWeight:600}}>Totaal {eur(total)}</span>
+      </div>
+      {items.length>0&&<table className="oot" style={{marginBottom:16}}><thead><tr><th>Titel</th><th>Omschrijving</th><th style={{textAlign:'right'}}>Prijs</th><th></th></tr></thead><tbody>{items.map(it=><tr key={it.id}><td style={{fontWeight:600}}>{it.title}</td><td style={{color:'var(--s500)'}}>{it.description}</td><td style={{textAlign:'right'}}>{eur(it.price)}</td><td><button className="bi" style={{padding:4}} onClick={()=>onRemove(it.id)}><Ic.Trash/></button></td></tr>)}</tbody></table>}
+      <div className="oos-form">
+        <div className="field" style={{marginBottom:10}}><label>Titel</label><input value={f.title} onChange={e=>setF(p=>({...p,title:e.target.value}))} placeholder="bijv. Extra rapportage module"/></div>
+        <div className="field" style={{marginBottom:10}}><label>Beschrijving</label><textarea value={f.description} onChange={e=>setF(p=>({...p,description:e.target.value}))} placeholder="Gedetailleerde beschrijving..." style={{minHeight:60}}/></div>
+        <div className="field" style={{marginBottom:10}}><label>Indicatieve prijs (optioneel)</label><input type="number" value={f.price} onChange={e=>setF(p=>({...p,price:e.target.value}))} placeholder="0"/></div>
+        <div style={{display:'flex',gap:8,justifyContent:'flex-end'}}>
+          <button className="btn bg bsm" onClick={()=>setF({title:'',description:'',price:''})}>Annuleren</button>
+          <button className="btn btn-amber bsm" disabled={!f.title.trim()} onClick={async()=>{await onAdd({title:f.title,description:f.description,price:parseFloat(f.price)||0});setF({title:'',description:'',price:''});}}><Ic.Plus/> Toevoegen</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LogoUploader({value,onChange}){
+  const ref=useRef();
+  if(value)return<div style={{display:'flex',alignItems:'center',gap:12}}><img src={value} style={{width:52,height:52,borderRadius:8,objectFit:'cover',border:'1px solid var(--s200)'}}/><div><div style={{fontSize:13,color:'var(--s600)',marginBottom:6}}>Logo ingesteld</div><button className="btn bg bsm" onClick={()=>onChange(null)}>Verwijderen</button></div></div>;
+  return<div><input ref={ref} type="file" accept="image/*" style={{display:'none'}} onChange={e=>{const f=e.target.files[0];if(f)downscale(f,onChange);}}/><div style={{display:'flex',alignItems:'center',gap:10}}><div style={{width:52,height:52,borderRadius:8,border:'1.5px dashed var(--s300)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--s300)',fontSize:22,flexShrink:0}}>?</div><div><button className="btn bg bsm" onClick={()=>ref.current.click()}><Ic.Upload/> Logo uploaden</button><div style={{fontSize:11.5,color:'var(--s400)',marginTop:4}}>PNG of JPG, automatisch verkleind tot 256px</div></div></div></div>;
+}
+
+function LicEditor({rows,onChange}){
+  const total=rows.reduce((s,l)=>s+(Number(l.cost)||0),0);
+  return<div>
+    {rows.length>0&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr auto',gap:'0 9px',marginBottom:4}}>
+      <div style={{fontSize:10,fontWeight:700,color:'var(--s400)',textTransform:'uppercase',letterSpacing:'.6px'}}>Type</div>
+      <div style={{fontSize:10,fontWeight:700,color:'var(--s400)',textTransform:'uppercase',letterSpacing:'.6px'}}>Kosten/jr (€)</div>
+      <div/>
+    </div>}
+    {rows.map((l,i)=>{
+      const isCustom=l.custom||(!LICENSE_TYPES.includes(l.type)&&l.type!=='');
+      return<div key={i} style={{display:'grid',gridTemplateColumns:'1fr 1fr auto',gap:9,alignItems:'center',marginBottom:8}}>
+        <div style={{display:'flex',flexDirection:'column',gap:4}}>
+          {!isCustom
+            ?<select value={l.type} onChange={e=>{const n=[...rows];if(e.target.value==='__custom__'){n[i]={...n[i],type:'',custom:true};}else{n[i]={...n[i],type:e.target.value,custom:false};}onChange(n);}} style={{padding:'8px 10px',border:'1px solid var(--s200)',borderRadius:'var(--rmd)',fontSize:13,color:'var(--s800)',outline:'none',background:'#fff',width:'100%'}}>
+              <option value="">Selecteer type...</option>
+              {LICENSE_TYPES.map(t=><option key={t} value={t}>{t}</option>)}
+              <option value="__custom__">+ Toevoegen...</option>
+            </select>
+            :<div style={{display:'flex',gap:5,alignItems:'center'}}>
+              <input value={l.type} onChange={e=>{const n=[...rows];n[i]={...n[i],type:e.target.value};onChange(n);}} placeholder="Naam licentie..." style={{padding:'8px 10px',border:'1px solid var(--primary)',borderRadius:'var(--rmd)',fontSize:13,color:'var(--s800)',outline:'none',width:'100%',boxShadow:'0 0 0 3px rgba(87,107,255,.1)'}} autoFocus/>
+              <button className="bi" style={{padding:5,flexShrink:0}} title="Terug naar lijst" onClick={()=>{const n=[...rows];n[i]={...n[i],type:'',custom:false};onChange(n);}}><Ic.Back/></button>
+            </div>
+          }
+        </div>
+        <input type="number" value={l.cost===0?'':l.cost} onChange={e=>{const n=[...rows];n[i]={...n[i],cost:e.target.value===''?0:parseFloat(e.target.value)||0};onChange(n);}} placeholder="0" style={{padding:'8px 10px',border:'1px solid var(--s200)',borderRadius:'var(--rmd)',fontSize:13,color:'var(--s800)',outline:'none',width:'100%'}}/>
+        <button className="bi" style={{padding:5}} onClick={()=>onChange(rows.filter((_,j)=>j!==i))}><Ic.X/></button>
+      </div>;
+    })}
+    <button className="lic-add-btn" onClick={()=>onChange([...rows,{type:'',cost:0,custom:false}])}><Ic.Plus/> Licentie toevoegen</button>
+    {rows.length>0&&<div style={{fontSize:12.5,color:'var(--s500)',textAlign:'right',paddingTop:8}}>Totaal: <strong style={{color:'var(--s800)'}}>{eur(total)}/jr</strong></div>}
+  </div>;
+}
+
+// ProjectForm — used for both new root projects and new deelprojecten
+function ProjectForm({initial,activeAM,title,onSave,onCancel}){
+  const[f,setF]=useState(initial?{
+    client:initial.client,name:initial.name,logo:initial.logo,
+    offerte_total:initial.offerte_total,owner_id:initial.owner_id,
+    licenties:initial.licenties.map(l=>({type:l.type,cost:l.cost})),
+  }:{client:'',name:'',logo:null,offerte_total:'',owner_id:activeAM,licenties:[]});
+  const set=(k,v)=>setF(p=>({...p,[k]:v}));
+  const valid=f.name.trim()&&(initial||f.client.trim());
+  return<>
+    <div className="mbody">
+      {!initial&&<div className="fr2" style={{marginBottom:0}}>
+        <div className="field"><label>Klantnaam</label><input value={f.client} onChange={e=>set('client',e.target.value)} placeholder="bijv. Acme BV" autoFocus/></div>
+        <div className="field"><label>Projectnaam</label><input value={f.name} onChange={e=>set('name',e.target.value)} placeholder="bijv. ERP Implementatie"/></div>
+      </div>}
+      {initial&&<div className="field"><label>Naam nieuw project</label><input value={f.name} onChange={e=>set('name',e.target.value)} placeholder="bijv. Fase 2" autoFocus/></div>}
+      <div className="field"><label>Klant logo (optioneel)</label><LogoUploader value={f.logo} onChange={v=>set('logo',v)}/></div>
+      <div className="field"><label>Offerte totaal</label>
+        <div style={{position:'relative'}}><span style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',color:'var(--s500)',fontSize:14}}>€</span>
+        <input type="number" value={f.offerte_total===0?'':f.offerte_total} onChange={e=>set('offerte_total',e.target.value===''?'':parseFloat(e.target.value)||0)} placeholder="0" style={{paddingLeft:26}}/></div>
+      </div>
+      <div className="field"><label>Jaarlijkse licenties</label><LicEditor rows={f.licenties} onChange={v=>set('licenties',v)}/></div>
+      <div className="field" style={{marginBottom:0}}><label>Getekende offerte</label>
+        <div className="logo-upload-area"><Ic.Upload/><div style={{fontSize:13.5,fontWeight:500,color:'var(--s600)'}}>Sleep bestand hierheen of klik om te uploaden</div><div style={{fontSize:12,color:'var(--s400)'}}>PDF, Word of afbeelding</div></div>
+      </div>
+    </div>
+    <div className="mftr"><button className="btn bg" onClick={onCancel}>Annuleren</button><button className="btn bp" disabled={!valid} onClick={()=>onSave(f)}>{title||'Project starten'}</button></div>
+  </>;
+}
+
+function DeleteModal({name,onConfirm,onCancel}){
+  return<div className="modal-backdrop" onClick={onCancel}>
+    <div className="modal modal-sm" onClick={e=>e.stopPropagation()}>
+      <div className="mhdr"><div style={{width:42,height:42,background:'var(--rbg)',borderRadius:12,display:'flex',alignItems:'center',justifyContent:'center',color:'var(--red)',flexShrink:0}}><Ic.Warn/></div><div className="mhdr-text"><div className="mhdr-sup">Bevestiging</div><div className="mtitle">Verwijderen?</div></div><button className="mhdr-close" onClick={onCancel}><Ic.X/></button></div>
+      <div className="mbody"><p style={{fontSize:13.5,color:'var(--s500)',lineHeight:1.6}}><strong style={{color:'var(--s800)'}}>{name}</strong> wordt permanent verwijderd inclusief alle data.</p></div>
+      <div className="mftr"><button className="btn bg" onClick={onCancel}>Annuleren</button><button className="btn bd" onClick={onConfirm}>Verwijderen</button></div>
+    </div>
+  </div>;
+}
+
+function AMDropdown({ams,activeAM,onSwitch,onAddAM,onClose}){
+  const[adding,setAdding]=useState(false);
+  const[newName,setNewName]=useState('');
+  const ref=useRef();
+  useEffect(()=>{const h=e=>{if(ref.current&&!ref.current.contains(e.target))onClose();};document.addEventListener('mousedown',h);return()=>document.removeEventListener('mousedown',h);},[onClose]);
+  return<div className="am-dropdown" ref={ref}>
+    <div className="am-section-label">Account Manager</div>
+    {ams.map(a=><div key={a.id} className={`am-option${activeAM===a.id?' active':''}`} onClick={()=>{onSwitch(a.id);onClose();}}>
+      <div className="am-av" style={{background:a.gradient}}>{a.initials}</div>
+      <span className="am-option-name">{a.name}</span>
+      {activeAM===a.id&&<span className="am-check"><Ic.Check/></span>}
+    </div>)}
+    {!adding
+      ?<div className="am-add" onClick={()=>setAdding(true)}><Ic.Plus/> Nieuwe AM toevoegen</div>
+      :<div style={{padding:'8px 14px',borderTop:'1px solid var(--s200)'}}>
+        <input autoFocus value={newName} onChange={e=>setNewName(e.target.value)} placeholder="Naam accountmanager..." style={{width:'100%',padding:'7px 10px',border:'1px solid var(--s200)',borderRadius:'var(--rmd)',fontSize:13,outline:'none',marginBottom:7}} onKeyDown={async e=>{if(e.key==='Enter'&&newName.trim()){const a=await dbInsertAM(newName);onAddAM(a);setAdding(false);setNewName('');}if(e.key==='Escape')setAdding(false);}}/>
+        <div style={{display:'flex',gap:6}}><button className="btn bg bsm" style={{flex:1}} onClick={()=>setAdding(false)}>Annuleren</button><button className="btn bp bsm" style={{flex:1}} disabled={!newName.trim()} onClick={async()=>{const a=await dbInsertAM(newName);onAddAM(a);setAdding(false);setNewName('');}}>Toevoegen</button></div>
+      </div>
+    }
+  </div>;
+}
+
+// ── Single project tab content ────────────────────────────
+function ProjectTabContent({p,onUpdate}){
+  const[editPhase,setEditPhase]=useState(null);
+  const[noteTxt,setNoteTxt]=useState('');
+  const upd=patch=>onUpdate({...p,...patch});
+
+  const setGauge=async(k,v)=>{
+    const gauges={gauge_timing:p.gauge_timing,gauge_budget:p.gauge_budget,gauge_scope:p.gauge_scope,[k]:v};
+    const ps=drollup(gauges);
+    await dbUpdateGauges(p.id,gauges,ps);
+    upd({...gauges,project_status:ps});
+  };
+  const handlePhase=async(key,data)=>{
+    const tl=await dbUpdatePhase(p.id,key,data);
+    const phases=p.phases.map(ph=>ph.key===key?{...ph,...data,updated_at:new Date().toISOString()}:ph);
+    upd({phases,timeline_status:tl});
+  };
+
+  const phaseStats=p.phases.reduce((a,ph)=>{a[ph.status]=(a[ph.status]||0)+1;return a;},{g:0,a:0,r:0});
+  const lastUpdated=p.phases.reduce((l,ph)=>{const d=ph.updated_at||'';return d>l?d:l;},'');
+
+  return<>
+    {/* Gauges */}
+    <div className="section-card">
+      <div className="section-header" style={{marginBottom:8}}>
+        <div style={{flex:1}}>
+          <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:4,flexWrap:'wrap'}}>
+            <div style={{fontSize:17,fontWeight:700,color:'var(--s900)',letterSpacing:'-.2px'}}>{p.name}</div>
+            {(()=>{
+              const doneOverride=projectDoneStatus(p.phases);
+              const tlStatus=p.timeline_status||'g';
+              const psStatus=p.project_status||'g';
+              return<>
+                <Pill status={doneOverride?'done':tlStatus} label={`Timeline: ${doneOverride?'Afgerond':slbl(tlStatus)}`}/>
+                <Pill status={doneOverride?'done':psStatus} label={`Status: ${doneOverride?'Afgerond':slbl(psStatus)}`}/>
+              </>;
+            })()}
+          </div>
+          <div className="section-subtitle">Klik links/midden/rechts op een meter om de status direct in te stellen.</div>
+        </div>
+        <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:2,flexShrink:0}}>
+          <div style={{fontSize:10,fontWeight:700,color:'var(--s400)',textTransform:'uppercase',letterSpacing:'.6px',display:'flex',gap:20}}><span>OFFERTE</span><span>LICENTIE/JR</span></div>
+          <div style={{fontSize:20,fontWeight:700,color:'var(--s900)',display:'flex',gap:20}}><span>{eur(p.offerte_total)}</span><span>{eur(p.licentie_jr)}</span></div>
+        </div>
+      </div>
+      <div className="gauge-grid">
+        <SpeedoGauge label="TIMING" sublabel="Tijdsplanning" status={p.gauge_timing||'g'} onSet={v=>setGauge('gauge_timing',v)}/>
+        <SpeedoGauge label="BUDGET" sublabel="Financieel" status={p.gauge_budget||'g'} onSet={v=>setGauge('gauge_budget',v)}/>
+        <SpeedoGauge label="SCOPE" sublabel="Omvang werk" status={p.gauge_scope||'g'} onSet={v=>setGauge('gauge_scope',v)}/>
+      </div>
+    </div>
+
+    {/* Phases */}
+    <div className="section-card">
+      <div className="section-header">
+        <div>
+          <div className="section-title-row"><span style={{color:'var(--primary)'}}><Ic.Target/></span><span className="section-title">Project overzicht · Fasen</span></div>
+          <div className="section-subtitle">Klik links/midden/rechts op een fase om de status direct in te stellen.</div>
+        </div>
+        {lastUpdated&&<div style={{fontSize:11,color:'var(--s400)',display:'flex',alignItems:'center',gap:4}}><Ic.Refresh/> Bijgewerkt {fdshort(lastUpdated)}</div>}
+      </div>
+      <div style={{height:5,borderRadius:999,background:'var(--s100)',display:'flex',overflow:'hidden',marginBottom:8}}>
+        {p.phases.map(ph=><div key={ph.key} style={{flex:1,background:ph.status==='g'?'var(--green)':ph.status==='a'?'var(--amber)':'var(--red)',margin:'0 1px'}}/>)}
+      </div>
+      <div style={{fontSize:11.5,color:'var(--s500)',marginBottom:12}}>{phaseStats.g}/{p.phases.length} op koers · {phaseStats.a} risico · {phaseStats.r} kritiek</div>
+      <div className="phase-cards">{p.phases.map(ph=><PhaseCard key={ph.key} phase={ph} onClick={()=>setEditPhase(ph)} onToggleDone={async(val)=>{
+        await handlePhase(ph.key,{...ph,done:val});
+      }}/>)}</div>
+    </div>
+
+    {/* Gantt */}
+    <div className="section-card">
+      <div className="section-header">
+        <div>
+          <div className="section-title-row"><span style={{color:'var(--primary)'}}><Ic.Calendar/></span><span className="section-title">Tijdlijn · Gantt</span></div>
+          <div className="section-subtitle">Klik op een balk om de mijlpaal te bewerken</div>
+        </div>
+      </div>
+      <GanttChart phases={p.phases} onPhaseClick={ph=>setEditPhase(ph)}/>
+    </div>
+
+    {/* Notes */}
+    <div className="section-card">
+      <div className="section-header">
+        <div><div className="section-title-row"><span style={{color:'var(--primary)'}}><Ic.Notes/></span><span className="section-title">Algemene notities</span></div></div>
+        <span style={{fontSize:12,color:'var(--s400)'}}>{p.notes.length} notities</span>
+      </div>
+      {p.notes.length>0&&<div className="notes-list">{[...p.notes].reverse().map(n=><div key={n.id} className="note-item"><div style={{fontSize:13.5,color:'var(--s700)',lineHeight:1.55}}>{n.text}</div><div style={{fontSize:11,color:'var(--s400)',marginTop:5}}>{fdate(n.created_at)}</div></div>)}</div>}
+      <textarea className="notes-input" value={noteTxt} onChange={e=>setNoteTxt(e.target.value)} placeholder="Voeg een notitie toe... (⌘+Enter om op te slaan)" onKeyDown={e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter'&&noteTxt.trim()){dbAddNote(p.id,noteTxt.trim()).then(n=>upd({notes:[...p.notes,n]}));setNoteTxt('');}}}/>
+      <div style={{display:'flex',justifyContent:'flex-end',marginTop:8}}>
+        <button className="btn bp bsm" disabled={!noteTxt.trim()} onClick={async()=>{const n=await dbAddNote(p.id,noteTxt.trim());upd({notes:[...p.notes,n]});setNoteTxt('');}}><Ic.Notes/> Opslaan</button>
+      </div>
+    </div>
+
+    {/* OOS */}
+    <OOSCard items={p.oos_items}
+      onAdd={async item=>{const o=await dbAddOOS(p.id,item);upd({oos_items:[...p.oos_items,o]});}}
+      onRemove={async id=>{await dbDeleteOOS(id);upd({oos_items:p.oos_items.filter(o=>o.id!==id)});}}/>
+
+    {editPhase&&<MilestoneModal phase={editPhase} onCancel={()=>setEditPhase(null)} onSave={async data=>{await handlePhase(editPhase.key,data);setEditPhase(null);}}/>}
+  </>;
+}
+
+// ── Project Detail (with tabs for deelprojecten) ──────────
+function ProjectDetail({project:init,siblings=[],ams,onBack,onChange,onAddProject,onSelectSibling}){
+  const[p,setP]=useState(init);
+  const[activeTab,setActiveTab]=useState(init.id); // default to main project tab
+  const[showEdit,setShowEdit]=useState(false);
+  const[showNewDeel,setShowNewDeel]=useState(false);
+  const[deleteDeelId,setDeleteDeelId]=useState(null);
+
+  const upd=patch=>{const np={...p,...patch};setP(np);onChange(np);};
+  const updDeel=deel=>{
+    const deelprojecten=p.deelprojecten.map(d=>d.id===deel.id?deel:d);
+    upd({deelprojecten});
+  };
+
+  const handleEditSave=async f=>{
+    const licentieJr=f.licenties.reduce((s,l)=>s+Number(l.cost),0);
+    const updated={...p,...f,licentie_jr:licentieJr,last_updated:new Date().toISOString()};
+    await dbUpdateProject(updated);
+    await dbSyncLicenties(p.id,f.licenties);
+    const licenties=f.licenties.map((l,i)=>({...l,id:l.id||uid(),project_id:p.id,sort_order:i}));
+    upd({...updated,licenties});
+    setShowEdit(false);
+  };
+
+  const handleNewDeel=async f=>{
+    try{
+      const licentieJr=f.licenties.reduce((s,l)=>s+Number(l.cost),0);
+      // Create as a NEW ROOT project (same client, no parent_id)
+      const newP=await dbInsertProject({
+        owner_id:p.owner_id,client:p.client,name:f.name,logo:f.logo||null,
+        offerte_total:Number(f.offerte_total)||0,licentie_jr:licentieJr,
+        gauge_timing:'g',gauge_budget:'g',gauge_scope:'g',
+        timeline_status:'g',project_status:'g',
+        created_at:new Date().toISOString(),last_updated:new Date().toISOString(),
+        licenties:f.licenties,
+      });
+      // Add to global project list so it appears in overview
+      onAddProject(newP);
+      setShowNewDeel(false);
+      // Navigate to the new project
+      setTimeout(()=>onBack(),100);
+    }catch(err){alert('Fout: '+err.message);}
+  };
+
+  const handleDeleteDeel=async()=>{
+    await dbDeleteProject(deleteDeelId);
+    const deelprojecten=p.deelprojecten.filter(d=>d.id!==deleteDeelId);
+    upd({deelprojecten});
+    if(activeTab===deleteDeelId)setActiveTab(p.id);
+    setDeleteDeelId(null);
+  };
+
+  const activeP=activeTab===p.id?p:p.deelprojecten.find(d=>d.id===activeTab)||p;
+  const isMainTab=activeTab===p.id;
+
+  return<div>
+    {/* Header — client level */}
+    <div className="dhdr">
+      <div className="dhdr-inner">
+        <button style={{display:'flex',alignItems:'center',gap:5,fontSize:12.5,color:'var(--s500)',padding:'5px 9px',borderRadius:'var(--rmd)',border:'1px solid var(--s200)',background:'transparent',cursor:'pointer'}} onClick={onBack}><Ic.Back/> Overzicht</button>
+        <Avatar logo={p.logo} client={p.client} size={44} rad={10}/>
+        <div>
+          <div style={{fontSize:22,fontWeight:700,color:'var(--s900)',letterSpacing:'-.3px'}}>{p.client}</div>
+          <div style={{fontSize:13,color:'var(--s500)',marginTop:1}}>
+            {[p,...siblings].length} project{[p,...siblings].length!==1?'en':''}
+            {' · '}{eur([p,...siblings].reduce((s,x)=>s+(x.offerte_total||0),0))} totaal offerte
+          </div>
+        </div>
+        <div style={{marginLeft:'auto'}}>
+          <button className="btn bg bsm" onClick={()=>setShowEdit(true)}><Ic.Edit/> Bewerken</button>
+        </div>
+      </div>
+      {/* Tab bar — all client projects sorted by created_at, current highlighted */}
+      <div style={{maxWidth:1180,margin:'0 auto',display:'flex',alignItems:'center',gap:8,paddingBottom:0,overflowX:'auto'}}>
+        <div className="tab-bar" style={{flexShrink:0}}>
+          {/* All client projects: current first, then siblings oldest→newest */}
+          {[p,...siblings].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at)).map(proj=>{
+            const isCurrent=proj.id===p.id;
+            const dot=projectDoneStatus(proj.phases)?'var(--green)':proj.project_status==='r'?'var(--red)':proj.project_status==='a'?'var(--amber)':'var(--green)';
+            return<button key={proj.id} className={`tab${isCurrent?' active':''}`}
+              onClick={()=>!isCurrent&&onSelectSibling&&onSelectSibling(proj.id)}>
+              <span style={{width:8,height:8,borderRadius:'50%',background:dot,flexShrink:0,display:'inline-block'}}/>
+              {proj.name}
+            </button>;
+          })}
+        </div>
+        <button className="btn bg bsm" style={{flexShrink:0}} onClick={()=>setShowNewDeel(true)}><Ic.Plus/> Nieuw project</button>
+      </div>
+    </div>
+
+    <div className="page" style={{paddingTop:24}}>
+      <ProjectTabContent
+        key={p.id}
+        p={p}
+        onUpdate={upd}
+      />
+    </div>
+
+    {/* Edit main project modal */}
+    {showEdit&&<div className="modal-backdrop"><div className="modal modal-lg" onClick={e=>e.stopPropagation()}>
+      <div className="mhdr"><div className="mhdr-icon"><Ic.Edit/></div><div className="mhdr-text"><div className="mhdr-sup">Project</div><div className="mtitle">Project bewerken</div></div><button className="mhdr-close" onClick={()=>setShowEdit(false)}><Ic.X/></button></div>
+      <ProjectForm initial={p} activeAM={p.owner_id} onSave={handleEditSave} onCancel={()=>setShowEdit(false)} title="Opslaan"/>
+    </div></div>}
+
+    {/* New deelproject modal */}
+    {showNewDeel&&<div className="modal-backdrop"><div className="modal modal-lg" onClick={e=>e.stopPropagation()}>
+      <div className="mhdr"><div className="mhdr-icon"><Ic.Layers/></div><div className="mhdr-text"><div className="mhdr-sup">{p.client}</div><div className="mtitle">Nieuw project</div></div><button className="mhdr-close" onClick={()=>setShowNewDeel(false)}><Ic.X/></button></div>
+      <ProjectForm initial={{name:'',logo:p.logo,offerte_total:'',owner_id:p.owner_id,licenties:[]}} activeAM={p.owner_id} onSave={handleNewDeel} onCancel={()=>setShowNewDeel(false)} title="Project aanmaken"/>
+    </div></div>}
+
+    {deleteDeelId&&<DeleteModal name={p.deelprojecten.find(d=>d.id===deleteDeelId)?.name||'Project'} onConfirm={handleDeleteDeel} onCancel={()=>setDeleteDeelId(null)}/>}
+  </div>;
+}
+
+// ── Overview ──────────────────────────────────────────────
+function Overview({projects,onSelect,onNew,onEdit,onDelete}){
+  const[q,setQ]=useState('');
+  const[collapsed,setCollapsed]=useState({});
+
+  const clients=useMemo(()=>{
+    const map={};
+    projects.forEach(p=>{if(!map[p.client])map[p.client]={name:p.client,logo:p.logo,projects:[]};map[p.client].projects.push(p);});
+    // Sort projects within each client oldest first
+    Object.values(map).forEach(cl=>cl.projects.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at)));
+    return Object.values(map).sort((a,b)=>a.name.localeCompare(b.name));
+  },[projects]);
+
+  const filtered=useMemo(()=>{
+    if(!q)return clients;
+    const ql=q.toLowerCase();
+    return clients.map(cl=>({...cl,projects:cl.projects.filter(p=>p.name.toLowerCase().includes(ql)||p.client.toLowerCase().includes(ql))})).filter(cl=>cl.projects.length>0);
+  },[clients,q]);
+
+  const cnt=useMemo(()=>{
+    const c={g:0,a:0,r:0,done:0};
+    projects.forEach(p=>{
+      if(projectDoneStatus(p.phases)) c.done=(c.done||0)+1;
+      else {const s=p.project_status||'g';c[s]=(c[s]||0)+1;}
     });
-    // Footer
-    const ft=document.createElement('div');ft.className='do-group-footer';ft.style.gridTemplateColumns=gridCols;
-    const ftDev=tickets.reduce((s,t)=>s+t.dev,0);
-    const ftPo=tickets.reduce((s,t)=>s+t.po,0);
-    const ftTotal=ftDev*DEV_RATE+ftPo*PO_RATE;
-    ft.innerHTML=`<span></span><span></span><span style="color:rgba(255,255,255,.5);font-size:11px;text-transform:uppercase;letter-spacing:.4px">Subtotaal</span><span style="text-align:right;color:rgba(255,255,255,.6)">${ftDev}</span><span style="text-align:right;color:rgba(255,255,255,.6)">${ftPo}</span><span class="do-total-cell" style="text-align:right">€ ${fmt(ftTotal)}</span><span></span><span></span>${isClient?'':'<span></span><span></span>'}`;
-    scrollWrap.appendChild(ft);
-    group.appendChild(scrollWrap);
-    container.appendChild(group);
-  });
-  // Grand total
-  if(grandTotal>0||container.children.length>0){
-    const gt=document.createElement('div');gt.className='do-grand-total';
-    gt.innerHTML=`<span></span><span></span><span style="color:rgba(255,255,255,.5);font-size:11px;text-transform:uppercase;letter-spacing:.4px">Totaal</span><span style="text-align:right;color:rgba(255,255,255,.6)">${grandDev}</span><span style="text-align:right;color:rgba(255,255,255,.6)">${grandPo}</span><span class="do-total-cell" style="text-align:right">€ ${fmt(grandTotal)}</span><span></span><span></span><span></span>`;
-    container.appendChild(gt);
-  }
+    return c;
+  },[projects]);
+
+  return<div className="page">
+    <div style={{marginBottom:28}}>
+      <div style={{fontSize:30,fontWeight:700,color:'var(--s900)',letterSpacing:'-.5px',marginBottom:4}}>Actieve projecten</div>
+      <div style={{fontSize:14,color:'var(--s500)'}}>Bewaar overzicht over de gezondheid van alle klantprojecten.</div>
+    </div>
+    <div className="kpi-grid" style={{gridTemplateColumns:'repeat(4,1fr)'}}>
+      <div className="kpi-card green"><div className="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg></div><div><div className="kpi-value">{cnt.g||0}</div><div className="kpi-label">Op koers</div></div></div>
+      <div className="kpi-card amber"><div className="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div><div className="kpi-value">{cnt.a||0}</div><div className="kpi-label">Waarschuwing</div></div></div>
+      <div className="kpi-card red"><div className="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div><div><div className="kpi-value">{cnt.r||0}</div><div className="kpi-label">Kritiek</div></div></div>
+      <div className="kpi-card" style={{'--kpi-tint':'linear-gradient(135deg,rgba(99,102,241,0.07),rgba(99,102,241,0.02) 60%)'}}><div className="kpi-icon" style={{background:'#eef2ff',color:'#4338ca',border:'1px solid #c7d2fe'}}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div><div className="kpi-value" style={{color:'#3730a3'}}>{cnt.done||0}</div><div className="kpi-label">Afgerond</div></div></div>
+    </div>
+    <div className="twrap">
+      <div className="tbar">
+        <div style={{position:'relative',flex:1,maxWidth:420}}>
+          <div style={{position:'absolute',left:11,top:'50%',transform:'translateY(-50%)',color:'var(--s400)',pointerEvents:'none'}}><Ic.Search/></div>
+          <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Zoek op project of klantnaam..." style={{width:'100%',padding:'8px 12px 8px 34px',border:'1px solid var(--s200)',borderRadius:'var(--rmd)',fontSize:13,outline:'none',color:'var(--s800)'}}/>
+        </div>
+        <span style={{fontSize:12.5,color:'var(--s400)',marginLeft:'auto',marginRight:10}}>{projects.length} project{projects.length!==1?'en':''}</span>
+        <button className="btn bp" onClick={onNew}><Ic.Plus/> Nieuw project</button>
+      </div>
+      {filtered.length===0&&<div className="empty-st"><div style={{fontSize:36,marginBottom:10}}>📋</div><p>{q?'Geen projecten gevonden.':'Nog geen projecten. Klik op "Nieuw project" om te starten.'}</p></div>}
+      {filtered.map(client=>(
+        <div key={client.name} className="client-group">
+          <div className="client-header">
+            <div style={{display:'flex',alignItems:'center',gap:10,flex:1,cursor:'pointer'}} onClick={()=>client.projects.length>0&&onSelect(client.projects[0].id)}>
+              <Avatar logo={client.logo} client={client.name} size={30} rad={6}/>
+              <span className="client-header-name">{client.name}</span>
+              <span className="client-header-count">{client.projects.length} project{client.projects.length!==1?'en':''}</span>
+            </div>
+            <span className={`client-chevron${collapsed[client.name]?'':' open'}`} style={{cursor:'pointer',padding:'4px 8px'}} onClick={e=>{e.stopPropagation();setCollapsed(prev=>({...prev,[client.name]:!prev[client.name]}));}}><Ic.ChevronRight/></span>
+          </div>
+          {!collapsed[client.name]&&<div className="client-projects">
+            {client.projects.map(proj=>(
+              <div key={proj.id} className="project-row" onClick={()=>onSelect(proj.id)}>
+                <div className={`project-status-bar ${proj.project_status||'g'}`}/>
+                <div className="project-info">
+                  <div className="project-name">{proj.name}</div>
+                  <div className="project-meta">{fdate(proj.created_at)} · {eur(proj.offerte_total)} offerte{proj.deelprojecten.length>0?` · ${proj.deelprojecten.length} deelproject${proj.deelprojecten.length!==1?'en':''}`:''}</div>
+                </div>
+                {(()=>{const d=projectDoneStatus(proj.phases);return<Pill status={d?'done':proj.project_status||'g'} label={d?'Afgerond':undefined}/>;})()}
+                <div onClick={e=>e.stopPropagation()} className="row-actions">
+                  <button className="bi" style={{padding:5}} onClick={e=>{e.stopPropagation();onEdit(proj.id);}}><Ic.Edit/></button>
+                  <button className="bi" style={{padding:5,color:'var(--rtxt)'}} onClick={e=>{e.stopPropagation();onDelete(proj.id);}}><Ic.Trash/></button>
+                </div>
+              </div>
+            ))}
+          </div>}
+        </div>
+      ))}
+    </div>
+  </div>;
 }
 
-// ============================================================
-// DO — ACTIONS
-// ============================================================
-function saveDoField(id,field,el){
-  const t=doTickets.find(t=>t.id===id);if(!t)return;
-  t[field]=el.innerText.trim();
-  updateDoTicket(id,{[field]:t[field]});
-}
-function restoreZero(inp){if(inp.value===''||isNaN(inp.value))inp.value='0';}
-function saveDoNum(id,field,inp){
-  const val=parseFloat(inp.value)||0;
-  const t=doTickets.find(t=>t.id===id);if(!t)return;
-  t[field]=val;
-  updateDoTicket(id,{[field]:val});
-  calcDoTotal(id);
-}
-function calcDoTotal(id){
-  const t=doTickets.find(t=>t.id===id);if(!t)return;
-  const row=document.getElementById(`do-row-${id}`);if(!row)return;
-  const devInp=row.querySelectorAll('.do-num-input')[0];
-  const poInp=row.querySelectorAll('.do-num-input')[1];
-  const dev=parseFloat(devInp?.value)||0;
-  const po=parseFloat(poInp?.value)||0;
-  const totalEl=document.getElementById(`do-total-${id}`);
-  if(totalEl)totalEl.textContent=`€ ${fmt(dev*DEV_RATE+po*PO_RATE)}`;
-}
-function setDoStatus(id,newStatus){
-  const t=doTickets.find(t=>t.id===id);if(!t)return;
-  if(t.status===newStatus)newStatus='TE VALIDEREN';
-  t.status=newStatus;
-  updateDoTicket(id,{status:newStatus});
-  // Update buttons
-  const row=document.getElementById(`do-row-${id}`);
-  if(row){
-    row.className='do-ticket-row'+(newStatus==='NO-GO'?' no-go-expanded':'');
-    const btns=row.querySelectorAll('.do-val-btn');
-    if(btns[0]){btns[0].className='do-val-btn'+(newStatus==='GO'?' go-active':'');}
-    if(btns[1]){btns[1].className='do-val-btn'+(newStatus==='NO-GO'?' nogo-active':'');}
-  }
-  const nrow=document.getElementById(`do-nogo-${id}`);
-  if(nrow)nrow.className='do-nogo-row'+(newStatus==='NO-GO'?' visible':'');
-  renderDoHero();renderDoBudget();renderDoFilters();
-  showToast(newStatus==='GO'?'✓ GO gezet':newStatus==='NO-GO'?'✗ NO-GO gezet':'↺ Teruggesteld');
-}
-function saveDoComment(id,el){
-  const t=doTickets.find(t=>t.id===id);if(!t)return;
-  t.comment=el.value.trim();
-  updateDoTicket(id,{comment:t.comment});
-}
-function toggleDoDone(id,cb){
-  const t=doTickets.find(t=>t.id===id);if(!t)return;
-  t.done=cb.checked;
-  updateDoTicket(id,{done:t.done});
-  const row=document.getElementById(`do-row-${id}`);
-  if(row){
-    if(t.done)row.classList.add('done-row');
-    else row.classList.remove('done-row');
-  }
-}
-async function removeDoTicket(id){
-  await deleteDoTicket(id);
-  renderDo();
-  showToast('Ticket verwijderd');
-}
-function openDoTicketModal(){
-  const sel=document.getElementById('dtProject');sel.innerHTML='';
-  doProjects.forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=p.name;sel.appendChild(o);});
-  document.getElementById('dtBoard').value='TL-';
-  document.getElementById('dtInh').value='';
-  document.getElementById('dtDev').value='0';
-  document.getElementById('dtPo').value='0';
-  document.getElementById('dtTotal').textContent='€ 0';
-  document.getElementById('doTicketModal').classList.add('open');
-  setTimeout(()=>document.getElementById('dtBoard').focus(),100);
-}
-['dtDev','dtPo'].forEach(id=>{
-  document.getElementById(id).addEventListener('input',()=>{
-    const dev=parseFloat(document.getElementById('dtDev').value)||0;
-    const po=parseFloat(document.getElementById('dtPo').value)||0;
-    document.getElementById('dtTotal').textContent=`€ ${fmt(dev*DEV_RATE+po*PO_RATE)}`;
-  });
-});
-async function saveDoTicket(){
-  const pid=document.getElementById('dtProject').value;
-  const board=document.getElementById('dtBoard').value.trim();
-  const inh=document.getElementById('dtInh').value.trim();
-  const dev=parseFloat(document.getElementById('dtDev').value)||0;
-  const po=parseFloat(document.getElementById('dtPo').value)||0;
-  await insertDoTicket({pid,board,inh,dev,po});
-  closeModal('doTicketModal');
-  renderDo();
-  showToast('Ticket toegevoegd ✓');
-}
-function openDoBudgetModal(){
-  const content=document.getElementById('doBudgetModalContent');content.innerHTML='';
-  doProjects.forEach(p=>{
-    const div=document.createElement('div');div.style.marginBottom='16px';
-    div.innerHTML=`<div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:8px">${p.name}</div><div class="budget-modal-grid"><div><label class="modal-label">Dev uren budget</label><input class="modal-input" type="number" id="bm-dev-${p.id}" value="${p.d_budget}" min="0"></div><div><label class="modal-label">PO uren budget</label><input class="modal-input" type="number" id="bm-po-${p.id}" value="${p.p_budget}" min="0"></div></div>`;
-    content.appendChild(div);
-  });
-  document.getElementById('doBudgetModal').classList.add('open');
-}
-async function saveDoBudget(){
-  for(const p of doProjects){
-    const d=parseInt(document.getElementById(`bm-dev-${p.id}`)?.value)||0;
-    const po=parseInt(document.getElementById(`bm-po-${p.id}`)?.value)||0;
-    p.d_budget=d;p.p_budget=po;
-    await updateDoBudget(p.id,d,po);
-  }
-  closeModal('doBudgetModal');
-  renderDoBudget();renderDoHero();
-  showToast('Budget opgeslagen ✓');
-}
-function doExportCsv(){
-  const BOM='\uFEFF';
-  const rows=[['#','BoardNr','Omschrijving','Project','Dev (u)','PO (u)','Totaal (€)','Status','Commentaar'].join(';')];
-  let i=0;
-  doProjects.forEach(proj=>{
-    doTickets.filter(t=>t.pid===proj.id).forEach(t=>{
-      i++;
-      rows.push([i,t.board,t.inh,proj.name,t.dev,t.po,Math.round(t.dev*DEV_RATE+t.po*PO_RATE),t.status,t.comment].join(';'));
-    });
-  });
-  const blob=new Blob([BOM+rows.join('\n')],{type:'text/csv;charset=utf-8'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='doorlopende-ontwikkelingen.csv';a.click();
-  showToast('CSV geëxporteerd ✓');
-}
-function confirmDoReset(){
-  doTickets=DO_FALLBACK_TICKETS.map(t=>({...t}));
-  doProjects=DO_FALLBACK_PROJECTS.map(p=>({...p}));
-  closeModal('doResetModal');renderDo();showToast('Data gereset ✓');
+// ── App ───────────────────────────────────────────────────
+function App(){
+  const[ams,setAms]=useState([]);
+  const[projects,setProjects]=useState([]);
+  const[activeAM,setActiveAM]=useState(()=>localStorage.getItem('mc-am')||'');
+  const[loading,setLoading]=useState(true);
+  const[view,setView]=useState('overview');
+  const[showNew,setShowNew]=useState(false);
+  const[editId,setEditId]=useState(null);
+  const[deleteId,setDeleteId]=useState(null);
+  const[showAMMenu,setShowAMMenu]=useState(false);
+
+  useEffect(()=>{
+    fetchAMs().then(data=>{
+      const enriched=data.length>0?data:FALLBACK_AMS;
+      setAms(enriched);
+      const saved=localStorage.getItem('mc-am');
+      const valid=enriched.find(a=>String(a.id)===saved);
+      setActiveAM(valid?saved:String(enriched[0].id));
+    }).catch(()=>{setAms(FALLBACK_AMS);setActiveAM(FALLBACK_AMS[0].id);setLoading(false);});
+  },[]);
+
+  useEffect(()=>{
+    if(!activeAM)return;
+    setLoading(true);
+    fetchProjects(activeAM).then(ps=>{setProjects(ps);setLoading(false);}).catch(err=>{console.error(err);setLoading(false);});
+  },[activeAM]);
+
+  const switchAM=id=>{setActiveAM(id);localStorage.setItem('mc-am',id);setView('overview');};
+
+  const handleNew=async f=>{
+    try{
+      const licentieJr=f.licenties.reduce((s,l)=>s+Number(l.cost),0);
+      const p=await dbInsertProject({
+        owner_id:f.owner_id||activeAM,client:f.client,name:f.name,logo:f.logo||null,
+        offerte_total:Number(f.offerte_total)||0,licentie_jr:licentieJr,
+        gauge_timing:'g',gauge_budget:'g',gauge_scope:'g',
+        timeline_status:'g',project_status:'g',
+        created_at:new Date().toISOString(),last_updated:new Date().toISOString(),
+        licenties:f.licenties,
+      });
+      setProjects(prev=>[p,...prev]);
+      setShowNew(false);
+    }catch(err){console.error(err);alert('Opslaan mislukt: '+(err.message||JSON.stringify(err)));}
+  };
+
+  const handleEditSave=async f=>{
+    const project=projects.find(p=>p.id===editId);
+    const licentieJr=f.licenties.reduce((s,l)=>s+Number(l.cost),0);
+    const updated={...project,...f,licentie_jr:licentieJr,last_updated:new Date().toISOString()};
+    await dbUpdateProject(updated);
+    await dbSyncLicenties(project.id,f.licenties);
+    const licenties=f.licenties.map((l,i)=>({...l,id:l.id||uid(),project_id:project.id,sort_order:i}));
+    setProjects(prev=>prev.map(p=>p.id===editId?{...updated,licenties}:p));
+    setEditId(null);
+  };
+
+  const handleDelete=async()=>{
+    await dbDeleteProject(deleteId);
+    setProjects(prev=>prev.filter(p=>p.id!==deleteId));
+    setDeleteId(null);
+    if(view===deleteId)setView('overview');
+  };
+
+  const curProject=projects.find(p=>p.id===view);
+  const activeAMObj=ams.find(a=>a.id===activeAM)||ams[0];
+
+  return<div>
+    <div className="topbar">
+      <img src="data:image/png;base64,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" alt="Aziri" style={{height:28,width:'auto',maxWidth:80,marginRight:10,flexShrink:0,objectFit:'contain'}}/>
+      <div style={{fontSize:13,fontWeight:700,color:'var(--s900)',letterSpacing:'-.2px',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>Project Mission Control</div>
+      <div className="topbar-right">
+        <button className="am-btn" onClick={()=>setShowAMMenu(v=>!v)}>
+          {activeAMObj&&<div className="am-av" style={{background:activeAMObj.gradient}}>{activeAMObj.initials}</div>}
+          <div className="am-btn-inner"><div className="am-label">Account Manager</div><div className="am-name">{activeAMObj?.name||'Selecteer AM'}</div></div>
+          <div className={`am-chevron${showAMMenu?' open':''}`}><Ic.ChevronDown/></div>
+        </button>
+        {showAMMenu&&<AMDropdown ams={ams} activeAM={activeAM} onSwitch={switchAM} onAddAM={a=>setAms(prev=>[...prev,a])} onClose={()=>setShowAMMenu(false)}/>}
+      </div>
+    </div>
+    {loading&&<div className="loading"><Ic.Refresh/> Projecten laden...</div>}
+    {!loading&&view==='overview'&&<Overview projects={projects} onSelect={id=>setView(id)} onNew={()=>setShowNew(true)} onEdit={id=>setEditId(id)} onDelete={id=>setDeleteId(id)}/>}
+    {!loading&&view!=='overview'&&curProject&&<ProjectDetail
+        key={curProject.id}
+        project={curProject}
+        siblings={projects.filter(p=>p.client===curProject.client&&p.id!==curProject.id).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at))}
+        ams={ams}
+        onBack={()=>setView('overview')}
+        onChange={p=>setProjects(prev=>prev.map(x=>x.id===p.id?p:x))}
+        onAddProject={p=>{setProjects(prev=>[...prev,p]);setView(p.id);}}
+        onSelectSibling={id=>setView(id)}
+      />}
+
+    {showNew&&<div className="modal-backdrop"><div className="modal modal-lg" onClick={e=>e.stopPropagation()}>
+      <div className="mhdr"><div className="mhdr-icon"><Ic.Layers/></div><div className="mhdr-text"><div className="mhdr-sup">Nieuw project</div><div className="mtitle">Mission Control</div></div><button className="mhdr-close" onClick={()=>setShowNew(false)}><Ic.X/></button></div>
+      <ProjectForm activeAM={activeAM} onSave={handleNew} onCancel={()=>setShowNew(false)}/>
+    </div></div>}
+
+    {editId&&<div className="modal-backdrop"><div className="modal modal-lg" onClick={e=>e.stopPropagation()}>
+      <div className="mhdr"><div className="mhdr-icon"><Ic.Edit/></div><div className="mhdr-text"><div className="mhdr-sup">Project</div><div className="mtitle">Project bewerken</div></div><button className="mhdr-close" onClick={()=>setEditId(null)}><Ic.X/></button></div>
+      <ProjectForm initial={projects.find(p=>p.id===editId)} activeAM={activeAM} onSave={handleEditSave} onCancel={()=>setEditId(null)} title="Opslaan"/>
+    </div></div>}
+
+    {deleteId&&<DeleteModal name={projects.find(p=>p.id===deleteId)?.name||'Project'} onConfirm={handleDelete} onCancel={()=>setDeleteId(null)}/>}
+  </div>;
 }
 
-// ============================================================
-// MODAL CLOSE
-// ============================================================
-function closeModal(id){document.getElementById(id).classList.remove('open')}
-document.querySelectorAll('.modal-overlay').forEach(ov=>ov.addEventListener('click',e=>{if(e.target===ov)ov.classList.remove('open')}));
-document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'))});
-
-// ============================================================
-// BOOT
-// ============================================================
-const s=document.createElement('script');
-s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-s.onload=init;
-s.onerror=()=>{applyTheme(getTheme());setWeekInfo()};
-document.head.appendChild(s);
-
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+<script>
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('/sw.js').then(
+      function(r){console.log('SW registered');},
+      function(e){console.log('SW failed',e);}
+    );
   });
 }
 </script>
