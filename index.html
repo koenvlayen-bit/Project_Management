@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Mission Control — Aziri</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#576BFF">
@@ -223,6 +224,31 @@ input,textarea,select{font-family:var(--font);}
 .toggle-switch.on .toggle-knob{transform:translateX(16px);}
 .empty-st{text-align:center;padding:48px 20px;color:var(--s400);}
 .loading{display:flex;align-items:center;justify-content:center;height:200px;color:var(--s400);font-size:14px;gap:8px;}
+.rag-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.rag-card{border-radius:var(--rlg);border:1px solid var(--s200);overflow:hidden;}
+.rag-top{padding:12px 14px 10px;display:flex;align-items:center;gap:10px;}
+.rag-icon{width:36px;height:36px;border-radius:var(--rmd);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.rag-name{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;}
+.rag-status{font-size:14px;font-weight:600;}
+.rag-toggle{display:flex;border-top:1px solid var(--s200);}
+.rag-tog-btn{flex:1;padding:8px 0;font-size:11px;font-weight:600;text-align:center;cursor:pointer;border:none;background:transparent;border-right:1px solid var(--s200);color:var(--s400);}
+.rag-tog-btn:last-child{border-right:none;}
+.rag-tog-btn.tg{background:var(--gbg);color:var(--gtxt);}
+.rag-tog-btn.ta{background:var(--abg);color:var(--atxt);}
+.rag-tog-btn.tr{background:var(--rbg);color:var(--rtxt);}
+.theme-g .rag-top{background:var(--gbg);}
+.theme-g .rag-icon{background:#bbf7d0;color:var(--gtxt);}
+.theme-g .rag-name{color:var(--gtxt);}
+.theme-g .rag-status{color:#166534;}
+.theme-a .rag-top{background:var(--abg);}
+.theme-a .rag-icon{background:#fde68a;color:#92400e;}
+.theme-a .rag-name{color:var(--atxt);}
+.theme-a .rag-status{color:#92400e;}
+.theme-r .rag-top{background:var(--rbg);}
+.theme-r .rag-icon{background:#fecaca;color:var(--rtxt);}
+.theme-r .rag-name{color:var(--rtxt);}
+.theme-r .rag-status{color:#991b1b;}
+@media(max-width:768px){.rag-grid{gap:6px;}.rag-name{font-size:10px;}.rag-status{font-size:12px;}.rag-top{padding:10px 10px 8px;gap:8px;}.rag-icon{width:30px;height:30px;font-size:15px;}}
 </style>
 </head>
 <body>
@@ -694,9 +720,27 @@ function AMDropdown({ams,activeAM,onSwitch,onAddAM,onClose}){
 }
 
 // ── Single project tab content ────────────────────────────
+function RAGCard({label,icon,sublabel,status,onSet}){
+  const themes={g:'theme-g',a:'theme-a',r:'theme-r'};
+  const labels={g:'Op koers',a:'Risico',r:'Kritiek'};
+  return<div className={`rag-card ${themes[status]}`}>
+    <div className="rag-top">
+      <div className="rag-icon"><i className={`ti ${icon}`} aria-hidden="true"/></div>
+      <div>
+        <div className="rag-name">{label}</div>
+        <div className="rag-status">{labels[status]}</div>
+      </div>
+    </div>
+    <div className="rag-toggle">
+      {['g','a','r'].map(s=><button key={s} className={`rag-tog-btn${status===s?' t'+s:''}`} onClick={()=>onSet(s)}>●</button>)}
+    </div>
+  </div>;
+}
+
 function ProjectTabContent({p,onUpdate}){
   const[editPhase,setEditPhase]=useState(null);
   const[noteTxt,setNoteTxt]=useState('');
+  const[gaugeView,setGaugeView]=useState('rag');
   const upd=patch=>onUpdate({...p,...patch});
 
   const setGauge=async(k,v)=>{
@@ -717,7 +761,7 @@ function ProjectTabContent({p,onUpdate}){
   return<>
     {/* Gauges */}
     <div className="section-card">
-      <div className="section-header" style={{marginBottom:8}}>
+      <div className="section-header" style={{marginBottom:12}}>
         <div style={{flex:1}}>
           <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:4,flexWrap:'wrap'}}>
             <div style={{fontSize:17,fontWeight:700,color:'var(--s900)',letterSpacing:'-.2px'}}>{p.name}</div>
@@ -731,18 +775,32 @@ function ProjectTabContent({p,onUpdate}){
               </>;
             })()}
           </div>
-          <div className="section-subtitle">Klik links/midden/rechts op een meter om de status direct in te stellen.</div>
         </div>
-        <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:2,flexShrink:0}}>
-          <div style={{fontSize:10,fontWeight:700,color:'var(--s400)',textTransform:'uppercase',letterSpacing:'.6px',display:'flex',gap:20}}><span>OFFERTE</span><span>LICENTIE/JR</span></div>
-          <div style={{fontSize:20,fontWeight:700,color:'var(--s900)',display:'flex',gap:20}}><span>{eur(p.offerte_total)}</span><span>{eur(p.licentie_jr)}</span></div>
+        <div style={{display:'flex',alignItems:'center',gap:12,flexShrink:0}}>
+          <div style={{textAlign:'right'}}>
+            <div style={{fontSize:10,fontWeight:700,color:'var(--s400)',textTransform:'uppercase',letterSpacing:'.6px',display:'flex',gap:16}}><span>OFFERTE</span><span>LICENTIE/JR</span></div>
+            <div style={{fontSize:18,fontWeight:700,color:'var(--s900)',display:'flex',gap:16}}><span>{eur(p.offerte_total)}</span><span>{eur(p.licentie_jr)}</span></div>
+          </div>
+          <button onClick={()=>setGaugeView(v=>v==='rag'?'speedo':'rag')}
+            style={{display:'flex',alignItems:'center',gap:5,padding:'5px 10px',borderRadius:'var(--rmd)',border:'1px solid var(--s200)',background:'var(--s50)',color:'var(--s600)',fontSize:12,fontWeight:600,cursor:'pointer',flexShrink:0,whiteSpace:'nowrap'}}>
+            {gaugeView==='rag'
+              ?<><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M10 70 A55 55 0 0 1 120 70" stroke="currentColor"/><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg> Meters</>
+              ?<><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="2" y="3" width="6" height="18" rx="1"/><rect x="9" y="8" width="6" height="13" rx="1"/><rect x="16" y="5" width="6" height="16" rx="1"/></svg> Kaarten</>
+              :<><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="2" y="3" width="6" height="18" rx="1"/><rect x="9" y="8" width="6" height="13" rx="1"/><rect x="16" y="5" width="6" height="16" rx="1"/></svg> Kaarten</>}
+          </button>
         </div>
       </div>
-      <div className="gauge-grid">
-        <SpeedoGauge label="TIMING" sublabel="Tijdsplanning" status={p.gauge_timing||'g'} onSet={v=>setGauge('gauge_timing',v)}/>
-        <SpeedoGauge label="BUDGET" sublabel="Financieel" status={p.gauge_budget||'g'} onSet={v=>setGauge('gauge_budget',v)}/>
-        <SpeedoGauge label="SCOPE" sublabel="Omvang werk" status={p.gauge_scope||'g'} onSet={v=>setGauge('gauge_scope',v)}/>
-      </div>
+      {gaugeView==='rag'
+        ?<div className="rag-grid">
+          <RAGCard label="Timing" icon="ti-clock" sublabel="Tijdsplanning" status={p.gauge_timing||'g'} onSet={v=>setGauge('gauge_timing',v)}/>
+          <RAGCard label="Budget" icon="ti-cash" sublabel="Financieel" status={p.gauge_budget||'g'} onSet={v=>setGauge('gauge_budget',v)}/>
+          <RAGCard label="Scope" icon="ti-vector-triangle" sublabel="Omvang werk" status={p.gauge_scope||'g'} onSet={v=>setGauge('gauge_scope',v)}/>
+        </div>
+        :<div className="gauge-grid">
+          <SpeedoGauge label="TIMING" sublabel="Tijdsplanning" status={p.gauge_timing||'g'} onSet={v=>setGauge('gauge_timing',v)}/>
+          <SpeedoGauge label="BUDGET" sublabel="Financieel" status={p.gauge_budget||'g'} onSet={v=>setGauge('gauge_budget',v)}/>
+          <SpeedoGauge label="SCOPE" sublabel="Omvang werk" status={p.gauge_scope||'g'} onSet={v=>setGauge('gauge_scope',v)}/>
+        </div>}
     </div>
 
     {/* Phases */}
